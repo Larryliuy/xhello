@@ -172,8 +172,8 @@ class HomeLayout extends React.Component {
                     </Content>
                     <Sider width={240} collapsible = {false} style={Object.assign({},sliderStyle,{borderLeft: '1px solid #eee'})}>
                         {/*头像区域*/}
-                        <div className="logo-area" >头像区域
-
+                        <div className="logo-area" >
+                            头像区域
                         </div>
                         {/*麦序区域*/}
                         <div className='microphone_area'>
@@ -197,7 +197,7 @@ class HomeLayout extends React.Component {
                         </div>
                         {/*广告区域*/}
                         <div className="ad-area" >
-                            广告区域
+                             广告区域
                         </div>
                     </Sider>
                 </Layout>
