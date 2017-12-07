@@ -8,6 +8,12 @@ import cookieUtil from '../libs/cookieUtil';
 if(!window.Promise){
     window.Promise = Promise
 }*/
+
+const iconStyle = {
+    width: '20px',
+    height: '20px'
+}
+
 const Login = (props) => {
     let userName = '';
     let password = '';
@@ -117,7 +123,12 @@ const Login = (props) => {
                         登 录
                     </Button>
                     Or <Link to="/register" >现在注册<Icon type="right"/></Link>
+                    <Link to="/register" >忘记密码<Icon type="question"/></Link>
                 </FormItem>
+                <div className='fast_login'>
+                    <span className='icon_qq'><Icon type="api" style={iconStyle} /></span>
+                    <span className='icon_wechat'><Icon type="play-circle" style={iconStyle}/></span>
+                </div>
         </Form>
     );
 }

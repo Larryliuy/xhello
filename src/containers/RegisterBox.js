@@ -3,7 +3,8 @@ import Register from '../components/Register';
 
 const divStyle = {
     textAlign:'center !important',
-    height:'100%'
+    height:'100%',
+    paddingTop: 'calc(100px + 15%)'
 };
 
 

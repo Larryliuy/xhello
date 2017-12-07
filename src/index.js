@@ -5,7 +5,7 @@ import { connect,Provider } from 'react-redux';
 import store,{collapsed,CONSTANT} from './reducer/reducer';
 import LoginBox from './containers/LoginBox';
 import RegisterBox from './containers/RegisterBox';
-import MenuBox from './containers/MenuBox';
+import MenuBox from './containers/ChannelListBox';
 import HomeLayout from './containers/HomeLayout';
 import Antd from './components/Antd';
 

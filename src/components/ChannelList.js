@@ -8,7 +8,7 @@ let state = store.getState().homeState[0];
     state = store.getState().homeState[0]
     console.log(store.getState())
 });*/
-class Menus extends React.Component{
+class ChannelList extends React.Component{
     /*state = {
         collapsed: false,
     }*/
@@ -27,10 +27,7 @@ class Menus extends React.Component{
     render(){
         return (
             <div style={{width:240,height:'100%'}}>
-                <Button type='primary' onClick={()=>this.toggleCollapsed()} style={{ marginBottom: 16}}>
-                    <Icon type = {this.state.collapsed ? 'menu-unfold' : 'menu-fold'}/>
-                </Button>
-                <Menu defaultSelectedKeys={['1']} defaultOpenKeys={['sub1']} mode="inline" theme="dark" inlineCollapsed={this.state.collapsed}>
+                <Menu defaultSelectedKeys={['1']} defaultOpenKeys={['sub1']} mode="inline" theme="light" inlineCollapsed={this.state.collapsed}>
                     <Menu.Item key="1"><Icon type = 'pie-chart' /><span>我的工作</span></Menu.Item>
                     <Menu.Item key="2"><Icon type="desktop" /><span>我的审批</span></Menu.Item>
                     <Menu.Item key="3"><Icon type="inbox" /><span>我的信息</span></Menu.Item>
@@ -38,7 +35,25 @@ class Menus extends React.Component{
                         <Menu.Item key="5">Option 5</Menu.Item>
                         <Menu.Item key="6">Option 6</Menu.Item>
                         <Menu.Item key="7">Option 7</Menu.Item>
-                        <Menu.Item key="8"><p>{store.getState().homeState[0].collapsed+'11'}</p></Menu.Item>
+                        <Menu.Item key="8"><p></p></Menu.Item>
+                    </SubMenu>
+                    <SubMenu key="sub2" title={<span><Icon type="mail" /><span>其他设置</span></span>}>
+                        <Menu.Item key="5">Option 5</Menu.Item>
+                        <Menu.Item key="6">Option 6</Menu.Item>
+                        <Menu.Item key="7">Option 7</Menu.Item>
+                        <Menu.Item key="8"><p></p></Menu.Item>
+                    </SubMenu>
+                    <SubMenu key="sub3" title={<span><Icon type="mail" /><span>其他设置</span></span>}>
+                        <Menu.Item key="5">Option 5</Menu.Item>
+                        <Menu.Item key="6">Option 6</Menu.Item>
+                        <Menu.Item key="7">Option 7</Menu.Item>
+                        <Menu.Item key="8"><p></p></Menu.Item>
+                    </SubMenu>
+                    <SubMenu key="sub4" title={<span><Icon type="mail" /><span>其他设置</span></span>}>
+                        <Menu.Item key="5">Option 5</Menu.Item>
+                        <Menu.Item key="6">Option 6</Menu.Item>
+                        <Menu.Item key="7">Option 7</Menu.Item>
+                        <Menu.Item key="8"><p></p></Menu.Item>
                     </SubMenu>
                 </Menu>
             </div>
@@ -46,4 +61,4 @@ class Menus extends React.Component{
     }
 };
 
-export default Menus;
+export default ChannelList;

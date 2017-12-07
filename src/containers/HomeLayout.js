@@ -7,7 +7,7 @@ const Search = Input.Search;
 import ShowTime from '../components/ShowTime'
 import store,{CONSTANT} from '../reducer/reducer';
 import cookieUtil from '../libs/cookieUtil';
-import MenuBox from '../containers/MenuBox'
+import ChannelListBox from './ChannelListBox'
 const layoutStyle = {
     width:'100%',
     height:'100%',
@@ -146,23 +146,7 @@ class HomeLayout extends React.Component {
                             onSearch={value => console.log(value)}
                             style={{ width: 200 }}/>
                         </div>
-                        <Menu theme="" mode="inline"
-                              defaultSelectedKeys={['1']}
-                              onClick={(e)=>this.onClickHandle(e)}
-                              defaultOpenKeys={['task']}>
-                            <SubMenu key='task'
-                                     title={<span><Icon type="plus" /><span>工作</span></span>}>
-                                <Menu.Item key="1">
-                                    <span className="nav-text">测试1</span>
-                                </Menu.Item>
-                                <Menu.Item key="2">
-                                    <span className="nav-text">测试2</span>
-                                </Menu.Item>
-                            </SubMenu>
-                            <Menu.Item key="3"><Icon type="plus" /><span className="nav-text" onClick={(e)=>this.onClickHandle(e)}>我的审批</span></Menu.Item>
-                            {/*/!*<Menu.Item key="4"><Icon type="upload" /><span className="nav-text">新增工作</span></Menu.Item>*/}
-                            <Menu.Item key="4"><Icon type="plus" /><span className="nav-text">操作记录</span></Menu.Item>
-                        </Menu>
+                        <ChannelListBox></ChannelListBox>
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150 }}>
                         <div className= 'content_show'>
