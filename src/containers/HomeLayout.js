@@ -134,7 +134,9 @@ class HomeLayout extends React.Component {
                     <h1>
                         中华人民共和国商务部直销查询信息管理系统
                     </h1>
-                    <span style={{position:'absolute',fontSize:16,right:80,top:3}}>{JSON.parse(decodeURI(this.props.location.search.substring(1))).name}</span>
+                    <span style={{cursor:'pointer',position:'absolute',fontSize:16,right:60,top:3}}>
+                        <Icon style={{color:'blue'}} type="appstore" />
+                        </span>
                     <Link to='/' onClick={this.loginOut} style={{position:'absolute',top:5,right:30,cursor:'pointer'}}><Icon type="poweroff" style={{fontSize:18,color:'red'}}/></Link>
                 </Header>
                 <Layout style={{backgroundColor:'#fff'}}>

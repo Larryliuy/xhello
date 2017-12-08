@@ -126,8 +126,18 @@ html,body{
     bottom: -30px;
 }
 .icon_qq,.icon_wechat{
-    width: 20px;
-    height: 20px;
+    font-size: 20px;
     margin-left: 5px;
     cursor: pointer;
+}
+
+
+/*频道列表*/
+.channel-list > ul > li{
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 5px 1px;
+}
+.channel-list > ul > li > ul > li{
+    padding: 5px 1px;
 }
