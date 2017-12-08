@@ -5,9 +5,11 @@ const { Header, Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
 const Search = Input.Search;
 import ShowTime from '../components/ShowTime'
+import UEditorBox from '../containers/UEditorBox'
 import store,{CONSTANT} from '../reducer/reducer';
 import cookieUtil from '../libs/cookieUtil';
-import ChannelListBox from './ChannelListBox'
+import ChannelListBox from './ChannelListBox';
+import '../static/login.scss'
 const layoutStyle = {
     width:'100%',
     height:'100%',
@@ -93,33 +95,7 @@ class HomeLayout extends React.Component {
     constructor(props){
         super(props)
     }
-    onClickHandle = (e) => {
-        //如果每次要刷新工作状态在这里需要再次请求数据
-        // console.log(e)
-        if(e.key === '1'){
-            getFetchData('/task/list','userId='+userId,1); //1代表我的任务
-            // tmpArrData = arrData;
-        } else if(e.key === '2'){
-            getFetchData('/task/assignList','assignUserId='+userId,2); //2代表我分配的任务
-            // tmpArrData = assginArrData;
-        }
-        store.dispatch({type:CONSTANT.TASKKEY,val:{key:e.key,currentTask:0,finished:state.homeState.finished}})
-    };
-    handleTask=(value)=>{
-        console.log('arg:'+value)
-        store.dispatch({type:CONSTANT.TASKKEY,val:{key:state.homeState.key,currentTask:value,finished:value.isComplete}})
-    };
-    onClickBtnHandle=(bool,key)=>{
-        if(key === '1'){
-            tmpArrData = arrData.filter(value=>value.isComplete == bool);
-        }else if(key === '2'){
-            tmpArrData = assginArrData.filter(value=>value.isComplete == bool);
-        }else{
-            message.error('错误参数：'+key);
-            return;
-        }
-        store.dispatch({type:CONSTANT.TASKKEY,val:{key:state.homeState.key,currentTask:state.homeState.currentTask,finished:bool}})
-    };
+
     loginOut=()=>{
         message.success('退出成功！');
         cookieUtil.unset('userName');
@@ -154,7 +130,9 @@ class HomeLayout extends React.Component {
                         <div className= 'content_show'>
 
                         </div>
-                        <div className= 'text_area'></div>
+                        <div className= 'text_area'>
+                            <UEditorBox></UEditorBox>
+                        </div>
                     </Content>
                     <Sider width={240} collapsible = {false} style={Object.assign({},sliderStyle,{borderLeft: '1px solid #eee'})}>
                         {/*头像区域*/}

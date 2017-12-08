@@ -77,10 +77,10 @@ html,body{
     color: #49a9ee;
 }
 .ant-layout-header {
-    background: #ececec;
+    background: #108ee9 !important;
     padding: 0 50px;
-    height: 64px;
-    line-height: 64px;
+    height: 100px !important;
+    line-height: 100px !important;
 }
 .footer{
     padding: 10px 0px 10px 20px !important;
@@ -140,4 +140,15 @@ html,body{
 }
 .channel-list > ul > li > ul > li{
     padding: 5px 1px;
+}
+#editor{min-height:200px;}
+
+.text_area{
+  height: 150px;
+  background-color: #fff;
+}
+.send-btn{
+    //position: absolute;
+    float: right;
+    buttom: 20px;
 }

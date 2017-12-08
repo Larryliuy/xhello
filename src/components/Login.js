@@ -3,6 +3,7 @@ import {BrowserRouter, Route, Link} from 'react-router-dom';
 import { Form, Icon, Input, Button, Checkbox,message } from 'antd';
 const FormItem = Form.Item;
 import cookieUtil from '../libs/cookieUtil';
+import '../static/login.scss'
 // console.log('login:'+document.cookie);
 /*import Promise from 'promise-polyfill';
 if(!window.Promise){

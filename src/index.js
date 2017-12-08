@@ -1,13 +1,11 @@
 import React,{ Component } from 'react';
 import ReactDom from 'react-dom';
-import {BrowserRouter, HashRouter, Route, Redirect ,Switch, withRouter} from 'react-router-dom';
+import {BrowserRouter, Route, withRouter} from 'react-router-dom';
 import { connect,Provider } from 'react-redux';
 import store,{collapsed,CONSTANT} from './reducer/reducer';
 import LoginBox from './containers/LoginBox';
 import RegisterBox from './containers/RegisterBox';
-import MenuBox from './containers/ChannelListBox';
 import HomeLayout from './containers/HomeLayout';
-import Antd from './components/Antd';
 
 //css
 const h4Style = {
@@ -18,12 +16,13 @@ const h4Style = {
 class App extends React.Component {
 render(){
     return (
+
             <div style={h4Style}>
                 <Route exact path='/' component={LoginBox}/>
                 <Route path='/register' component={RegisterBox}/>
                 <Route path='/home' component={HomeLayout}/>
             </div>
-    )
+        )
 }
 
 }
@@ -47,8 +46,8 @@ const App1=withRouter(connect(mapStateToProps)(App));
 
 ReactDom.render(
     <Provider store={store}>
-        <HashRouter>
+        <BrowserRouter>
         <App1/>
-        </HashRouter>
+        </BrowserRouter>
     </Provider>,
     document.getElementById('main'));

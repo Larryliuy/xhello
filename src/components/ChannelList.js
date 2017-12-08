@@ -2,6 +2,7 @@ import React,{ Component } from 'react';
 import { Menu,Icon,Button } from 'antd';
 import store,{ collapsed } from '../reducer/reducer';
 const SubMenu = Menu.SubMenu;
+import '../static/login.scss'
 
 let state = store.getState().homeState[0];
 /*store.subscribe(function () {

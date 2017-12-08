@@ -3,7 +3,7 @@ import {BrowserRouter, Route,Redirect, Link} from 'react-router-dom';
 import Login from '../components/Login';
 import HomeLayout from '../containers/HomeLayout';
 import cookieUtil from '../libs/cookieUtil';
-
+import '../static/login.scss'
 const divStyle = {
     textAlign:'center !important',
     height:'100%',
