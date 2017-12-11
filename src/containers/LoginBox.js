@@ -1,7 +1,6 @@
 import React,{Component} from 'react'
 import {BrowserRouter, Route,Redirect, Link} from 'react-router-dom';
 import Login from '../components/Login';
-import HomeLayout from '../containers/HomeLayout';
 import cookieUtil from '../libs/cookieUtil';
 import '../static/login.scss'
 const divStyle = {

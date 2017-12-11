@@ -5,7 +5,9 @@ const { Header, Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
 const Search = Input.Search;
 import ShowTime from '../components/ShowTime'
-import UEditorBox from '../containers/UEditorBox'
+import UEditorBox from './UEditorBox'
+import MessageListBox from './MessageListBox'
+
 import store,{CONSTANT} from '../reducer/reducer';
 import cookieUtil from '../libs/cookieUtil';
 import ChannelListBox from './ChannelListBox';
@@ -126,9 +128,9 @@ class HomeLayout extends React.Component {
                         </div>
                         <ChannelListBox></ChannelListBox>
                     </Sider>
-                    <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150 }}>
+                    <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
                         <div className= 'content_show'>
-
+                            <MessageListBox></MessageListBox>
                         </div>
                         <div className= 'text_area'>
                             <UEditorBox></UEditorBox>

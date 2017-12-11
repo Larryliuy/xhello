@@ -6,9 +6,9 @@ import 'quill/dist/quill.snow.css';
 class UEditor extends React.Component {
     constructor(props){
         super(props)
-        this.state = {
-            value:'',
-        };
+        this.state={
+            value:''
+        }
         this.editor=null;
     }
     componentDidMount(){
@@ -16,7 +16,11 @@ class UEditor extends React.Component {
         const options = {
             debug: 'warn',
             modules: {
-                toolbar: ['bold', 'italic', 'underline', 'strike', 'image'],
+                toolbar: [{ header: [1, 2, 3, false] },
+                    'bold', 'italic', 'underline', 'strike',
+                    {color:['white','red','orange','yellow','green','blue','purple','black']},
+                    {background:['white','red','orange','yellow','green','blue','purple','black']},
+                     'icon','image'],
                 history: {          // Enable with custom configurations
                     delay: 2500,
                     userOnly: true
@@ -28,13 +32,20 @@ class UEditor extends React.Component {
         };
         const editor =this.editor= new Quill(textbox,options);
         const {value}=this.state;
+        let BackgroundClass = Quill.import('attributors/class/background');
+        let ColorClass = Quill.import('attributors/class/color');
+        let SizeClass = Quill.import('attributors/class/size');
+        Quill.register(BackgroundClass, true);
+        Quill.register(ColorClass, true);
+        Quill.register(SizeClass, true);
         if (value) editor.clipboard.dangerouslyPasteHTML(value);
         editor.on('text-change', this.handleChange.bind(this));
     }
     handleChange () {
-        let { value }=this.state;
-        value = this.editor.root.innerHTML;
-        this.setState({value:value});
+        // let { value }=this.state;
+        let value = this.editor.root.innerHTML;
+        // this.setState({value:value});
+        this.props.setText(value)
     }
     render(){
         return (
