@@ -36,7 +36,7 @@ const Login = (props) => {
         let args = 'account='+userName+'&password='+password;
         // console.log(args);
         // if('fetch' in window){
-            fetch('/user/login',{
+           /* fetch('/user/login',{
                 method:'POST',
                 credentials: "include",
                 headers:{
@@ -61,7 +61,7 @@ const Login = (props) => {
                   }else {
                       message.error(data.msg)
                   }
-              }).catch(err=>console.log(err))
+              }).catch(err=>console.log(err))*/
 
         //默认进入
         message.success('登录成功')

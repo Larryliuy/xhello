@@ -7,7 +7,7 @@ const Search = Input.Search;
 import ShowTime from '../components/ShowTime'
 import UEditorBox from './UEditorBox'
 import MessageListBox from './MessageListBox'
-
+import UserSearchBox from '../containers/UserSearchBox';
 import store,{CONSTANT} from '../reducer/reducer';
 import cookieUtil from '../libs/cookieUtil';
 import ChannelListBox from './ChannelListBox';
@@ -32,10 +32,10 @@ let arrData = [],
     tmpArrData = [],
     userId = 0,
     isInit = true;
-if(decodeURI(window.location.href).indexOf('?') !== -1){
+if(decodeURI(window.location.href).indexOf('?{') !== -1){
     console.log(decodeURI(window.location.href))
     console.log(userId)
-    userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?')+1,decodeURI(window.location.href).length)).id
+    userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?{')+1,decodeURI(window.location.href).length)).id
 }
 //fetch请求
 function getFetchData(url,arg,acData) {
@@ -121,11 +121,7 @@ class HomeLayout extends React.Component {
 
                     <Sider width={240} collapsible = {false} style={Object.assign({},sliderStyle,{borderRight: '1px solid #eee'})}>
                         {/*搜索框*/}
-                        <div className="logo-slider" >
-                            <Search placeholder="input search text"
-                            onSearch={value => console.log(value)}
-                            style={{ width: 200 }}/>
-                        </div>
+                        <UserSearchBox></UserSearchBox>
                         <ChannelListBox></ChannelListBox>
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>

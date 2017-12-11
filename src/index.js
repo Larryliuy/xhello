@@ -1,6 +1,6 @@
 import React,{ Component } from 'react';
 import ReactDom from 'react-dom';
-import {BrowserRouter, Route, withRouter} from 'react-router-dom';
+import {BrowserRouter, HashRouter, Route, withRouter} from 'react-router-dom';
 import { connect,Provider } from 'react-redux';
 import store,{collapsed,CONSTANT} from './reducer/reducer';
 import LoginBox from './containers/LoginBox';
@@ -16,7 +16,6 @@ const h4Style = {
 class App extends React.Component {
 render(){
     return (
-
             <div style={h4Style}>
                 <Route exact path='/' component={LoginBox}/>
                 <Route path='/register' component={RegisterBox}/>
@@ -46,8 +45,8 @@ const App1=withRouter(connect(mapStateToProps)(App));
 
 ReactDom.render(
     <Provider store={store}>
-        <BrowserRouter>
+        <HashRouter>
         <App1/>
-        </BrowserRouter>
+        </HashRouter>
     </Provider>,
     document.getElementById('main'));

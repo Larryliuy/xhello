@@ -20,7 +20,7 @@ class UEditor extends React.Component {
                     'bold', 'italic', 'underline', 'strike',
                     {color:['white','red','orange','yellow','green','blue','purple','black']},
                     {background:['white','red','orange','yellow','green','blue','purple','black']},
-                     'icon','image'],
+                     'image'],
                 history: {          // Enable with custom configurations
                     delay: 2500,
                     userOnly: true
