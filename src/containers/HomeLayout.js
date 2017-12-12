@@ -11,6 +11,8 @@ import UserSearchBox from '../containers/UserSearchBox';
 import store,{CONSTANT} from '../reducer/reducer';
 import cookieUtil from '../libs/cookieUtil';
 import ChannelListBox from './ChannelListBox';
+import MicroPhoneBox from './MicroPhoneBox';
+import AdvertisementBox from './AdvertisementBox';
 import '../static/login.scss'
 const layoutStyle = {
     width:'100%',
@@ -133,33 +135,13 @@ class HomeLayout extends React.Component {
                         </div>
                     </Content>
                     <Sider width={240} collapsible = {false} style={Object.assign({},sliderStyle,{borderLeft: '1px solid #eee'})}>
-                        {/*头像区域*/}
-                        <div className="logo-area" >
-                            头像区域
-                        </div>
                         {/*麦序区域*/}
                         <div className='microphone_area'>
-                            <Menu theme="" mode="inline"
-                                  defaultSelectedKeys={['1']}
-                                  onClick={(e)=>this.onClickHandle(e)}
-                                  defaultOpenKeys={['task']}>
-                                <SubMenu key='task'
-                                         title={<span><Icon type="plus" /><span>工作</span></span>}>
-                                    <Menu.Item key="1">
-                                        <span className="nav-text">测试1</span>
-                                    </Menu.Item>
-                                    <Menu.Item key="2">
-                                        <span className="nav-text">测试2</span>
-                                    </Menu.Item>
-                                </SubMenu>
-                                <Menu.Item key="3"><Icon type="plus" /><span className="nav-text" onClick={(e)=>this.onClickHandle(e)}>我的审批</span></Menu.Item>
-                                {/*/!*<Menu.Item key="4"><Icon type="upload" /><span className="nav-text">新增工作</span></Menu.Item>*/}
-                                <Menu.Item key="4"><Icon type="plus" /><span className="nav-text">操作记录</span></Menu.Item>
-                            </Menu>
+                            <MicroPhoneBox></MicroPhoneBox>
                         </div>
                         {/*广告区域*/}
                         <div className="ad-area" >
-                             广告区域
+                            <AdvertisementBox></AdvertisementBox>
                         </div>
                     </Sider>
                 </Layout>

@@ -1,9 +1,9 @@
 import React,{ Component }  from 'react'
-
+import MicroPhone from '../components/MicroPhone'
 
 class MicroPhoneBox extends React.Component {
     render(){
-        return (<div></div>)
+        return (<MicroPhone></MicroPhone>)
     }
 }
 
