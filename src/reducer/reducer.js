@@ -35,7 +35,7 @@ export const loginState = (state = loginInitState,action) => {
             return loginInitState;
     }
 };
-const homeInitState = {viewModel:false,skinColor:'green',currentChannelId:1,currentRoomId :0};
+const homeInitState = {viewModel:false,skinColor:'#108ee9',currentChannelId:1,currentRoomId :0};
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
     switch (action.type){

@@ -44,12 +44,12 @@ class UEditor extends React.Component {
     handleChange () {
         // let { value }=this.state;
         let value = this.editor.root.innerHTML;
-        // this.setState({value:value});
-        this.props.setText(value)
+        let temp = value.replace(/<p><br><\/p>/g,'');
+        this.props.setText(temp)
     }
     render(){
         return (
-                <div ref="textarea"> </div>
+                <div onKeyDown={(e)=>{this.props.keydownHandle(e)}} ref="textarea"> </div>
         )
     }
 }

@@ -4,13 +4,13 @@ import { Button } from 'antd';
 import '../static/login.scss'
 const divStyle = {
     position: 'relation',
-    height: '130px'
+    height:'80%'
 };
 
 
 class UEditorBox extends React.Component {
     constructor(){
-        super()
+        super();
         this.state={
             value:''
         }
@@ -18,21 +18,37 @@ class UEditorBox extends React.Component {
     componentDidMount(){
     }
     setText(value){
+        //过滤空字符串和回车字符串
+        if(!value || !value.trim()) return;
         this.setState({
             value:value
-        })
-        console.log(value)
+        });
+        console.log(value);
     }
     sendClickhandle(){
         let message = {username:'larry',time:new Date().toLocaleDateString(),value:this.state.value};
-        console.log(message)
-        alert(message)
+        console.log(message);
+        alert(message.value);
         //通过websocket发送给服务器
+    }
+    keydownHandle(e){
+        if(!this.state.value || this.state.value.indexOf('<p><br></p>') !== -1) {
+            e.target.innerHTML = '';
+            return false;
+        };
+        //ctrl+enter发送，enter发送需要做字符串处理
+        if(e.keyCode === 13 && e.ctrlKey){
+            console.log(this.state.value);
+            alert(this.state.value);
+            e.target.innerHTML = '';
+        }else if(e.keyCode === 13 && !e.ctrlKey){
+            e.target.innerHTML = this.state.value;
+        }
     }
     render(){
         return(
         <div style={divStyle}>
-            <UEditor setText={this.setText.bind(this)}></UEditor>
+            <UEditor keydownHandle={this.keydownHandle.bind(this)} setText={this.setText.bind(this)}></UEditor>
             <Button onClick={() => {this.sendClickhandle()} }
                     className = 'send-btn'
                     type='primary'
