@@ -26,6 +26,7 @@ class UEditorBox extends React.Component {
     sendClickhandle(){
         let message = {username:'larry',time:new Date().toLocaleDateString(),value:this.state.value};
         console.log(message)
+        alert(message)
         //通过websocket发送给服务器
     }
     render(){

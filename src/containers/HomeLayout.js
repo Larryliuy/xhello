@@ -1,10 +1,6 @@
 import React,{Component} from 'react';
-import {Link} from 'react-router-dom'
-import { Layout, Menu, Icon ,message, Input, Button, Breadcrumb } from 'antd';
+import { Layout, Icon ,message, Button } from 'antd';
 const { Header, Content, Footer, Sider } = Layout;
-const SubMenu = Menu.SubMenu;
-const Search = Input.Search;
-import ShowTime from '../components/ShowTime'
 import UEditorBox from './UEditorBox'
 import MessageListBox from './MessageListBox'
 import UserSearchBox from '../containers/UserSearchBox';
@@ -13,6 +9,7 @@ import cookieUtil from '../libs/cookieUtil';
 import ChannelListBox from './ChannelListBox';
 import MicroPhoneBox from './MicroPhoneBox';
 import AdvertisementBox from './AdvertisementBox';
+import HeaderTopBox from './HeaderTopBox';
 import '../static/login.scss'
 const layoutStyle = {
     width:'100%',
@@ -85,7 +82,7 @@ class HomeLayout extends React.Component {
         if(!userId){
             userId = JSON.parse(decodeURI(cookieUtil.get('userData'))).id || 0;
         }
-        console.log(userId)
+        console.log(userId);
         if(userId){
             /*getFetchData('/task/list','userId='+userId,1);
             getFetchData('/task/assignList','assignUserId='+userId,2);*/
@@ -100,24 +97,11 @@ class HomeLayout extends React.Component {
         super(props)
     }
 
-    loginOut=()=>{
-        message.success('退出成功！');
-        cookieUtil.unset('userName');
-        cookieUtil.unset('password');
-        cookieUtil.unset('userData');
-    };
     render() {
         return (
             <Layout style={layoutStyle}>
-                <Header style={{ padding: 0,textAlign:'center',borderBottom:'1px solid #ececec' }} >
-                    <div className="logo" > <ShowTime/></div>
-                    <h1>
-                        中华人民共和国商务部直销查询信息管理系统
-                    </h1>
-                    <span style={{cursor:'pointer',position:'absolute',fontSize:16,right:60,top:3}}>
-                        <Icon style={{color:'blue'}} type="appstore" />
-                        </span>
-                    <Link to='/' onClick={this.loginOut} style={{position:'absolute',top:5,right:30,cursor:'pointer'}}><Icon type="poweroff" style={{fontSize:18,color:'red'}}/></Link>
+                <Header style={{ backgroundColor:state.homeState.skinColor,padding: 0,textAlign:'center',borderBottom:'1px solid #ececec' }} >
+                    <HeaderTopBox></HeaderTopBox>
                 </Header>
                 <Layout style={{backgroundColor:'#fff'}}>
 
@@ -146,6 +130,7 @@ class HomeLayout extends React.Component {
                     </Sider>
                 </Layout>
                 <Footer className ='footer'>
+                    {/*底部功能区*/}
                     <div>
                         <span style={{fontSize:13,marginRight:80,top:3}}>{JSON.parse(decodeURI(this.props.location.search.substring(1))).name}</span>
                     </div>
