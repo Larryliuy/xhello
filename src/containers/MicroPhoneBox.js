@@ -3,7 +3,7 @@ import MicroPhone from '../components/MicroPhone'
 
 class MicroPhoneBox extends React.Component {
     render(){
-        return (<MicroPhone></MicroPhone>)
+        return (<div className='microphone_area'><MicroPhone></MicroPhone></div>)
     }
 }
 

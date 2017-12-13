@@ -76,17 +76,20 @@ class HomeLayout extends React.Component {
                             {state.homeState.currentRoomInfo.living && <LivingBox></LivingBox>}
                         </div>
                         <div className= 'text_area'>
-                            <UEditorBox></UEditorBox>
+                            {!state.homeState.currentRoomInfo.living && <UEditorBox></UEditorBox>}
+                            {state.homeState.currentRoomInfo.living && <AdvertisementBox></AdvertisementBox>}
                         </div>
                     </Content>
                     <Sider width={240} collapsible = {false} style={Object.assign({},sliderStyle,{borderLeft: '1px solid #eee'})}>
                         {/*麦序区域*/}
-                        <div className='microphone_area'>
-                            <MicroPhoneBox></MicroPhoneBox>
+                        <div className='content-right-up'>
+                            {!state.homeState.currentRoomInfo.living && <MicroPhoneBox></MicroPhoneBox>}
+                            {state.homeState.currentRoomInfo.living && <MessageListBox></MessageListBox>}
                         </div>
                         {/*广告区域*/}
                         <div className="ad-area" >
-                            <AdvertisementBox></AdvertisementBox>
+                            {!state.homeState.currentRoomInfo.living && <AdvertisementBox></AdvertisementBox>}
+                            {state.homeState.currentRoomInfo.living && <UEditorBox></UEditorBox>}
                         </div>
                     </Sider>
                 </Layout>

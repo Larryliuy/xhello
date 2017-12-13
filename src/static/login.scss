@@ -103,8 +103,9 @@ html,body{
 
 //消息展示框样式
 .message-box{
-    height: 100%;
-    overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
 }
 
 .text_area{
@@ -118,9 +119,13 @@ html,body{
 .ad-area{
     position: absolute;
     width: 100%;
-    height: 200px;
-    background-color: #9fd2f6;
+  height: 30%;
+  line-height: 30%;
+    //background-color: #9fd2f6;
     bottom: 0px;
+}
+.ql-container{
+  height: 100% !important;
 }
 
 .fast_login{
@@ -191,8 +196,13 @@ ul{
 
 
 /*麦序模块样式*/
+.content-right-up{
+  width: 100%;
+  height: 70%;
+}
 .microphone_area{
-    width: 100%;
+  width: 100%;
+  height: 100%;
     //height: 350px;
     .avatar-area{
         text-align: center !important;
@@ -247,4 +257,14 @@ ul{
 .user-icon img{
   width: 18px;
   height: 18px;
+}
+
+.video-ele{
+  width: 100%;
+  height: 70%;
+}
+.host-text{
+  width: 100%;
+  height: 30%;
+  padding-top: 10px;
 }
