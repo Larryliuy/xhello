@@ -127,8 +127,8 @@ const Login = (props) => {
                     <Link to="/register" >忘记密码<Icon type="question"/></Link>
                 </FormItem>
                 <div className='fast_login'>
-                    <span className='icon_qq'><Icon type="api" style={iconStyle} /></span>
-                    <span className='icon_wechat'><Icon type="play-circle" style={iconStyle}/></span>
+                    <span className='icon_qq'><Icon type="wechat" style={iconStyle}/></span>
+                    <span className='icon_wechat'><Icon type="qq" style={iconStyle}/></span>
                 </div>
         </Form>
     );

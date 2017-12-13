@@ -8,7 +8,7 @@ export const CONSTANT = {
     VIEWMODEL:'VIEWMODEL',
     SKINCOLOR:'SKINCOLOR',
     CURRENTCHANNELID:'CURRENTCHANNELID',
-    CURRENTROOMID:'CURRENTROOMID'
+    CURRENTROOMINFO:'CURRENTROOMINFO'
 };
 function toggleLogin() {
     return {
@@ -35,14 +35,14 @@ export const loginState = (state = loginInitState,action) => {
             return loginInitState;
     }
 };
-const homeInitState = {viewModel:false,skinColor:'#108ee9',currentChannelId:1,currentRoomId :0};
+const homeInitState = {viewModel:false,skinColor:'#108ee9',currentChannelId:1,currentRoomInfo :{id:1,online:3,living:false}};
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
     switch (action.type){
-        case CONSTANT.VIEWMODEL:
-            return Object.assign({},tmpState,{viewModel:action.val.viewModel});
+        case CONSTANT.CURRENTROOMINFO:
+            return Object.assign({},tmpState,{currentRoomInfo:action.val});
         case CONSTANT.SKINCOLOR:
-            return Object.assign({},tmpState,{skinColor:action.val.skinColor});
+            return Object.assign({},tmpState,{skinColor:action.val});
         default:
             console.log('default')
             return homeInitState;

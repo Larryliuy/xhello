@@ -19,7 +19,7 @@ const color = [
 const clickHandle = (e) => {
     if(!e.target.style.backgroundColor) return;
     console.log(e.target.style.backgroundColor);
-    store.dispatch({type:CONSTANT.SKINCOLOR,val:{skinColor:e.target.style.backgroundColor}})
+    store.dispatch({type:CONSTANT.SKINCOLOR,val:e.target.style.backgroundColor});
 };
 const content = (
     <div style={{width:'200px'}} onClick={clickHandle}>

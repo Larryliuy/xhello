@@ -79,14 +79,19 @@ html,body{
 .ant-layout-header {
     //background: #108ee9;
     padding: 0 50px;
-    height: 100px !important;
-    line-height: 100px !important;
+    height: 80px !important;
+    line-height: 80px !important;
+}
+.ant-layout-footer{
+    padding: 10px 5px !important;
 }
 .footer{
-    padding: 10px 0px 10px 20px !important;
+    //padding: 10px 0px 10px 20px !important;
     textAlign: center;
     display: flex;
     justify-content: space-around;
+    line-height: 100%;
+    align-items:center;
 }
 
 .content_show{
@@ -237,4 +242,9 @@ ul{
         width: 100%;
         height: 200px;
     }
+}
+/*用户图标样式*/
+.user-icon img{
+  width: 18px;
+  height: 18px;
 }

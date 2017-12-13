@@ -9,7 +9,9 @@ import cookieUtil from '../libs/cookieUtil';
 import ChannelListBox from './ChannelListBox';
 import MicroPhoneBox from './MicroPhoneBox';
 import AdvertisementBox from './AdvertisementBox';
+import LivingBox from './LivingBox';
 import HeaderTopBox from './HeaderTopBox';
+import FooterBottomBox from './FooterBottomBox';
 import '../static/login.scss'
 const layoutStyle = {
     width:'100%',
@@ -26,55 +28,15 @@ let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
 });
-let arrData = [],
-    assginArrData = [],
-    tmpArrData = [],
-    userId = 0,
+let userId = 0,
     isInit = true;
 if(decodeURI(window.location.href).indexOf('?{') !== -1){
     console.log(decodeURI(window.location.href))
-    console.log(userId)
+    console.log(userId);
     userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?{')+1,decodeURI(window.location.href).length)).id
 }
-//fetch请求
-function getFetchData(url,arg,acData) {
-    if('fetch' in window){
-        fetch(url,{
-            method:'POST',
-            // mode:'no-cors',
-            credentials: "include",
-            headers:{
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body:arg
-        }).then((response)=>{console.log(response);return response.json()})
-            .then((data)=>{
-            console.log(data)
-                if (acData == 1){
-                    arrData = tmpArrData = data.result;
-                    store.dispatch({type:CONSTANT.TASKKEY,val:{key:state.homeState.key,currentTask:state.homeState.currentTask,finished:0}})
-                }else if(acData == 2){
-                    assginArrData = data.result;
-                    // console.log('fetch'+acData+':'+isInit)
-                    if(!isInit){
-                        assginArrData = tmpArrData = data.result;
-                        store.dispatch({type:CONSTANT.TASKKEY,val:{key:state.homeState.key,currentTask:state.homeState.currentTask,finished:0}})
-                    }
-                }else {
-                    message.error('错误类型');
-                    return ;
-                }
-            }).catch(err=>console.log(err))
-    }
-}
+console.log('href:'+userId);
 
-console.log('href:'+userId)
-
-export function updateData() {
-    if(userId){
-        getFetchData('/task/assignList','assignUserId='+userId,2); //2代表我分配的任务
-    }
-}
 
 class HomeLayout extends React.Component {
     componentWillMount(){
@@ -91,12 +53,10 @@ class HomeLayout extends React.Component {
                 isInit = false;
             },1000)
         }
-
     }
     constructor(props){
         super(props)
     }
-
     render() {
         return (
             <Layout style={layoutStyle}>
@@ -112,7 +72,8 @@ class HomeLayout extends React.Component {
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
                         <div className= 'content_show'>
-                            <MessageListBox></MessageListBox>
+                            {!state.homeState.currentRoomInfo.living && <MessageListBox></MessageListBox>}
+                            {state.homeState.currentRoomInfo.living && <LivingBox></LivingBox>}
                         </div>
                         <div className= 'text_area'>
                             <UEditorBox></UEditorBox>
@@ -129,25 +90,9 @@ class HomeLayout extends React.Component {
                         </div>
                     </Sider>
                 </Layout>
-                <Footer className ='footer'>
+                <Footer>
                     {/*底部功能区*/}
-                    <div>
-                        <span style={{fontSize:13,marginRight:80,top:3}}>{JSON.parse(decodeURI(this.props.location.search.substring(1))).name}</span>
-                    </div>
-                    <div>
-                        <span style={{cursor:'pointer'}}><Icon type="sound" /></span>
-                        <span style={{marginLeft:10,top:3,cursor:'pointer'}}><Icon type="phone" /></span>
-                    </div>
-                    <div>
-                        <span style={{marginLeft:80,top:3}}><Button type='primary'>点击开麦</Button></span>
-                    </div>
-                    <div>
-                        <span style={{marginLeft:80,top:3,cursor:'pointer'}}>欢呼</span>
-                        <span style={{marginLeft:10,top:3,cursor:'pointer'}}>鼓掌</span>
-                    </div>
-                    <div>
-                        <span style={{cursor:'pointer'}}><Icon type="sound" />播放</span>
-                    </div>
+                    <FooterBottomBox userName={JSON.parse(decodeURI(this.props.location.search.substring(1))).name}></FooterBottomBox>
                 </Footer>
             </Layout>
         );
