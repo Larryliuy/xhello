@@ -3,8 +3,8 @@ import UEditor from '../components/UEditor';
 import { Button } from 'antd';
 import '../static/login.scss'
 const divStyle = {
-    position: 'relation',
-    height:'80%'
+    position: 'relative',
+    height:'100%'
 };
 
 
