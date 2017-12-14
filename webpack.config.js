@@ -22,7 +22,9 @@ module.exports = {
                 comments: false,  // remove all comments
             },
             compress: {
-                warnings: false
+                warnings: false,
+                drop_debugger: true,
+                drop_console: true //去掉console
             }
         })
     ],
@@ -46,7 +48,7 @@ module.exports = {
                         {
                             loader: 'css-loader',
                             options:{
-                                minimize: true //css压缩
+                                minimize: false //css压缩
                             }
                         }
                     ]

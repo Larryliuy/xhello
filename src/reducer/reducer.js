@@ -44,7 +44,7 @@ export const homeState = (state = homeInitState,action)=>{
         case CONSTANT.SKINCOLOR:
             return Object.assign({},tmpState,{skinColor:action.val});
         default:
-            console.log('default')
+            // console.log('default');
             return homeInitState;
     }
 };

@@ -302,3 +302,23 @@ ul{
   height: 30%;
   padding-top: 10px;
 }
+.upload-btn{
+  #file-input{
+    width: 0px;
+    height: 0px;
+    display: none;
+    border: none;
+    outline: none;
+  }
+  label{
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+  }
+}
+#pre-show{
+  margin-top: 20px;
+  img{
+    width: 200px;
+    height: 250px;
+  }
+}

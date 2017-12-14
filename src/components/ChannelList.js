@@ -180,9 +180,3 @@ class ChannelList extends React.Component{
 };
 
 export default ChannelList;
-
-let arr = [1,2,3,4,5];
-arr.filter(function(ar){
-    return ar>2;
-});
-console.log(arr);

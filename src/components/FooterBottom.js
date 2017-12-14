@@ -1,14 +1,27 @@
 import React,{ Component } from 'react';
 import { Icon ,message, Button, Slider } from 'antd';
+import UploadAvatar from './UploadAvatar';
 
 class FooterBottom extends React.Component{
     constructor(props){
-        super(props)
+        super(props);
+        this.state={
+            visible: false
+        }
     }
     clickHandle(e){
         // alert(e.target)
         if(!e.target.id) return;
-        alert(e.target.id);
+        console.log(e.target.id);
+        if(e.target.id === 'avatar-img'){
+            this.setState({visible: true})
+        }
+    }
+    handOk(){
+        this.setState({visible: false});
+    }
+    handleCancel(){
+        this.setState({visible: false});
     }
     render(){
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
@@ -16,7 +29,12 @@ class FooterBottom extends React.Component{
                 <span className={'user-info'}>
                     <img id='avatar-img' src={'./images/avatar.png'}></img>
                     {this.props.userName}
-                    </span>
+                </span>
+                <UploadAvatar visible={this.state.visible}
+                              handleOk={this.handOk.bind(this)}
+                              handleCancel={this.handleCancel.bind(this)}
+                >
+                </UploadAvatar>
             </div>
             <div>
                 <span>
