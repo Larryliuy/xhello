@@ -1,7 +1,7 @@
 {
-  "name": "oa",
+  "name": "live",
   "version": "1.0.0",
-  "description": "oa for company",
+  "description": "live for company",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Larryliuy/oa.git"
+    "url": "git+https://github.com/Larryliuy/live.git"
   },
   "keywords": [
     "oa"
@@ -17,14 +17,15 @@
   "author": "larry",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Larryliuy/oa/issues"
+    "url": "https://github.com/Larryliuy/live/issues"
   },
-  "homepage": "https://github.com/Larryliuy/oa#readme",
+  "homepage": "https://github.com/Larryliuy/live#readme",
   "dependencies": {
     "antd": "^3.0.1",
     "babel-plugin-import": "^1.4.0",
     "babel-polyfill": "^6.26.0",
     "es6-promise": "^4.1.1",
+    "nodejs-websocket": "^1.7.1",
     "promise-polyfill": "^6.0.2",
     "quill": "^1.3.4",
     "react": "^15.6.1",
@@ -32,7 +33,8 @@
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
     "redux": "^3.7.2",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^2.0.3",
+    "ws": "^3.3.2"
   },
   "devDependencies": {
     "antd": "^3.0.1",

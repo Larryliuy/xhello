@@ -2,6 +2,8 @@ import React,{Component} from 'react'
 import UEditor from '../components/UEditor';
 import { Button } from 'antd';
 import '../static/login.scss'
+// import WS from  '../static/wsInstace';
+
 const divStyle = {
     position: 'relative',
     height:'100%'
@@ -30,6 +32,7 @@ class UEditorBox extends React.Component {
         console.log(message);
         alert(message.value);
         //通过websocket发送给服务器
+        // WS.emit('message',message);
     }
     keydownHandle(e){
         if(!this.state.value || this.state.value.indexOf('<p><br></p>') !== -1) {

@@ -5,10 +5,10 @@ import 'quill/dist/quill.snow.css';
 
 class UEditor extends React.Component {
     constructor(props){
-        super(props)
+        super(props);
         this.state={
             value:''
-        }
+        };
         this.editor=null;
     }
     componentDidMount(){

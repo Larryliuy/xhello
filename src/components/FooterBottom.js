@@ -1,28 +1,46 @@
 import React,{ Component } from 'react';
-import { Layout, Icon ,message, Button } from 'antd';
+import { Icon ,message, Button, Slider } from 'antd';
 
 class FooterBottom extends React.Component{
     constructor(props){
         super(props)
     }
+    clickHandle(e){
+        // alert(e.target)
+        if(!e.target.id) return;
+        alert(e.target.id);
+    }
     render(){
-        return (<div className ='footer'>
+        return (<div className ='footer' onClick={e => this.clickHandle(e)}>
             <div>
-                <span style={{fontSize:13,marginRight:80,top:3}}>{this.props.userName}</span>
+                <span className={'user-info'}>
+                    <img id='avatar-img' src={'./images/avatar.png'}></img>
+                    {this.props.userName}
+                    </span>
             </div>
             <div>
-                <span style={{cursor:'pointer'}}><Icon type="sound" /></span>
-                <span style={{marginLeft:10,top:3,cursor:'pointer'}}><Icon type="phone" /></span>
+                <span>
+                    <img id='audio-img' src='./images/icons/audio.png' />
+                    <div className='sound-slider'>
+                        <Slider className='slider' defaultValue={30} />
+                    </div>
+                </span>
+                <span style={{marginLeft:10}}>
+                    <img id='microphone-img' src='./images/icons/Microphone_open.png' />
+                    <div className='sound-slider'>
+                        <Slider defaultValue={30} />
+                    </div>
+                </span>
             </div>
             <div>
-                <span style={{marginLeft:80,top:3}}><Button type='primary'>点击开麦</Button></span>
+                <span style={{marginLeft:80}}><Button id='open-microphone-btn' type='primary'>点击开麦</Button></span>
             </div>
             <div>
-                <span style={{marginLeft:80,top:3,cursor:'pointer'}}>欢呼</span>
-                <span style={{marginLeft:10,top:3,cursor:'pointer'}}>鼓掌</span>
+                <span id='huanhu-span' style={{marginLeft:80}}>欢呼</span>
+                <span id='guzhang-span' style={{marginLeft:10}}>鼓掌</span>
             </div>
-            <div>
-                <span style={{cursor:'pointer'}}><Icon type="sound" />播放</span>
+            <div className='play-sound'>
+                <span><img id='play-img' src='./images/icons/music.png' />播放</span>
             </div>
         </div>)
     }

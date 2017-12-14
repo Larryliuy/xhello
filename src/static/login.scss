@@ -96,6 +96,37 @@ html,body{
     justify-content: space-around;
     line-height: 100%;
     align-items:center;
+  span{
+    cursor: pointer;
+  }
+  img{
+    width: 18px;
+    height: 18px;
+    margin-right: 1px;
+  }
+  .user-info{
+    font-size: 14px;
+    margin-right: 40px;
+    top:3px;
+  }
+  .audio{
+    width: 0px;
+    height: 0px;
+  }
+  .sound-slider{
+    display: inline-block;
+    width: 60px;
+    height: 20px;
+  }
+  .play-sound{
+    img{
+      width: 14px;
+      height: 14px;
+    }
+  }
+  .slider{
+    border: 1px solid #eee;
+  }
 }
 
 .content_show{

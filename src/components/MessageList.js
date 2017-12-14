@@ -4,28 +4,18 @@ import { List, Avatar } from 'antd';
 
 class MessageList extends React.Component{
     constructor(props) {
-        super(props)
+        super(props);
+
+    }
+    componentDidMount(){
+
     }
     render(){
-        const data = [{username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12'}];
+
         return (<List
             size="small"
             itemLayout="horizontal"
-            dataSource={data}
+            dataSource={this.props.data}
             renderItem={item => (
                 <List.Item>
                     <List.Item.Meta

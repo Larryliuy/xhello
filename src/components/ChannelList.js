@@ -11,7 +11,7 @@ store.subscribe(function () {
 let tRoomStatus = {};
 class ChannelList extends React.Component{
     constructor(props){
-        super(props)
+        super(props);
         this.state = {data:[],roomStatus:{}};
     }
     componentDidMount(){
