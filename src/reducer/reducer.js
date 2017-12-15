@@ -8,7 +8,10 @@ export const CONSTANT = {
     VIEWMODEL:'VIEWMODEL',
     SKINCOLOR:'SKINCOLOR',
     CURRENTCHANNELID:'CURRENTCHANNELID',
-    CURRENTROOMINFO:'CURRENTROOMINFO'
+    CURRENTROOMINFO:'CURRENTROOMINFO',
+    SEARCHKEYWORD:'SEARCHKEYWORD',
+    SEARCHRESULT:'SEARCHRESULT',
+    ALLROOMLIST:'ALLROOMLIST'
 };
 function toggleLogin() {
     return {
@@ -35,7 +38,13 @@ export const loginState = (state = loginInitState,action) => {
             return loginInitState;
     }
 };
-const homeInitState = {viewModel:false,skinColor:'#108ee9',currentChannelId:1,currentRoomInfo :{id:1,online:3,living:false}};
+const homeInitState = {viewModel:false,skinColor:'#108ee9',
+    currentChannelId:1,
+    currentRoomInfo :{id:1,online:3,living:false},
+    allRoomList:[],
+    searchResult:[],
+    searchKeyword:''
+};
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
     switch (action.type){
@@ -43,6 +52,12 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{currentRoomInfo:action.val});
         case CONSTANT.SKINCOLOR:
             return Object.assign({},tmpState,{skinColor:action.val});
+        case CONSTANT.SEARCHRESULT:
+            return Object.assign({},tmpState,{searchResult:action.val});
+        case CONSTANT.SEARCHKEYWORD:
+            return Object.assign({},tmpState,{searchKeyword:action.val});
+        case CONSTANT.ALLROOMLIST:
+            return Object.assign({},tmpState,{allRoomList:action.val});
         default:
             // console.log('default');
             return homeInitState;

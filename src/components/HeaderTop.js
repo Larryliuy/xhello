@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import {Link} from 'react-router-dom'
 import { Icon ,message } from 'antd';
 import cookieUtil from "../libs/cookieUtil";
+import HeaderLeft from "../components/HeaderLeft";
+
+
 
 import Skin from './Skin';
 
@@ -14,7 +17,9 @@ class HeaderTop extends React.Component{
     };
     render(){
         return (<div>
-            <div className="logo" ></div>
+            <div className="logo" >
+                <HeaderLeft></HeaderLeft>
+            </div>
             <h2>
                 中华人民共和国商务部直销查询信息管理系统
             </h2>

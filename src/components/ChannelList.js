@@ -6,40 +6,43 @@ import '../static/login.scss'
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
-    console.log(store.getState())
+    // console.log(store.getState())
 });
 let tRoomStatus = {};
 class ChannelList extends React.Component{
     constructor(props){
         super(props);
-        this.state = {data:[],roomStatus:{}};
+        this.state = {roomStatus:{}};
     }
     componentDidMount(){
         const datas = [
             {title:'房间1',id:1,living:false,online:5,childNode:[
-                    {title:'用户1',id:1,level:1,sex:1},
-                    {title:'用户2',id:2,level:2,sex:2},
-                    {title:'用户3',id:3,level:3,sex:1}
+                    {userName:'用户1',id:1,level:1,sex:1},
+                    {userName:'用户2',id:2,level:4,sex:2},
+                    {userName:'用户3',id:3,level:3,sex:1},
+                    {userName:'larry',id:7,level:1,sex:1}
                 ]},
             {title:'房间2',id:2,living:true,online:10,childNode:[
-                    {title:'用户4',id:4,level:4,sex:2},
-                    {title:'用户5',id:5,level:5,sex:1},
-                    {title:'用户6',id:6,level:6,sex:2}
+                    {userName:'用户4',id:4,level:4,sex:2},
+                    {userName:'用户5',id:5,level:5,sex:1},
+                    {userName:'用户6',id:6,level:6,sex:2}
                 ]},
             {title:'房间3',id:3,living:false,online:5,childNode:[]},
             {title:'房间4',id:4,living:false,online:10,childNode:[]}
         ];
         datas.map(function(item){
-            // console.log(item.id == state.homeState.currentRoomInfo.id);
+            //将当前房间的状态设置为打开
             if(item.id == state.homeState.currentRoomInfo.id){
-                tRoomStatus[item.id] = true;
+                tRoomStatus['r'+item.id] = true;
             }else{
-                tRoomStatus[item.id] = false;
+                tRoomStatus['r'+item.id] = false;
             }
             return item;
         });
         // console.log(tRoomStatus);
-        this.setState({data:datas,roomStatus:tRoomStatus});
+        this.setState({roomStatus:tRoomStatus});
+        //这里需要将this.state改成reducer
+        store.dispatch({type:CONSTANT.ALLROOMLIST,val:datas});
         // console.log(this.state.roomStatus);
         // console.log(this.state)
     }
@@ -52,17 +55,17 @@ class ChannelList extends React.Component{
         // console.log(channelId);
 
         //进入房间，更新当前房间信息
-        let tDatas = this.state.data.map(function(item){
-            if(item.id == roomId){
+        let tDatas = state.homeState.allRoomList.map(function(item){
+            if(('r'+item.id) == roomId){
                 //修改当前房间信息并添加自己到当前用户中
-                item.childNode.push({title:'larry',id:7,level:1,sex:1});
+                item.childNode.push({userName:'larry',id:7,level:1,sex:1});
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{id:item.id,online:item.online,living:item.living}});
             }else{
                 //删除其他房间的自己
                 item.childNode = item.childNode.filter(function(user){
-                    return user.id != 7
+                    return user.id != 7;
                 });
-                console.log(item.childNode)
+                // console.log(item.childNode)
             }
             return item;
 
@@ -72,7 +75,8 @@ class ChannelList extends React.Component{
         if(!this.state.roomStatus[roomId]){
             tRoomState[roomId] = true;
         }
-        this.setState({data:tDatas,roomStatus:tRoomState});
+        this.setState({roomStatus:tRoomState});
+        store.dispatch({type:CONSTANT.ALLROOMLIST,val:tDatas});
         // console.log(state)
     };
     rightClickHandle = (e) =>{
@@ -102,7 +106,7 @@ class ChannelList extends React.Component{
         console.log(this.state.roomStatus);
     };
     render(){
-        const { data, roomStatus } = this.state;
+        const { roomStatus } = this.state;
         const clickOpenHandle = this.clickOpenHandle;
         const getUserIconSrc = (sex,level) =>{
             let src = '';
@@ -159,15 +163,15 @@ class ChannelList extends React.Component{
                  className='channel-list'
             >
                 <ul>
-                {data.map(function (item) {
-                    return <li id={item.id} key={item.id}>
-                        <span onClick={clickOpenHandle}><Icon type={roomStatus[item.id] ?"minus" : "plus"} /> </span>
+                {state.homeState.allRoomList.map(function (item) {
+                    return <li id={'r'+item.id} key={item.id}>
+                        <span onClick={clickOpenHandle}><Icon type={roomStatus['r'+item.id] ?"minus" : "plus"} /> </span>
                         {item.title}
-                        {roomStatus[item.id] && item.childNode &&
+                        {roomStatus['r'+item.id] && item.childNode &&
                         <ul style={{paddingLeft:'10px'}}>
                             {item.childNode.map(function (item) {
                                 return <li id={item.id} key={item.id}>
-                                    <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span> {item.title}
+                                    <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span> {item.userName}
                                     </li>
                             })}
                         </ul>}

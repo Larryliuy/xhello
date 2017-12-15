@@ -1,23 +1,53 @@
 import React,{ Component } from 'react';
 import { Input, Icon } from 'antd';
-const Search = Input.Search;
+import SearchResult from './SearchResult';
 
+import store ,{ CONSTANT } from "../reducer/reducer";
+
+let state = store.getState();
+let AllRoomData = [];
+store.subscribe(function(){
+    state = store.getState();
+    AllRoomData = state.homeState.allRoomList;
+});
 class UserSearch extends React.Component{
-    clickSearchHandle(value){
-        alert(value)
+    constructor(){
+        super();
     }
+    // 点击搜索处理
+    changeSearchHandle(e){
+        let resultData = [];
+        AllRoomData.map(function(item){
+            if(item.childNode.length !== 0){
+                return item.childNode.filter(function(item){
+                    if(item.userName.indexOf(e.target.value) !== -1){
+                        resultData.push(item);
+                    }
+                    return item.userName.indexOf(e.target.value) !== -1
+                });
+            }else{
+                return ;
+            }
+        });
+        store.dispatch({type:CONSTANT.SEARCHKEYWORD,val:e.target.value});
+        store.dispatch({type:CONSTANT.SEARCHRESULT,val:resultData});
+    }
+    // 定位自己
     clickLocationHandle(){
-    alert('location')
+        alert('location')
     }
     render(){
         return (
-            <div><Search style={{marginLeft:'-10px',width:'190px'}} placeholder="input search text"
-                        onSearch={value => this.clickSearchHandle(value)}
-                        enterButton
+            <div>
+                <Input style={{marginLeft:'-10px',width:'190px'}}
+                        placeholder="请输入用户名"
+                        prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                        onChange={value => this.changeSearchHandle(value)}
             />
-            <span onClick={this.clickLocationHandle}><Icon className='icon-location' type="environment-o" /></span>
+                <span onClick={this.clickLocationHandle}><Icon className='icon-location' type="environment-o" /></span>
+                <SearchResult data={state.homeState.resultData}></SearchResult>
             </div>)
     }
 }
 
-export default UserSearch
+export default UserSearch;

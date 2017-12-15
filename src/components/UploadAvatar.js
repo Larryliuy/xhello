@@ -61,7 +61,7 @@ class UploadAvatar extends React.Component{
                 onCancel={this.props.handleCancel}
             >
                 <div className='upload-btn'>
-                    <label for="file">选择图片<input onChange={(e) => {this.handleFiles(e)}} id='file-input' type='file' /></label>
+                    <label htmlFor="file">选择图片<input onChange={(e) => {this.handleFiles(e)}} id='file-input' type='file' /></label>
                     <span>提示：支持jpg gif png 格式图片,不能超过5M</span>
                 </div>
                 <div id='pre-show'>

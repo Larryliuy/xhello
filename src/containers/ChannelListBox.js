@@ -4,6 +4,6 @@ import ChannelList from '../components/ChannelList';
 const ChannelListBox = () => (
                         <div className='channel-list-box'>
                         <ChannelList/>
-                    </div>)
+                    </div>);
 
 export default ChannelListBox;

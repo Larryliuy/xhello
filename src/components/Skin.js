@@ -39,7 +39,7 @@ class Skin extends React.Component{
     render(){
         return (
             <Popover placement="bottom" title={text} content={content} trigger="click">
-                <Icon style={{color:'blue'}} type="skin" />
+                <span className='changeskin-logo'><img src='./images/icons/ChangeSkin.png' /></span>
             </Popover>
         )
     }

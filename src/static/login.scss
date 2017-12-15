@@ -45,10 +45,10 @@ html,body{
 }
 .logo {
     position: absolute;
-    height: 32px;
+    height: 60px;
     color: #000;
     font-size: 15px;
-    line-height: 32px;
+    line-height: 60px;
     left: 5px;
     top: 15px;
     overflow: hidden;
@@ -306,8 +306,8 @@ ul{
   #file-input{
     width: 0px;
     height: 0px;
-    display: none;
-    border: none;
+    //display: none;
+    border: 1px solid #fff;
     outline: none;
   }
   label{
@@ -320,5 +320,26 @@ ul{
   img{
     width: 200px;
     height: 250px;
+  }
+}
+
+/*
+搜索框*/
+
+.result-ul{
+  width: 150px;
+  li:hover{
+    background-color: #1890ff;
+  }
+  .no-match:hover{
+    background-color: #fff;
+  }
+}
+
+//换皮肤logo
+.changeskin-logo{
+  img{
+    width: 20px;
+    height: 20px;
   }
 }

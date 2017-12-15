@@ -7730,8 +7730,7 @@ ul {
 .upload-btn #file-input {
   width: 0px;
   height: 0px;
-  display: none;
-  border: none;
+  border: 1px solid #fff;
   outline: none; }
 
 .upload-btn label {
