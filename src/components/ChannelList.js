@@ -32,7 +32,7 @@ class ChannelList extends React.Component{
         ];
         datas.map(function(item){
             //将当前房间的状态设置为打开
-            if(item.id == state.homeState.currentRoomInfo.id){
+            if(item.id === state.homeState.currentRoomInfo.id){
                 tRoomStatus['r'+item.id] = true;
             }else{
                 tRoomStatus['r'+item.id] = false;
@@ -48,7 +48,9 @@ class ChannelList extends React.Component{
     }
 
     dblClickHandle = (event) =>{
-        let roomId = event.target.getAttribute('id');
+        let roomId = event.target.id;
+        //如果双击的不是房间则直接返回
+        if(roomId.indexOf('r') === -1) return;
         //权限不够给提示
         //参数：roomId
         //返回值：data
@@ -56,14 +58,14 @@ class ChannelList extends React.Component{
 
         //进入房间，更新当前房间信息
         let tDatas = state.homeState.allRoomList.map(function(item){
-            if(('r'+item.id) == roomId){
+            if(('r'+item.id) === roomId){
                 //修改当前房间信息并添加自己到当前用户中
                 item.childNode.push({userName:'larry',id:7,level:1,sex:1});
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{id:item.id,online:item.online,living:item.living}});
             }else{
                 //删除其他房间的自己
                 item.childNode = item.childNode.filter(function(user){
-                    return user.id != 7;
+                    return user.id !== 7;
                 });
                 // console.log(item.childNode)
             }
@@ -80,18 +82,28 @@ class ChannelList extends React.Component{
         // console.log(state)
     };
     rightClickHandle = (e) =>{
-        if(e.button == 2){
+        /*if(e.button !== 2){
+            //如果点击的不是右键则隐藏弹窗
+            store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none'}});
+        }else{
             const id = e.target.getAttribute('id');
-            if(id.length == 1){
-                // alert('创建频道列表')
-                //弹出创建频道列表
+            if(!id){
+                return;
             }
-            if(id.length == 3){
-                // alert('创建房间列表，修改房间信息等')
+            store.dispatch({type:CONSTANT.LOCATION,val:{x:e.clientX,y:e.clientY,display:'block'}});
+            if(id.indexOf('r') !== -1){
+                // alert('对房间进行操作');
+                //弹出创建频道列表
+            }else{
+                // alert('对用户进行操作');
                 //弹出创建房间或子房间列表
             }
-            console.log('right')
-        }
+            let classArr = e.target.getAttribute('class');
+            console.log(classArr);
+            if(e.target.getAttribute('class')){
+                alert('space');
+            }
+        }*/
     };
     clickOpenHandle  = (e) => {
         const roomId = e.target.parentNode.parentNode.getAttribute('id');

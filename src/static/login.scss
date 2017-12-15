@@ -30,12 +30,18 @@ html,body{
     height: 100%;
 }
 .login-form {
-    position: relative;
-    max-width: 300px;
-    margin: 0 auto;
-    padding: 15px 15px 0 15px;
-    border: 1px solid #eee;
-    /*margin-top: calc(100px + 15%);*/
+  max-height: 300px;
+  margin: auto;
+  position: absolute;
+  max-width: 300px;
+  /* margin: 0 auto; */
+  padding: 15px 15px 0 15px;
+  border: 1px solid #eee;
+  /* margin-top: calc(100px + 15%); */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 .login-form-forgot {
     float: right;
@@ -206,6 +212,7 @@ ul{
     height: 90%;
     overflow-x: hidden;
     overflow-y: scroll;
+    user-select: none;
 }
 .icon-location{
     color:#1890ff;

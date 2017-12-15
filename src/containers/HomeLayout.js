@@ -1,8 +1,8 @@
 import React,{Component} from 'react';
 import { Layout, Icon ,message, Button } from 'antd';
 const { Header, Content, Footer, Sider } = Layout;
-import UEditorBox from './UEditorBox'
-import MessageListBox from './MessageListBox'
+import UEditorBox from './UEditorBox';
+import MessageListBox from './MessageListBox';
 import UserSearchBox from '../containers/UserSearchBox';
 import store,{CONSTANT} from '../reducer/reducer';
 import cookieUtil from '../libs/cookieUtil';
@@ -12,6 +12,7 @@ import AdvertisementBox from './AdvertisementBox';
 import LivingBox from './LivingBox';
 import HeaderTopBox from './HeaderTopBox';
 import FooterBottomBox from './FooterBottomBox';
+import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
 const layoutStyle = {
     width:'100%',
@@ -31,7 +32,7 @@ store.subscribe(function () {
 let userId = 0,
     isInit = true;
 if(decodeURI(window.location.href).indexOf('?{') !== -1){
-    console.log(decodeURI(window.location.href))
+    console.log(decodeURI(window.location.href));
     console.log(userId);
     userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?{')+1,decodeURI(window.location.href).length)).id
 }
@@ -97,6 +98,7 @@ class HomeLayout extends React.Component {
                     {/*底部功能区*/}
                     <FooterBottomBox userName={JSON.parse(decodeURI(this.props.location.search.substring(1))).name}></FooterBottomBox>
                 </Footer>
+                <RightClickPanelBox></RightClickPanelBox>
             </Layout>
         );
     }

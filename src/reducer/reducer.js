@@ -11,7 +11,8 @@ export const CONSTANT = {
     CURRENTROOMINFO:'CURRENTROOMINFO',
     SEARCHKEYWORD:'SEARCHKEYWORD',
     SEARCHRESULT:'SEARCHRESULT',
-    ALLROOMLIST:'ALLROOMLIST'
+    ALLROOMLIST:'ALLROOMLIST',
+    LOCATION:"LOCATION"
 };
 function toggleLogin() {
     return {
@@ -43,7 +44,8 @@ const homeInitState = {viewModel:false,skinColor:'#108ee9',
     currentRoomInfo :{id:1,online:3,living:false},
     allRoomList:[],
     searchResult:[],
-    searchKeyword:''
+    searchKeyword:'',
+    location:{x:0,y:0,display:'none'}
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
@@ -58,6 +60,8 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{searchKeyword:action.val});
         case CONSTANT.ALLROOMLIST:
             return Object.assign({},tmpState,{allRoomList:action.val});
+        case CONSTANT.LOCATION:
+            return Object.assign({},tmpState,{location:action.val});
         default:
             // console.log('default');
             return homeInitState;

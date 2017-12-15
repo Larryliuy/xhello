@@ -7499,12 +7499,18 @@ html, body {
   height: 100%; }
 
 .login-form {
-  position: relative;
+  max-height: 300px;
+  margin: auto;
+  position: absolute;
   max-width: 300px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   padding: 15px 15px 0 15px;
   border: 1px solid #eee;
-  /*margin-top: calc(100px + 15%);*/ }
+  /* margin-top: calc(100px + 15%); */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0; }
 
 .login-form-forgot {
   float: right; }
@@ -7514,10 +7520,10 @@ html, body {
 
 .logo {
   position: absolute;
-  height: 32px;
+  height: 60px;
   color: #000;
   font-size: 15px;
-  line-height: 32px;
+  line-height: 60px;
   left: 5px;
   top: 15px;
   overflow: hidden; }
@@ -7650,7 +7656,8 @@ ul {
   width: 100%;
   height: 90%;
   overflow-x: hidden;
-  overflow-y: scroll; }
+  overflow-y: scroll;
+  user-select: none; }
 
 .icon-location {
   color: #1890ff;
@@ -7742,6 +7749,19 @@ ul {
   #pre-show img {
     width: 200px;
     height: 250px; }
+
+/*
+搜索框*/
+.result-ul {
+  width: 150px; }
+  .result-ul li:hover {
+    background-color: #1890ff; }
+  .result-ul .no-match:hover {
+    background-color: #fff; }
+
+.changeskin-logo img {
+  width: 20px;
+  height: 20px; }
 /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
 /* stylelint-disable no-duplicate-selectors */
 /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors */
