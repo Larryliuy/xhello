@@ -14,49 +14,53 @@ import HeaderTopBox from './HeaderTopBox';
 import FooterBottomBox from './FooterBottomBox';
 import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
+
+import WS,{ getDateString } from "../static/wsInstace";
+
 const layoutStyle = {
     width:'100%',
     height:'100%',
     color:'#222'
-}
+};
 const sliderStyle = {
     width:'240px !important',
     maxWidth:'240px !important',
     backgroundColor:'#fff'
-}
+};
 
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
 });
 let userId = 0,
-    isInit = true;
+    userName = '';
 if(decodeURI(window.location.href).indexOf('?{') !== -1){
     console.log(decodeURI(window.location.href));
     console.log(userId);
     userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?{')+1,decodeURI(window.location.href).length)).id
 }
-console.log('href:'+userId);
+// console.log('href:'+userId);
 
 
 class HomeLayout extends React.Component {
+    constructor(props){
+        super(props);
+        this.state={sendData:''};
+    }
     componentWillMount(){
         userId = JSON.parse(decodeURI(this.props.location.search.substring(1))).id;
+        userName = JSON.parse(decodeURI(this.props.location.search.substring(1))).name;
         if(!userId){
             userId = JSON.parse(decodeURI(cookieUtil.get('userData'))).id || 0;
         }
-        console.log(userId);
-        if(userId){
-            /*getFetchData('/task/list','userId='+userId,1);
-            getFetchData('/task/assignList','assignUserId='+userId,2);*/
-            // console.log('init:'+isInit)
-            setTimeout(function () {
-                isInit = false;
-            },1000)
-        }
+        // console.log(userId+','+userName);
+        store.dispatch({type:CONSTANT.USERINFO,val:{id:userId,userName:userName,sex:1,level:1,avatar:'./images/avatar.png'}})
     }
-    constructor(props){
-        super(props)
+    componentWillUnmount(){
+
+    }
+    setSendData(value){
+        this.setState({sendData:value});
     }
     render() {
         return (
@@ -73,11 +77,11 @@ class HomeLayout extends React.Component {
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
                         <div className= 'content_show'>
-                            {!state.homeState.currentRoomInfo.living && <MessageListBox></MessageListBox>}
+                            {!state.homeState.currentRoomInfo.living && <MessageListBox sendData={this.state.sendData}></MessageListBox>}
                             {state.homeState.currentRoomInfo.living && <LivingBox></LivingBox>}
                         </div>
                         <div className= 'text_area'>
-                            {!state.homeState.currentRoomInfo.living && <UEditorBox></UEditorBox>}
+                            {!state.homeState.currentRoomInfo.living && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
                             {state.homeState.currentRoomInfo.living && <AdvertisementBox></AdvertisementBox>}
                         </div>
                     </Content>
@@ -85,12 +89,12 @@ class HomeLayout extends React.Component {
                         {/*麦序区域*/}
                         <div className='content-right-up'>
                             {!state.homeState.currentRoomInfo.living && <MicroPhoneBox></MicroPhoneBox>}
-                            {state.homeState.currentRoomInfo.living && <MessageListBox></MessageListBox>}
+                            {state.homeState.currentRoomInfo.living && <MessageListBox sendData={this.state.sendData}></MessageListBox>}
                         </div>
                         {/*广告区域*/}
                         <div className="ad-area" >
                             {!state.homeState.currentRoomInfo.living && <AdvertisementBox></AdvertisementBox>}
-                            {state.homeState.currentRoomInfo.living && <UEditorBox></UEditorBox>}
+                            {state.homeState.currentRoomInfo.living && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
                         </div>
                     </Sider>
                 </Layout>

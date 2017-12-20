@@ -19,9 +19,9 @@ class MessageList extends React.Component{
             renderItem={item => (
                 <List.Item>
                     <List.Item.Meta
-                        avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
-                        title={<p>{item.username} {item.time}</p>}
-                        description={<p style={{color:'red'}}>111</p>}
+                        avatar={<Avatar src="./images/avatar.png" />}
+                        title={<p>{item.userName} {item.time}</p>}
+                        description={<div dangerouslySetInnerHTML={{__html:item.data}} />}
                     />
                 </List.Item>
             )}
@@ -30,4 +30,10 @@ class MessageList extends React.Component{
 }
 
 
-export default MessageList
+export default MessageList;
+
+/*
+注明：dangerouslySetInnerHTML需要对内容做<script>和HTML注释给escape一下
+function  escape(str){
+    str.replace(/<\/script/g, '<\\/script').replace(/<!--/g, '<\\!--');
+}*/

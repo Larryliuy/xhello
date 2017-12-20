@@ -2,6 +2,8 @@ import React,{ Component } from 'react';
 import ChannelList from '../components/ChannelList';
 import store,{ CONSTANT } from '../reducer/reducer';
 
+
+
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();

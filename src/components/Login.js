@@ -64,8 +64,14 @@ const Login = (props) => {
               }).catch(err=>console.log(err))*/
 
         //默认进入
-        message.success('登录成功')
-        props.login(true,{name:'larry',age:25,id:1});
+
+        if(userName){
+            props.login(true,{name:userName,age:25,id:Math.ceil(Math.random()*1000)});
+            message.success('登录成功');
+        }else{
+            message.warning('请输入用户名');
+            return;
+        }
         /*}else{
             message.error('浏览器不支持fetch新特性')
         }*/

@@ -14,9 +14,8 @@ class LoginBox extends React.Component {
     state = {
         login:false,
         data:''
-    }
+    };
     handleLogin(bool,data){
-        console.log(data)
         this.setState({login:bool,data:data});
     }
     componentDidMount(){

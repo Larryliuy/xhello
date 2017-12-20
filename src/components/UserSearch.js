@@ -17,13 +17,14 @@ class UserSearch extends React.Component{
     // 点击搜索处理
     changeSearchHandle(e){
         let resultData = [];
+        console.log(AllRoomData)
         AllRoomData.map(function(item){
             if(item.childNode.length !== 0){
                 return item.childNode.filter(function(item){
-                    if(item.userName.indexOf(e.target.value) !== -1){
+                    if(item.userName && item.userName.indexOf(e.target.value) !== -1){
                         resultData.push(item);
                     }
-                    return item.userName.indexOf(e.target.value) !== -1
+                    return item.userName && item.userName.indexOf(e.target.value) !== -1
                 });
             }else{
                 return ;
