@@ -13,19 +13,19 @@ store.subscribe(function () {
 const rightClickHandle = (e) => {
     if(e.button !== 2){
         //如果点击的不是右键则隐藏弹窗
-        store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none'}});
+        store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
     }else{
         const id = e.target.getAttribute('id');
-        store.dispatch({type:CONSTANT.LOCATION,val:{x:e.clientX,y:e.clientY,display:'block'}});
-        if(id){
+        store.dispatch({type:CONSTANT.LOCATION,val:{x:e.clientX,y:e.clientY,display:'block',obj:id.indexOf('r') === -1?'user':'room'}});
+        /*if(id){
             if(id.indexOf('r') !== -1){
-                // alert('对房间进行操作');
+                alert('对房间进行操作');
                 //弹出创建频道列表
             }else{
-                // alert('对用户进行操作');
+                alert('对用户进行操作');
                 //弹出创建房间或子房间列表
             }
-        }
+        }*/
         let classArr = e.target;
         console.log(classArr);
     }

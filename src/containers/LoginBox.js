@@ -17,6 +17,7 @@ class LoginBox extends React.Component {
     };
     handleLogin(bool,data){
         this.setState({login:bool,data:data});
+        location.replace("#/home?"+encodeURI(JSON.stringify(data)));
     }
     componentDidMount(){
         if(cookieUtil.get('userName') && cookieUtil.get('password')){
@@ -24,16 +25,6 @@ class LoginBox extends React.Component {
         }
     }
     render(){
-        if(this.state.login){
-            // console.log(JSON.stringify(this.state.data))
-            return (<Redirect push to={'/home?'+encodeURI(JSON.stringify(this.state.data))}/>)
-           /* return (<Link to={{
-                pathname: '/',
-                search: '?'+encodeURI(this.state.data),
-                hash: '#home',
-                state: { fromDashboard: true }
-            }}/>)*/
-        }
         return(
         <div style={divStyle}>
             <Login login ={this.handleLogin.bind(this)}/>

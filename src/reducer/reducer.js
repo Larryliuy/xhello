@@ -42,12 +42,12 @@ export const loginState = (state = loginInitState,action) => {
 };
 const homeInitState = {viewModel:false,skinColor:'#108ee9',
     lastRoomInfo:{id:1,online:3,living:false,title:'房间'},
-    currentRoomInfo :{id:1,online:3,living:false,title:'房间'},
+    currentRoomInfo :{id:1,online:3,living:false,title:'房间1'},
     userInfo:{id:7,userName:'larry',sex:1,level:1,avatar:'./images/avatar.png'},
     allRoomList:[],
     searchResult:[],
     searchKeyword:'',
-    location:{x:0,y:0,display:'none'}
+    location:{x:0,y:0,display:'none',obj:0}
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;

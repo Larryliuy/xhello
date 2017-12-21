@@ -27,7 +27,7 @@ class ChannelList extends React.Component{
         // console.log(uId+':'+uName);
         //数据从父组件来
         const datas = [
-            {title:'房间1',id:1,living:false,online:5,childNode:[
+            {title:'房间1',id:1,living:false,online:15,childNode:[
                     {userName:'用户1',id:1,level:1,sex:1},
                     {userName:'用户2',id:2,level:4,sex:2},
                     {userName:'用户3',id:3,level:3,sex:1}
@@ -79,7 +79,7 @@ class ChannelList extends React.Component{
             send(JSON.stringify(enterMsg),function(){
 
             });
-            //获取房间列表信息
+            //获取房间里用户列表信息
             let getUsersInfo = getSendData(
                 'get_room_users',
                 state.homeState.currentRoomInfo.id,
@@ -94,13 +94,14 @@ class ChannelList extends React.Component{
             send(JSON.stringify(getUsersInfo),function(){
 
             });
+            //需要默认将默认房间信息更新到当前房间
 
         }else{
             console.log('房间id不存在');
         }
         // console.log(tRoomStatus);
         this.setState({roomStatus:tRoomStatus});
-        //这里需要将this.state改成reducer
+        // store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{id:item.id,online:item.online,living:item.living}});
         store.dispatch({type:CONSTANT.ALLROOMLIST,val:datas});
         // console.log(this.state.roomStatus);
         // console.log(this.state)
@@ -170,7 +171,7 @@ class ChannelList extends React.Component{
         //进入房间，更新当前房间信息
         state.homeState.allRoomList.map(function(item){
             if(('r'+item.id) === roomId){
-                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{id:item.id,online:item.online,living:item.living}});
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{title:item.title,id:item.id,online:item.online,living:item.living}});
             }
             return item;
         });

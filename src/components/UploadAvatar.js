@@ -4,7 +4,7 @@ class UploadAvatar extends React.Component{
     constructor(props){
         super(props);
         this.state={
-            visible: false
+            visible: this.props.visible
         }
     }
     componentDidMount(){
@@ -50,6 +50,7 @@ class UploadAvatar extends React.Component{
             fileList.removeChild(fileList.querySelector('img'));
             fileList.appendChild(img);
         }
+        console.log(files);
     };
     render(){
         return (<div>

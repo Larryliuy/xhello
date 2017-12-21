@@ -28,7 +28,7 @@ const content = (
             dataSource={color}
             renderItem={item => (
                 <List.Item>
-                    <Card style={{backgroundColor:item.color,width:'30px',height:'30px',cursor:'pointer'}}></Card>
+                    <Card style={{backgroundColor:item.color,width:'30px',height:'30px !important',cursor:'pointer'}}></Card>
                 </List.Item>
             )}
         />

@@ -393,3 +393,89 @@ ul{
     height: 20px;
   }
 }
+//设置换皮肤弹窗 颜色块的高度
+.ant-popover-content .ant-list-item-content{
+  height: 30px;
+}
+
+
+//右键菜单选项样式
+.right-click{
+  display: flex;
+  justify-content: left;
+}
+.right-panel,.right-panel-item{
+  cursor: pointer;
+  .ant-list-item:hover{
+    background-color: #1890ff;
+  }
+}
+.ant-card-bordered{
+  height: 100% !important;
+  cursor: pointer;
+}
+
+
+//点房间头像后房间设置样式,小叶写
+
+.menu-logo {
+  cursor: pointer;
+  img {
+    vertical-align: bottom;
+    height: 20px;
+    padding-right: 10px;
+  }
+}
+.room-manage-dialog{
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  //border-right: 1px solid #cccccc;
+  .room-manage-list{
+    //margin: 15px 0px 5px 0px;
+    padding-top: 15px;
+    padding-bottom: 50px;
+  }
+  img{
+    width: 60px;
+    height: 60px;
+    border: 1px solid #eee;
+  }
+  button{
+    margin-top: 10px;
+    margin-bottom: 60px;
+    color: #49a9ee;
+    border: none;
+    cursor: pointer;
+  }
+  .manager-set{
+    cursor: pointer;
+    width: 100%;
+    height: 20px;
+    line-height: 20px;
+    background-color: #d3e9ff;
+  }
+  .blacklist-set{
+    cursor: pointer;
+    width: 100%;
+    height: 20px;
+    line-height: 20px;
+    //background-color: #d3e9ff;
+  }
+}
+.room-manage-table{
+  border-left: 1px solid #cccccc;
+}
+//创建房间input样式
+.create-room{
+  .input-style{
+    width: 200px !important;
+  }
+  label{
+    margin: 15px 0px !important;
+  }
+  .ant-select-selection{
+    background: none !important;
+    color: #fff;
+  }
+}

@@ -13,7 +13,7 @@ if(!window.Promise){
 const iconStyle = {
     width: '20px',
     height: '20px'
-}
+};
 
 const Login = (props) => {
     let userName = '';

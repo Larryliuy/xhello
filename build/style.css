@@ -7804,6 +7804,19 @@ ul {
 .changeskin-logo img {
   width: 20px;
   height: 20px; }
+
+.right-click {
+  display: flex;
+  justify-content: left; }
+
+.right-panel, .right-panel-item {
+  cursor: pointer; }
+  .right-panel .ant-list-item:hover, .right-panel-item .ant-list-item:hover {
+    background-color: #1890ff; }
+
+.ant-card-bordered {
+  height: 100% !important;
+  cursor: pointer; }
 /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
 /* stylelint-disable no-duplicate-selectors */
 /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors */

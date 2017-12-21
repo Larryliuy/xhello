@@ -1,4 +1,5 @@
 import './pageClose.js';
+import './media.js';
 let WS = null;
 if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
