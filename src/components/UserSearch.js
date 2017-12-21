@@ -1,10 +1,14 @@
 import React,{ Component } from 'react';
-import { Input, Icon } from 'antd';
+import { Input, Icon, message } from 'antd';
 import SearchResult from './SearchResult';
 
 import store ,{ CONSTANT } from "../reducer/reducer";
 
 let state = store.getState();
+store.subscribe(function(){
+    state = store.getState();
+});
+
 let AllRoomData = [];
 store.subscribe(function(){
     state = store.getState();
@@ -35,7 +39,13 @@ class UserSearch extends React.Component{
     }
     // 定位自己
     clickLocationHandle(){
-        alert('location')
+        let selfDom = document.getElementById(state.homeState.userInfo.id.toString());
+        if(!selfDom) {
+            message.warn('自己所在的房间未展开');
+            return;
+        }
+        selfDom.scrollIntoView();
+        selfDom.style.color = 'green';
     }
     render(){
         return (
