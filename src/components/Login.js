@@ -112,12 +112,12 @@ const Login = (props) => {
     return (<Form onSubmit={handleSubmit} className="login-form">
                 <FormItem>
                     <Input id='user' onChange = {(e) => onChangeUserName(e)}
-                           prefix={<Icon type="user" style={{ fontSize: 13 ,color:'#97b5fb' }} />}
+                           prefix={<Icon type="user" className={'login-form-input-logo'} />}
                            defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('userName'):''}  placeholder="Username" />
                 </FormItem>
                 <FormItem>
                     <Input id='pwd' onChange = {(e) => onChangePassword(e)}
-                           prefix={<Icon type="lock" style={{ fontSize: 13,color:'#97b5fb' }} />}
+                           prefix={<Icon type="lock" className={'login-form-input-logo'} />}
                            type="password" defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('password'):''} placeholder="Password" />
                 </FormItem>
                 <FormItem>
@@ -129,8 +129,14 @@ const Login = (props) => {
                     <Button type="primary" htmlType="submit" className="login-form-button" onClick={()=>onClickHandle()}>
                         登 录
                     </Button>
-                    Or <Link to="/register" >现在注册<Icon type="right"/></Link>
+                    {/*Or <Link to="/register" >现在注册<Icon type="right"/></Link>
+                    <Link to="/register" >忘记密码<Icon type="question"/></Link>*/}
+                </FormItem>
+                <FormItem>
+                    <div className={'register-forget-box'}>
+                    <Link to="/register" >现在注册<Icon type="right"/></Link>
                     <Link to="/register" >忘记密码<Icon type="question"/></Link>
+                    </div>
                 </FormItem>
                 <div className='fast_login'>
                     <span className='icon_qq'><Icon type="wechat" style={iconStyle}/></span>

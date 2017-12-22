@@ -1,6 +1,6 @@
 import React,{Component} from 'react';
 import { Link} from 'react-router-dom';
-import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import { Form, Icon, Input, Button, Radio } from 'antd';
 const FormItem = Form.Item;
 
 
@@ -11,13 +11,19 @@ const Register = () => {
     };
     return (<Form onSubmit={handleSubmit} className="login-form">
             <FormItem>
-                <Input prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Username" />
+                <Input prefix={<Icon type="user" className={'login-form-input-logo'} />} placeholder="Username" />
             </FormItem>
             <FormItem>
-                <Input prefix={<Icon type="lock" style={{ fontSize: 13 }} />} type="password" placeholder="Password" />
+                <Input prefix={<Icon type="lock" className={'login-form-input-logo'} />} type="password" placeholder="Password" />
             </FormItem>
             <FormItem>
-                <Input prefix={<Icon type="lock" style={{ fontSize: 13 }} />} type="password" placeholder="Confirm " />
+                <Input prefix={<Icon type="lock" className={'login-form-input-logo'} />} type="password" placeholder="Confirm " />
+            </FormItem>
+            <FormItem>
+                <Radio.Group>
+                    <Radio value="man">男</Radio>
+                    <Radio value="female">女</Radio>
+                </Radio.Group>
             </FormItem>
             <FormItem>
                 <Button type="primary" htmlType="submit" className="login-form-button">

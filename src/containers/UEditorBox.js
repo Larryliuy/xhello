@@ -48,7 +48,7 @@ class UEditorBox extends React.Component {
         // WS.emit('message',message);
         console.log(this.state.value);
         this.props.setData(this.state.value);
-        let msg = getSendData('msg',rId,rTitle,uId,uName,null,this.state.value);
+        let msg = getSendData('msg',rId,rTitle,uId,uName,null,null,null,this.state.value);
         WS.send(JSON.stringify(msg));
     }
     keydownHandle(e){

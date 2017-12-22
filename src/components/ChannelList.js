@@ -1,5 +1,6 @@
 import React,{ Component } from 'react';
-import { Icon } from 'antd';
+import { Icon, Modal } from 'antd';
+import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from  '../static/wsInstace.js';
 import '../static/login.scss';
@@ -17,7 +18,11 @@ let uId = '',
 class ChannelList extends React.Component{
     constructor(props){
         super(props);
-        this.state = {roomStatus:{}};
+        this.state = {roomStatus:{},
+            passwordModal:false,
+            roomPassword:'',
+            inputPassword:'',
+            clickRoomInfo:{id:0,title:'',}};
     }
     componentDidMount(){
         uId = state.homeState.userInfo.id;
@@ -37,7 +42,7 @@ class ChannelList extends React.Component{
                     {userName:'用户5',id:5,level:5,sex:1},
                     {userName:'用户6',id:6,level:6,sex:2}
                 ]},
-            {title:'房间3',id:3,living:false,online:5,childNode:[]},
+            {title:'密码房123',id:3,living:false,online:5,childNode:[],password:'123'},
             {title:'房间4',id:4,living:false,online:10,childNode:[]}
         ];
         datas.map(function(item){
@@ -124,36 +129,25 @@ class ChannelList extends React.Component{
             // WS.close();
         }
     }
-    dblClickHandle = (event) =>{
-        let roomId = event.target.id;
-        let roomIdInt = parseInt(roomId.substring(1,roomId.length));
-        let roomName = event.target.innerText;
-        // console.log(roomName);
-        //如果双击的不是房间则直接返回
-        if(roomId.indexOf('r') === -1 || ('r'+state.homeState.currentRoomInfo.id) === roomId ) return;
-        //权限不够给提示
-        //参数：roomId
-        //返回值：data
-        // console.log(channelId);
-
+    enterRoom(roomIdInt,roomName){
         //离开上一个聊天室
-        let data = uName + "<p>离开了房间</p>" + roomName,
+        let data = uName + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
             leaveMsg = getSendData(
-            'leave_room',
-            state.homeState.currentRoomInfo.id,
-            state.homeState.currentRoomInfo.title,
-            uId,
-            uName,
-            uLevel,
-            uSex,
-            state.homeState.userInfo,
-            data);
+                'leave_room',
+                state.homeState.currentRoomInfo.id,
+                state.homeState.currentRoomInfo.title,
+                uId,
+                uName,
+                uLevel,
+                uSex,
+                state.homeState.userInfo,
+                data);
         // WS.send(JSON.stringify(enterMsg));
         send(JSON.stringify(leaveMsg),function(){
 
         });
         // 进入该房间聊天室
-        data = uName + "<p>进入了房间</p>" + roomName;
+        data ="<p>"+ uName + "进入了房间" + roomName +"</p>";
         let enterMsg = getSendData(
             'enter_room',
             roomIdInt,
@@ -170,21 +164,21 @@ class ChannelList extends React.Component{
         });
         //进入房间，更新当前房间信息
         state.homeState.allRoomList.map(function(item){
-            if(('r'+item.id) === roomId){
+            if((item.id) === roomIdInt){
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{title:item.title,id:item.id,online:item.online,living:item.living}});
             }
             return item;
         });
 
         let tRoomState = this.state.roomStatus;
-        if(!this.state.roomStatus[roomId]){
-            tRoomState[roomId] = true;
+        if(!this.state.roomStatus['r'+roomIdInt]){
+            tRoomState['r'+roomIdInt] = true;
         }
         this.setState({roomStatus:tRoomState});
 
-        //测试获取的房间
-        let getRooms = getSendData(
-            'get_rooms',
+        //获取房间里用户列表信息
+        let getUsersInfo = getSendData(
+            'get_room_users',
             roomIdInt,
             roomName,
             uId,
@@ -194,9 +188,35 @@ class ChannelList extends React.Component{
             state.homeState.userInfo,
             data);
         // WS.send(JSON.stringify(enterMsg));
-        send(JSON.stringify(getRooms),function(){
+        send(JSON.stringify(getUsersInfo),function(){
 
         });
+    }
+    dblClickHandle = (event) =>{
+        const _this = this;
+        let roomId = parseInt(event.target.id)? ('r'+parseInt(event.target.id)) :  event.target.id;
+        let roomIdInt = parseInt(roomId.substring(1,roomId.length));
+        let roomName = event.target.innerText;
+        this.setState({clickRoomInfo:{id:roomIdInt,title:roomName}});
+        // console.log(event.target.innerText);
+        //如果双击的不是房间则直接返回
+        if(roomId.indexOf('r') === -1 || ('r'+state.homeState.currentRoomInfo.id) === roomId ) return;
+        //权限不够给提示
+        //参数：roomId
+        //返回值：data
+        // console.log(channelId);
+        state.homeState.allRoomList.map(function(item){
+            if('r'+item.id === roomId){
+                if(item.password){
+                    _this.setState({passwordModal:true});
+                    _this.setState({roomPassword:item.password});
+                    return;
+                }else{
+                    _this.enterRoom(roomIdInt,roomName);
+                }
+            }
+            });
+
     };
     rightClickHandle = (e) =>{
 
@@ -213,6 +233,25 @@ class ChannelList extends React.Component{
             //打开本地房间列表
         // console.log(this.state.roomStatus);
     };
+    setRoomPassword(value){
+        this.setState({inputPassword:value});
+    }
+    handleOk(){
+        //如果密码正确,则进入房间
+        console.log(typeof this.state.roomPassword+':'+typeof this.state.inputPassword);
+        if(this.state.roomPassword === this.state.inputPassword){
+            this.setState({passwordModal:false});
+            this.enterRoom(this.state.clickRoomInfo.id,this.state.clickRoomInfo.title);
+        }else{
+            Modal.info({
+                title:'密码错误'
+            })
+        }
+
+    }
+    handleCancel(){
+        this.setState({passwordModal:false})
+    }
     render(){
         const { roomStatus } = this.state;
         const clickOpenHandle = this.clickOpenHandle;
@@ -220,12 +259,12 @@ class ChannelList extends React.Component{
             let src = '';
             switch(level){
                 case 1:
-                    if(sex === 1){
+                    /*if(sex === 1){
                         src = 'p_man.png';
                     }else{
                         src = 'p_female.png';
                     }
-                    break;
+                    break;*/
                 case 2:
                     if(sex === 1){
                         src = 'p_man.png';
@@ -260,6 +299,12 @@ class ChannelList extends React.Component{
                     }else{
                         src = 'vip_female2.png';
                     }
+                case 7:
+                    if(sex === 1){
+                        src = 'c_man.png';
+                    }else{
+                        src = 'c_female.png';
+                    }
                     break;
             }
             return "./images/icons/"+src;
@@ -274,7 +319,7 @@ class ChannelList extends React.Component{
                 {state.homeState.allRoomList.map(function (item) {
                     return <li id={'r'+item.id} key={item.id}>
                         <span onClick={clickOpenHandle}><Icon type={roomStatus['r'+item.id] ?"minus" : "plus"} /> </span>
-                        {item.title}
+                        <span id={item.id+'r'}>{item.title}</span>
                         {roomStatus['r'+item.id] && item.childNode &&
                         <ul style={{paddingLeft:'10px'}}>
                             {item.childNode.map(function (item) {
@@ -288,6 +333,12 @@ class ChannelList extends React.Component{
                         </li>
                 })}
                 </ul>
+                <VerifyPassword visible={this.state.passwordModal}
+                                handleCancel={this.handleCancel.bind(this)}
+                                setRoomPassword = {this.setRoomPassword.bind(this)}
+                                handleOk={this.handleOk.bind(this)}
+                >
+                </VerifyPassword>
             </div>
         )
     }

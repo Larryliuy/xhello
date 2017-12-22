@@ -36,7 +36,7 @@ html,body{
   max-width: 300px;
   /* margin: 0 auto; */
   padding: 15px 15px 0 15px;
-  border: 1px solid #eee;
+  //border: 1px solid #eee;
   /* margin-top: calc(100px + 15%); */
   top: 0;
   bottom: 0;
@@ -49,6 +49,22 @@ html,body{
 .login-form-button {
     width: 100%;
 }
+.login-form-input-logo{
+  font-size: 13px;
+  color:#97b5fb ;
+}
+.register-forget-box{
+  display: inline-flex;
+  width: 100%;
+  justify-content: space-between;
+  a{
+    display: inline-block;
+  }
+}
+.ant-form-item-control-wrapper{
+  margin-top: -5px;
+}
+
 .logo {
     position: absolute;
     height: 60px;
@@ -323,6 +339,9 @@ ul{
       padding: 0px 0px 1px 0px;
     >span{
       cursor: pointer;
+      >span{
+        color:#428cff;
+      }
     }
   }
     .ant-list-split .ant-list-item{

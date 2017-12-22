@@ -42,7 +42,7 @@ export const loginState = (state = loginInitState,action) => {
 };
 const homeInitState = {viewModel:false,skinColor:'#108ee9',
     lastRoomInfo:{id:1,online:3,living:false,title:'房间'},
-    currentRoomInfo :{id:1,online:3,living:false,title:'房间1'},
+    currentRoomInfo :{id:1,online:3,living:false,title:'房间1',password:''},
     userInfo:{id:7,userName:'larry',sex:1,level:1,avatar:'./images/avatar.png'},
     allRoomList:[],
     searchResult:[],
