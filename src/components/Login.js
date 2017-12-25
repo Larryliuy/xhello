@@ -100,7 +100,7 @@ const Login = (props) => {
     const onChangeCheckBox =(e) => {
         // if(!cookieUtil.get('loginChecked')){
             cookieUtil.set('loginChecked',e.target.checked)
-            console.log(document.cookie)
+            console.log(document.cookie);
             console.log(cookieUtil.get('loginChecked'))
        /* if(e.target.checked){
         }else {

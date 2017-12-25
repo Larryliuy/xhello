@@ -45,7 +45,7 @@ if(decodeURI(window.location.href).indexOf('?{') !== -1){
 class HomeLayout extends React.Component {
     constructor(props){
         super(props);
-        this.state={sendData:''};
+        this.state={sendData:'',sliderWidth:240};
     }
     componentWillMount(){
         userId = JSON.parse(decodeURI(this.props.location.search.substring(1))).id;
@@ -53,11 +53,52 @@ class HomeLayout extends React.Component {
         if(!userId){
             userId = JSON.parse(decodeURI(cookieUtil.get('userData'))).id || 0;
         }
-        // console.log(userId+','+userName);
-        store.dispatch({type:CONSTANT.USERINFO,val:{id:userId,userName:userName,sex:1,level:1,avatar:'./images/avatar.png'}})
+        console.log(userId+','+userName);
+        store.dispatch({type:CONSTANT.USERINFO,val:{id:userId,name:userName,sex:1,level:1,avatar:'./images/avatar.png'}})
+
+    }
+    componentDidMount(){
+        let startPos,
+            endPos,
+            moveLen,
+            isChanging = false,
+            _this = this,
+            dragBar = document.getElementById('resizable');
+        /*dragBar.addEventListener('selectstart',function(event){
+            return;
+        });
+        dragBar.addEventListener('dragstart',function(){
+            return;
+        });*/
+        dragBar.addEventListener('mousedown',function(event){
+            document.body.style.cursor = 'ew-resize';
+            isChanging = true;
+        });
+        dragBar.addEventListener('mouseup',function(){
+            isChanging = false;
+        });
+        /*dragBar.addEventListener('mouseover',function(){
+            document.body.style.cursor = 'ew-resize';
+            // isChanging = false;
+        });*/
+        /*dragBar.addEventListener('mouseout',function(){
+            document.body.style.cursor = 'default';
+            isChanging = false;
+        });*/
+        document.addEventListener('mousemove',function(event){
+            if(isChanging && event.clientX > 240 && event.clientX < winWidth/3){
+                _this.setState({sliderWidth:event.clientX});
+            }
+        });
+        document.addEventListener('mouseup',function(event){
+            document.body.style.cursor = 'default';
+        });
+        document.addEventListener('mouseup',function(){
+            isChanging = false;
+        });
     }
     componentWillUnmount(){
-
+        //解绑事件监听
     }
     setSendData(value){
         this.setState({sendData:value});
@@ -70,8 +111,8 @@ class HomeLayout extends React.Component {
                 </Header>
                 <Layout style={{backgroundColor:'#fff'}}>
 
-                    <Sider width={240} collapsible = {false} style={Object.assign({},sliderStyle,{borderRight: '1px solid #eee'})}>
-                        {/*搜索框*/}
+                    <Sider width={this.state.sliderWidth} collapsible = {false} style={Object.assign({},sliderStyle,{borderRight: '1px solid #eee'})}>
+                        <div id={'resizable'} className={'ui-resizable'}></div>
                         <UserSearchBox></UserSearchBox>
                         <ChannelListBox></ChannelListBox>
                     </Sider>
@@ -113,3 +154,7 @@ export default HomeLayout;
 // 系统屏幕尺寸（宽高）
 const winWidth = window.innerWidth;
 const winHeight = window.innerHeight;
+
+window.onload = function(){
+
+};

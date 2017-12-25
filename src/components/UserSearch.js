@@ -21,14 +21,14 @@ class UserSearch extends React.Component{
     // 点击搜索处理
     changeSearchHandle(e){
         let resultData = [];
-        console.log(AllRoomData)
+        // console.log(AllRoomData)
         AllRoomData.map(function(item){
             if(item.childNode.length !== 0){
                 return item.childNode.filter(function(item){
-                    if(item.userName && item.userName.indexOf(e.target.value) !== -1){
+                    if(item.name && item.name.indexOf(e.target.value) !== -1){
                         resultData.push(item);
                     }
-                    return item.userName && item.userName.indexOf(e.target.value) !== -1
+                    return item.name && item.name.indexOf(e.target.value) !== -1
                 });
             }else{
                 return ;
@@ -50,12 +50,12 @@ class UserSearch extends React.Component{
     render(){
         return (
             <div>
-                <Input style={{marginLeft:'-10px',width:'190px'}}
+                <Input style={{marginLeft:'-10px',width:'180px'}}
                         placeholder="请输入用户名"
                         prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
                         onChange={value => this.changeSearchHandle(value)}
             />
-                <span onClick={this.clickLocationHandle}><Icon className='icon-location' type="environment-o" /></span>
+                <span onClick={this.clickLocationHandle} style={{overflowX: 'hidden'}}><Icon className='icon-location' type="environment-o" /></span>
                 <SearchResult data={state.homeState.resultData}></SearchResult>
             </div>)
     }

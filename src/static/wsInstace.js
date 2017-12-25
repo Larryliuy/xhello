@@ -41,15 +41,11 @@ export {send};
 
 
 //消息对象返回函数
-export function getSendData(type,roomId,roomTitle,uId,uName,uLevel,uSex,user,data){
+export function getSendData(type,roomId,roomTitle,user,data){
     return {
         type:type,
         roomId: roomId,		//房间唯一标识符
         roomName: roomTitle,
-        userName: uName,
-        userId: uId,
-        userLevel:uLevel,
-        userSex:uSex,
         user:user,
         data:data
     }

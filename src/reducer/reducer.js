@@ -13,7 +13,8 @@ export const CONSTANT = {
     SEARCHRESULT:'SEARCHRESULT',
     ALLROOMLIST:'ALLROOMLIST',
     LOCATION:'LOCATION',
-    USERINFO:'USERINFO'
+    USERINFO:'USERINFO',
+    ROOMMICROPHONEUSER:'ROOMMICROPHONEUSER'
 };
 function toggleLogin() {
     return {
@@ -43,7 +44,8 @@ export const loginState = (state = loginInitState,action) => {
 const homeInitState = {viewModel:false,skinColor:'#108ee9',
     lastRoomInfo:{id:1,online:3,living:false,title:'房间'},
     currentRoomInfo :{id:1,online:3,living:false,title:'房间1',password:''},
-    userInfo:{id:7,userName:'larry',sex:1,level:1,avatar:'./images/avatar.png'},
+    roomMicrophoneUser:[],
+    userInfo:{id:7,name:'larry',sex:1,level:1,avatar:'./images/avatar.png'},
     allRoomList:[],
     searchResult:[],
     searchKeyword:'',
@@ -66,6 +68,8 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{location:action.val});
         case CONSTANT.USERINFO:
             return Object.assign({},tmpState,{userInfo:action.val});
+        case CONSTANT.ROOMMICROPHONEUSER:
+            return Object.assign({},tmpState,{roomMicrophoneUser:action.val});
         default:
             // console.log('default');
             return homeInitState;

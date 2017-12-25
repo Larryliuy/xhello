@@ -31,7 +31,7 @@ class SearchResult extends React.Component{
         const content = (<ul className='result-ul' onClick={e => this.handleClickUser(e)}>
             {state.homeState.searchResult.length !== 0 ?
                 state.homeState.searchResult.map(function(item){
-                    return <li key={'result'+item.id} id={'s'+item.id}>{item.userName}</li>
+                    return <li key={item.id} id={'s'+item.id}>{item.name}</li>
                 }):<li className='no-match'>没有匹配的用户</li>
             }
         </ul>);

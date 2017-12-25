@@ -33,10 +33,11 @@ class MessageListBox extends React.Component{
     }
     componentDidMount(){
         uId = state.homeState.userInfo.id;
-        uName = state.homeState.userInfo.userName;
+        uName = state.homeState.userInfo.name;
         uLevel = state.homeState.userInfo.level;
         uSex = state.homeState.userInfo.sex;
 
+        //data为消息数据
         let data = [{username:'larry',time:'2017-12-11 13:12'},
             {username:'larry',time:'2017-12-11 13:12',data:'321'},
             {username:'larry',time:'2017-12-11 13:12',data:'dsfs'},
@@ -64,14 +65,34 @@ class MessageListBox extends React.Component{
             let allRoomListTmp = [];
             switch(dataJson.type){
                 case 'msg':
-                    console.log(dataJson);
+                    // console.log(dataJson);
+                    if(dataJson.typeString === '放麦'){
+                        let userData = state.homeState.roomMicrophoneUser;
+                        // console.log(state.homeState.roomMicrophoneUser);
+                        userData.push(dataJson.user);
+                        store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:userData});
+                        return;
+                    }
+                    if(dataJson.typeString === '离麦'){
+                        let userData = state.homeState.roomMicrophoneUser;
+                        // console.log(state.homeState.roomMicrophoneUser);
+                        let tmp = userData.filter(function(item){
+                            return item.id !== dataJson.user.id;
+                        });
+                        store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:tmp});
+                        return;
+                    }
+                    if(dataJson.typeString === '禁麦'){
+                        console.log('禁麦');
+                        return;
+                    }
                     if(dataJson.data === '消息成功发出'){
                         // console.log(_this.props.sendData);
-                        data.push({userName:dataJson.userName,
+                        data.push({userName:dataJson.user.name,
                             time:getDateString(),
                             data:_this.props.sendData});
                     }else{
-                        data.push({userName:dataJson.userName,
+                        data.push({userName:dataJson.user.name,
                             time:getDateString(),
                             data:dataJson.data});
                         // console.log(data);
@@ -88,38 +109,37 @@ class MessageListBox extends React.Component{
                     allRoomListTmp = state.homeState.allRoomList;
                     allRoomListTmp.map(function (item) {
                         if(item.id === dataJson.roomId){
-                            item.childNode.push({userName:dataJson.userName,
-                                id:dataJson.userId,
-                                level:dataJson.userLevel,
-                                sex:dataJson.userSex,
-                                avatar:dataJson.avatar
+                            item.childNode.push({
+                                name:dataJson.user.name,
+                                id:dataJson.user.id,
+                                level:dataJson.user.level,
+                                sex:dataJson.user.sex,
+                                avatar:dataJson.user.avatar
                             })
                         }
                     });
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
                     // console.log(dataJson);
-                    data.push({userName:dataJson.userName,
+                    data.push({userName:dataJson.user.name,
                         time:getDateString(),
-                        data:'<p>'+ dataJson.userName + '已进入房间' +'</p>'});
+                        data:'<p>'+ dataJson.user.name + '已进入房间' +'</p>'});
                     break;
                 case 'leave_room':
                     // console.log(dataJson);
                     //有人离开房间时需要更新AllRoomList
                     allRoomListTmp = state.homeState.allRoomList;
-                    // console.log(allRoomListTmp);
                     allRoomListTmp.map(function (item) {
                         if(item.id === dataJson.roomId){
                             item.childNode = item.childNode.filter(function(item){
-                                // console.log(item.id !== dataJson.userId);
-                                return item.id !== dataJson.userId;
+                                return item.id !== dataJson.user.id;
                             })
                         }
                     });
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
                     // console.log(allRoomListTmp);
-                    data.push({userName:dataJson.userName,
+                    data.push({userName:dataJson.user.name,
                         time:getDateString(),
-                        data:'<p>'+ dataJson.userName + '已离开房间' +'</p>'});
+                        data:'<p>'+ dataJson.user.name + '已离开房间' +'</p>'});
                     break;
                 case 'get_room_users':
                     // console.log(dataJson.data);
@@ -138,6 +158,7 @@ class MessageListBox extends React.Component{
                             }
                         }
                     });
+                    // console.log(allRoomListTmp)
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
                     // console.log(allRoomListTmp);
                     break;

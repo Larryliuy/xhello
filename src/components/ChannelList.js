@@ -26,32 +26,32 @@ class ChannelList extends React.Component{
     }
     componentDidMount(){
         uId = state.homeState.userInfo.id;
-        uName = state.homeState.userInfo.userName;
+        uName = state.homeState.userInfo.name;
         uLevel = state.homeState.userInfo.level;
         uSex = state.homeState.userInfo.sex;
         // console.log(uId+':'+uName);
         //数据从父组件来
         const datas = [
             {title:'房间1',id:1,living:false,online:15,childNode:[
-                    {userName:'用户1',id:1,level:1,sex:1},
-                    {userName:'用户2',id:2,level:4,sex:2},
-                    {userName:'用户3',id:3,level:3,sex:1}
+                    {name:'用户1',id:1,level:1,sex:1},
+                    {name:'用户2',id:2,level:4,sex:2},
+                    {name:'用户3',id:3,level:3,sex:1}
                 ]},
             {title:'房间2',id:2,living:true,online:10,childNode:[
-                    {userName:'用户4',id:4,level:4,sex:2},
-                    {userName:'用户5',id:5,level:5,sex:1},
-                    {userName:'用户6',id:6,level:6,sex:2}
+                    {name:'用户4',id:4,level:4,sex:2},
+                    {name:'用户5',id:5,level:5,sex:1},
+                    {name:'用户6',id:6,level:6,sex:2}
                 ]},
             {title:'密码房123',id:3,living:false,online:5,childNode:[],password:'123'},
             {title:'房间4',id:4,living:false,online:10,childNode:[]}
         ];
+        console.log(state.homeState.userInfo);
         datas.map(function(item){
             let messageJSON = {
                 type:'create_room',
                 roomId: item.id,		//房间唯一标识符
                 roomName: item.title,
-                userName: uName,
-                userId: uId,
+                user:state.homeState.userInfo,
                 data: {}
             };
             //前端每运行一次就创建一次聊天室了，创建聊天室让服务端去创建；
@@ -74,10 +74,6 @@ class ChannelList extends React.Component{
                     'enter_room',
                     state.homeState.currentRoomInfo.id,
                     state.homeState.currentRoomInfo.title,
-                    uId,
-                    uName,
-                    uLevel,
-                    uSex,
                     state.homeState.userInfo,
                     data);
             // WS.send(JSON.stringify(enterMsg));
@@ -89,10 +85,6 @@ class ChannelList extends React.Component{
                 'get_room_users',
                 state.homeState.currentRoomInfo.id,
                 state.homeState.currentRoomInfo.title,
-                uId,
-                uName,
-                uLevel,
-                uSex,
                 state.homeState.userInfo,
                 data);
             // WS.send(JSON.stringify(enterMsg));
@@ -119,10 +111,6 @@ class ChannelList extends React.Component{
             send(JSON.stringify(getSendData('leave_room',
                 state.homeState.currentRoomInfo.id,
                 state.homeState.currentRoomInfo.title,
-                uId,
-                uName,
-                uLevel,
-                uSex,
                 state.homeState.userInfo,
                 data)),function(){});
             // alert('close');
@@ -136,10 +124,6 @@ class ChannelList extends React.Component{
                 'leave_room',
                 state.homeState.currentRoomInfo.id,
                 state.homeState.currentRoomInfo.title,
-                uId,
-                uName,
-                uLevel,
-                uSex,
                 state.homeState.userInfo,
                 data);
         // WS.send(JSON.stringify(enterMsg));
@@ -152,10 +136,6 @@ class ChannelList extends React.Component{
             'enter_room',
             roomIdInt,
             roomName,
-            uId,
-            uName,
-            uLevel,
-            uSex,
             state.homeState.userInfo,
             data);
         // WS.send(JSON.stringify(enterMsg));
@@ -181,10 +161,6 @@ class ChannelList extends React.Component{
             'get_room_users',
             roomIdInt,
             roomName,
-            uId,
-            uName,
-            uLevel,
-            uSex,
             state.homeState.userInfo,
             data);
         // WS.send(JSON.stringify(enterMsg));
@@ -310,7 +286,7 @@ class ChannelList extends React.Component{
             return "./images/icons/"+src;
         };
         return (
-            <div style={{paddingLeft:'20px',width:240,height:'100%'}}
+            <div style={{paddingLeft:'20px',minWidth:'240px',overflowX:'scroll',height:'100%'}}
                  onDoubleClick={this.dblClickHandle}
                  onMouseDown={this.rightClickHandle}
                  className='channel-list'
@@ -326,7 +302,7 @@ class ChannelList extends React.Component{
                                 // console.log(item)
                                 return <li id={item.id} key={item.id}>
                                     <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span>
-                                    {item.userName}
+                                    {item.name}
                                     </li>
                             })}
                         </ul>}

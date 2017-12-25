@@ -11,7 +11,7 @@ store.subscribe(function () {
     // console.log(store.getState())
 });
 let uId = state.homeState.userInfo.id,
-    uName = state.homeState.userInfo.userName,
+    uName = state.homeState.userInfo.name,
     rId = state.homeState.currentRoomInfo.id,
     rTitle = state.homeState.currentRoomInfo.title;
 const divStyle = {
@@ -29,7 +29,7 @@ class UEditorBox extends React.Component {
     }
     componentDidMount(){
         uId = state.homeState.userInfo.id;
-        uName = state.homeState.userInfo.userName;
+        uName = state.homeState.userInfo.name;
         rId = state.homeState.currentRoomInfo.id;
         rTitle = state.homeState.currentRoomInfo.title;
     }
