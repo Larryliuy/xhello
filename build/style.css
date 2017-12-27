@@ -7689,6 +7689,10 @@ html, body {
   color: #43a915; }
 
 /*频道列表*/
+.channelContents {
+  -webkit-user-drag: none;
+  -webkit-user-select: none; }
+
 ul {
   list-style-type: none;
   padding-left: 0px; }
@@ -7709,10 +7713,14 @@ ul {
   position: absolute;
   top: 60px;
   width: 100%;
+  min-width: 240px;
+  max-width: 500px;
   height: 90%;
   overflow-x: hidden;
   overflow-y: scroll;
-  user-select: none; }
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none; }
 
 .icon-location {
   color: #1890ff;
@@ -7885,6 +7893,16 @@ ul {
 .create-room .ant-select-selection {
   background: none !important;
   color: #fff; }
+
+.ui-resizable {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  width: 6px;
+  height: 100%;
+  background-color: #cccccc;
+  z-index: 10;
+  cursor: ew-resize; }
 /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
 /* stylelint-disable no-duplicate-selectors */
 /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors */
