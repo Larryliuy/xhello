@@ -11,9 +11,7 @@ store.subscribe(function () {
     // console.log(store.getState())
 });
 let uId = state.homeState.userInfo.id,
-    uName = state.homeState.userInfo.name,
-    rId = state.homeState.currentRoomInfo.id,
-    rTitle = state.homeState.currentRoomInfo.title;
+    uName = state.homeState.userInfo.name;
 const divStyle = {
     position: 'relative',
     height:'100%'
@@ -24,14 +22,16 @@ class UEditorBox extends React.Component {
     constructor(){
         super();
         this.state={
-            value:''
+            value:'',
+            textareaDom:''
         }
     }
     componentDidMount(){
         uId = state.homeState.userInfo.id;
         uName = state.homeState.userInfo.name;
-        rId = state.homeState.currentRoomInfo.id;
-        rTitle = state.homeState.currentRoomInfo.title;
+    }
+    setDom(ele){
+        this.setState({textareaDom:ele});
     }
     setText(value){
         //过滤空字符串和回车字符串
@@ -41,15 +41,18 @@ class UEditorBox extends React.Component {
         });
     }
     sendClickhandle(){
-        /*let message = {username:uName,time:new Date().toLocaleDateString(),data:this.state.value};
-        console.log(message);
-        alert(message.value);*/
+        if(!this.state.value)return;
         //通过websocket发送给服务器
         // WS.emit('message',message);
-        console.log(this.state.value);
+        // console.log('ueditor:'+state.homeState.currentRoomInfo.id);
         this.props.setData(this.state.value);
-        let msg = getSendData('msg',rId,rTitle,uId,uName,null,null,null,this.state.value);
+        let msg = getSendData('msg',
+            state.homeState.currentRoomInfo.id,
+            state.homeState.currentRoomInfo.title,
+            state.homeState.userInfo,
+            this.state.value);
         WS.send(JSON.stringify(msg));
+        this.state.textareaDom.innerHTML = '';
     }
     keydownHandle(e){
         if(!this.state.value || this.state.value.indexOf('<p><br></p>') !== -1) {
@@ -62,7 +65,11 @@ class UEditorBox extends React.Component {
             // alert(this.state.value);
             e.target.innerHTML = '';
             this.props.setData(this.state.value);
-            let msg = getSendData('msg',rId,rTitle,uId,uName,null,null,null,this.state.value);
+            let msg = getSendData('msg',
+                state.homeState.currentRoomInfo.id,
+                state.homeState.currentRoomInfo.title,
+                state.homeState.userInfo,
+                this.state.value);
             WS.send(JSON.stringify(msg));
         }else if(e.keyCode === 13 && e.ctrlKey){
             e.target.innerHTML = this.state.value;
@@ -72,7 +79,9 @@ class UEditorBox extends React.Component {
     render(){
         return(
         <div style={divStyle}>
-            <UEditor keydownHandle={this.keydownHandle.bind(this)} setText={this.setText.bind(this)}></UEditor>
+            <UEditor keydownHandle={this.keydownHandle.bind(this)}
+                     setDom={this.setDom.bind(this)}
+                     setText={this.setText.bind(this)}></UEditor>
             <Button onClick={() => {this.sendClickhandle()} }
                     className = 'send-btn'
                     type='primary'

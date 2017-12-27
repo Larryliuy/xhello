@@ -3,6 +3,12 @@ import {BrowserRouter, Route,Redirect, Link} from 'react-router-dom';
 import Login from '../components/Login';
 import cookieUtil from '../libs/cookieUtil';
 import '../static/login.scss'
+import store,{ CONSTANT } from "../reducer/reducer";
+
+let state = store.getState();
+store.subscribe(function () {
+    state = store.getState()
+});
 const divStyle = {
     textAlign:'center !important',
     height:'100%',
@@ -17,7 +23,8 @@ class LoginBox extends React.Component {
     };
     handleLogin(bool,data){
         this.setState({login:bool,data:data});
-        location.replace("#/home?"+encodeURI(JSON.stringify(data)));
+        location.replace("#/home");
+        store.dispatch({type:CONSTANT.USERINFO,val:{id:data.id,name:data.name,sex:parseInt(data.sex),level:parseInt(data.level),limit:data.limit,avatar:'./images/avatar.png'}});
     }
     componentDidMount(){
         if(cookieUtil.get('userName') && cookieUtil.get('password')){

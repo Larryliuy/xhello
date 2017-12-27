@@ -7,7 +7,7 @@ class Living extends React.Component{
                 <video id='video' className='video-ele' src="movie.ogg" controls="controls">
                     您的浏览器不支持 video 标签。
                 </video>
-                <div className='host-text'><p>打个小广告</p></div>
+                <div className='host-text'><p><a href={'http://www.baidu.com'}>打个小广告</a></p></div>
             </div>
         )
     }

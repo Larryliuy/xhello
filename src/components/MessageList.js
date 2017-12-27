@@ -11,7 +11,7 @@ class MessageList extends React.Component{
 
     }
     render(){
-
+        // console.log(this.props.data);
         return (<List
             size="small"
             itemLayout="horizontal"

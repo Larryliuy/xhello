@@ -11,6 +11,8 @@ store.subscribe(function () {
 });
 
 const rightClickHandle = (e) => {
+    // console.log(state.homeState.userInfo.level);
+    if(state.homeState.userInfo.level > 4)return;
     if(e.button !== 2){
         //如果点击的不是右键则隐藏弹窗
         store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});

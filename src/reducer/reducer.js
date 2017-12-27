@@ -9,6 +9,7 @@ export const CONSTANT = {
     SKINCOLOR:'SKINCOLOR',
     CURRENTCHANNELID:'CURRENTCHANNELID',
     CURRENTROOMINFO:'CURRENTROOMINFO',
+    LASTROOMINFO:'LASTROOMINFO',
     SEARCHKEYWORD:'SEARCHKEYWORD',
     SEARCHRESULT:'SEARCHRESULT',
     ALLROOMLIST:'ALLROOMLIST',
@@ -42,10 +43,10 @@ export const loginState = (state = loginInitState,action) => {
     }
 };
 const homeInitState = {viewModel:false,skinColor:'#108ee9',
-    lastRoomInfo:{id:1,online:3,living:false,title:'房间'},
-    currentRoomInfo :{id:1,online:3,living:false,title:'房间1',password:''},
+    lastRoomInfo:{},
+    currentRoomInfo :{},
     roomMicrophoneUser:[],
-    userInfo:{id:7,name:'larry',sex:1,level:1,avatar:'./images/avatar.png'},
+    userInfo:{},
     allRoomList:[],
     searchResult:[],
     searchKeyword:'',
@@ -56,6 +57,8 @@ export const homeState = (state = homeInitState,action)=>{
     switch (action.type){
         case CONSTANT.CURRENTROOMINFO:
             return Object.assign({},tmpState,{currentRoomInfo:action.val});
+        case CONSTANT.LASTROOMINFO:
+            return Object.assign({},tmpState,{lastRoomInfo:action.val});
         case CONSTANT.SKINCOLOR:
             return Object.assign({},tmpState,{skinColor:action.val});
         case CONSTANT.SEARCHRESULT:

@@ -11,7 +11,7 @@ class VerifyPassword extends React.Component{
     }
     render(){
         return (<Modal
-                    title="Basic Modal"
+                    title="请输入房间密码"
                     visible={this.props.visible}
                     onOk={this.props.handleOk}
                     onCancel={this.props.handleCancel}

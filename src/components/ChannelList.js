@@ -11,10 +11,6 @@ store.subscribe(function () {
     // console.log(store.getState())
 });
 let tRoomStatus = {};//本地所有房间的开关状态
-let uId = '',
-    uName = '',
-    uLevel = '',
-    uSex = '';
 class ChannelList extends React.Component{
     constructor(props){
         super(props);
@@ -25,27 +21,17 @@ class ChannelList extends React.Component{
             clickRoomInfo:{id:0,title:'',}};
     }
     componentDidMount(){
-        uId = state.homeState.userInfo.id;
-        uName = state.homeState.userInfo.name;
-        uLevel = state.homeState.userInfo.level;
-        uSex = state.homeState.userInfo.sex;
-        // console.log(uId+':'+uName);
         //数据从父组件来
         const datas = [
-            {title:'房间1',id:1,living:false,online:15,childNode:[
-                    {name:'用户1',id:1,level:1,sex:1},
-                    {name:'用户2',id:2,level:4,sex:2},
-                    {name:'用户3',id:3,level:3,sex:1}
-                ]},
-            {title:'房间2',id:2,living:true,online:10,childNode:[
-                    {name:'用户4',id:4,level:4,sex:2},
-                    {name:'用户5',id:5,level:5,sex:1},
-                    {name:'用户6',id:6,level:6,sex:2}
-                ]},
+            {title:'接待大厅',id:1,living:false,online:15,childNode:[]},
+            {title:'管理员办公室',id:2,living:true,online:10,childNode:[]},
             {title:'密码房123',id:3,living:false,online:5,childNode:[],password:'123'},
-            {title:'房间4',id:4,living:false,online:10,childNode:[]}
+            {title:'总裁会议室',id:4,living:false,online:10,childNode:[]}
         ];
-        console.log(state.homeState.userInfo);
+        //更新当前房间信息
+        store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{title:datas[0].title,id:datas[0].id,online:datas[0].online,living:datas[0].living}});
+        store.dispatch({type:CONSTANT.LASTROOMINFO,val:{title:datas[0].title,id:datas[0].id,online:datas[0].online,living:datas[0].living}});
+        // console.log(state.homeState.userInfo);
         datas.map(function(item){
             let messageJSON = {
                 type:'create_room',
@@ -66,10 +52,11 @@ class ChannelList extends React.Component{
             });
 
         });
+
         // console.log('crid：'+state.homeState.currentRoomInfo.id);
         //判断用户是否在房间里 && WS.send(JSON.stringify({type:'in_room'}))
         if(state.homeState.currentRoomInfo.id){
-            let data = uName + "<p>进入了房间</p>" + state.homeState.currentRoomInfo.title,
+            let data = state.homeState.userInfo.name + "<p>进入了房间</p>" + state.homeState.currentRoomInfo.title,
                 enterMsg = getSendData(
                     'enter_room',
                     state.homeState.currentRoomInfo.id,
@@ -78,7 +65,6 @@ class ChannelList extends React.Component{
                     data);
             // WS.send(JSON.stringify(enterMsg));
             send(JSON.stringify(enterMsg),function(){
-
             });
             //获取房间里用户列表信息
             let getUsersInfo = getSendData(
@@ -96,18 +82,15 @@ class ChannelList extends React.Component{
         }else{
             console.log('房间id不存在');
         }
-        // console.log(tRoomStatus);
         this.setState({roomStatus:tRoomStatus});
         // store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{id:item.id,online:item.online,living:item.living}});
         store.dispatch({type:CONSTANT.ALLROOMLIST,val:datas});
-        // console.log(this.state.roomStatus);
-        // console.log(this.state)
     }
 
     componentWillUnmount(){
         //页面卸载是关闭聊天室连接
         if(WS){
-            let data =  uName + "<p>离开了房间</p>" + state.homeState.currentRoomInfo.title ;
+            let data =  state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.currentRoomInfo.title ;
             send(JSON.stringify(getSendData('leave_room',
                 state.homeState.currentRoomInfo.id,
                 state.homeState.currentRoomInfo.title,
@@ -118,8 +101,8 @@ class ChannelList extends React.Component{
         }
     }
     enterRoom(roomIdInt,roomName){
-        //离开上一个聊天室
-        let data = uName + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
+            //离开上一个聊天室
+        let data = state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
             leaveMsg = getSendData(
                 'leave_room',
                 state.homeState.currentRoomInfo.id,
@@ -128,10 +111,13 @@ class ChannelList extends React.Component{
                 data);
         // WS.send(JSON.stringify(enterMsg));
         send(JSON.stringify(leaveMsg),function(){
-
         });
+        //离开后标记离开的房间为最后一次房间
+        store.dispatch({type:CONSTANT.LASTROOMINFO,val:state.homeState.currentRoomInfo});
         // 进入该房间聊天室
-        data ="<p>"+ uName + "进入了房间" + roomName +"</p>";
+        console.log(state.homeState.lastRoomInfo);
+        console.log(roomIdInt+','+roomName);
+        data ="<p>"+ state.homeState.userInfo.name + "进入了房间" + roomName +"</p>";
         let enterMsg = getSendData(
             'enter_room',
             roomIdInt,
@@ -145,6 +131,7 @@ class ChannelList extends React.Component{
         //进入房间，更新当前房间信息
         state.homeState.allRoomList.map(function(item){
             if((item.id) === roomIdInt){
+                // alert('set');
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:{title:item.title,id:item.id,online:item.online,living:item.living}});
             }
             return item;
@@ -188,10 +175,16 @@ class ChannelList extends React.Component{
                     _this.setState({roomPassword:item.password});
                     return;
                 }else{
+                    console.log(roomIdInt+','+roomName);
                     _this.enterRoom(roomIdInt,roomName);
                 }
             }
             });
+        /*setTimeout(function(){
+            console.log('channel:'+JSON.stringify(state.homeState.allRoomList[0]));
+            console.log('channel:'+JSON.stringify(state.homeState.allRoomList[3]));
+        },1000);*/
+
 
     };
     rightClickHandle = (e) =>{
@@ -293,14 +286,14 @@ class ChannelList extends React.Component{
             >
                 <ul>
                 {state.homeState.allRoomList.map(function (item) {
-                    return <li id={'r'+item.id} key={item.id}>
+                    return <li id={'r'+item.id} key={'r'+item.id}>
                         <span onClick={clickOpenHandle}><Icon type={roomStatus['r'+item.id] ?"minus" : "plus"} /> </span>
                         <span id={item.id+'r'}>{item.title}</span>
                         {roomStatus['r'+item.id] && item.childNode &&
                         <ul style={{paddingLeft:'10px'}}>
                             {item.childNode.map(function (item) {
                                 // console.log(item)
-                                return <li id={item.id} key={item.id}>
+                                return <li id={item.id} key={'u'+item.id}>
                                     <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span>
                                     {item.name}
                                     </li>

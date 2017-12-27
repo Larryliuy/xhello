@@ -249,6 +249,10 @@ html,body{
 
 
 /*频道列表*/
+.channelContents{
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+}
 ul{
     list-style-type: none;
     padding-left: 0px;
@@ -274,6 +278,8 @@ ul{
     overflow-x: hidden;
     overflow-y: scroll;
     user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
 }
 .icon-location{
     color:#1890ff;

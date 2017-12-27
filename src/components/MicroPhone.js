@@ -36,12 +36,12 @@ class MicroPhone extends React.Component {
                 onOk() {},
             });
         };
-        noPowerArr.map(function(item){
+        /*noPowerArr.map(function(item){
             if(text.indexOf(item) !== -1){
                 tips('您没有权限');
                 return;
             }
-        });
+        });*/
         powerArr.map(function(item){
             if(text.indexOf(item) !== -1){
                 //如果自己已经在排序，则给出提示并返回
@@ -98,7 +98,7 @@ class MicroPhone extends React.Component {
             </div>
             <div className='online-total'>上麦总人数：{state.homeState.roomMicrophoneUser.length}</div>
             <div className='microphone' onClick={e=>this.onClickHandle(e)}>
-                <Select size={'small'} disabled={(state.homeState.userInfo.level <= 7) ? false : true} defaultValue='主席模式' onChange={e => {this.handleChange(e)}}>
+                <Select size={'small'} disabled={(state.homeState.userInfo.level < 4) ? false : true} defaultValue='主席模式' onChange={e => {this.handleChange(e)}}>
                     <Option value="主席模式">主席模式</Option>
                     <Option value="麦序模式">麦序模式</Option>
                     <Option value="自由模式">自由模式</Option>

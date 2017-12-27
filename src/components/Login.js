@@ -4,11 +4,7 @@ import { Form, Icon, Input, Button, Checkbox,message } from 'antd';
 const FormItem = Form.Item;
 import cookieUtil from '../libs/cookieUtil';
 import '../static/login.scss'
-// console.log('login:'+document.cookie);
-/*import Promise from 'promise-polyfill';
-if(!window.Promise){
-    window.Promise = Promise
-}*/
+import { loginApi } from "../static/apiInfo";
 
 const iconStyle = {
     width: '20px',
@@ -33,69 +29,30 @@ const Login = (props) => {
     const onClickHandle =() =>{
         userName = document.getElementById('user').value;
         password = document.getElementById('pwd').value;
-        let args = 'account='+userName+'&password='+password;
+        // let url = 'http://192.168.6.3:82/softwares/xtell_projects_dev/24_YUN_VIDEO/server/app/api/user/login.php';
+        let args = {};//'LoginName='+userName+'&Password='+password;
+        let arg = 'LoginName='+userName+'&Password='+password;
+        args.LoginName = userName;
+        args.Password = password;
         // console.log(args);
         // if('fetch' in window){
-           /* fetch('/user/login',{
+            fetch(loginApi,{
                 method:'POST',
-                credentials: "include",
+                // credentials: "include",
                 headers:{
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body:args
-            }).then((response) => {console.log(response);return response.json()})
+                body:arg//JSON.stringify(args)
+            }).then((response) => {/*console.log(response);*/return response.json()})
               .then(data=>{
-                  console.log(data)
-                  if(data.state == 100){
-                      message.success(data.msg)
-                      props.login(true,data.result[0]);
-                      console.log(data.result[0])
-                      console.log(JSON.stringify(data.result[0]))
-                      console.log(encodeURI(JSON.stringify(data.result[0])))
-                      if(!cookieUtil.get('userName')){
-                          // console.log('cookie设置成功');
-                          cookieUtil.set('userName',userName,new Date().setTime(new Date().getTime()+30*24*60*60*1000))
-                          cookieUtil.set('password',password,new Date().setTime(new Date().getTime()+30*24*60*60*1000))
-                          cookieUtil.set('userData',encodeURI(JSON.stringify(data.result[0])),new Date().setTime(new Date().getTime()+30*24*60*60*1000))
-                      }
+                  console.log(data.data);
+                  if(data.status === 'ok'){
+                      message.success('登录成功');
+                      props.login(true,{name:userName,level:data.data.Type,id:data.data.Id,sex:data.data.Sex,limit:data.data.Limit});
                   }else {
-                      message.error(data.msg)
+                      message.error('用户名与密码不匹配');
                   }
-              }).catch(err=>console.log(err))*/
-
-        //默认进入
-
-        if(userName){
-            props.login(true,{name:userName,age:25,id:Math.ceil(Math.random()*1000)});
-            message.success('登录成功');
-        }else{
-            message.warning('请输入用户名');
-            return;
-        }
-        /*}else{
-            message.error('浏览器不支持fetch新特性')
-        }*/
-        /*if(cookieUtil.get('loginChecked')=='true'){
-            if('larry' === cookieUtil.get('userName') && '123' === cookieUtil.get('password')){
-                message.success('登录成功！')
-                props.login(true);
-                if(cookieUtil.get('loginChecked')=='true'){
-                    cookieUtil.set('userName',userName,new Date().setTime(new Date().getTime()+24*60*60*1000))
-                    cookieUtil.set('password',password,new Date().setTime(new Date().getTime()+24*60*60*1000))
-                }
-            }else{
-                message.error('帐号或密码错误')
-            }
-        }else {
-            if(userName === 'larry' && password === '123'){
-                message.success('登录成功！')
-                props.login(true);
-            }else {
-                message.error('帐号或密码错误')
-            }
-            cookieUtil.unset('userName')
-            cookieUtil.unset('password')
-        }*/
+              }).catch(err=>console.log(err))
     };
     const onChangeCheckBox =(e) => {
         // if(!cookieUtil.get('loginChecked')){
@@ -135,7 +92,7 @@ const Login = (props) => {
                 <FormItem>
                     <div className={'register-forget-box'}>
                     <Link to="/register" >现在注册<Icon type="right"/></Link>
-                    <Link to="/register" >忘记密码<Icon type="question"/></Link>
+                    <Link to="/register" >邀请登录<Icon type="question"/></Link>
                     </div>
                 </FormItem>
                 <div className='fast_login'>
@@ -144,7 +101,7 @@ const Login = (props) => {
                 </div>
         </Form>
     );
-}
+};
 
 export default Login;
 

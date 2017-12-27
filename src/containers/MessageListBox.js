@@ -86,8 +86,8 @@ class MessageListBox extends React.Component{
                         console.log('禁麦');
                         return;
                     }
+                    console.log(dataJson);
                     if(dataJson.data === '消息成功发出'){
-                        // console.log(_this.props.sendData);
                         data.push({userName:dataJson.user.name,
                             time:getDateString(),
                             data:_this.props.sendData});
@@ -100,7 +100,7 @@ class MessageListBox extends React.Component{
                     }
                     break;
                 case 'enter_room':
-                    console.log(response);
+                    console.log(dataJson);
                     if(response.data === '房间不存在'){
                         alert('房间不存在需要创建房间');
                         console.log('并进入房间');
@@ -125,7 +125,7 @@ class MessageListBox extends React.Component{
                         data:'<p>'+ dataJson.user.name + '已进入房间' +'</p>'});
                     break;
                 case 'leave_room':
-                    // console.log(dataJson);
+                    console.log(dataJson);
                     //有人离开房间时需要更新AllRoomList
                     allRoomListTmp = state.homeState.allRoomList;
                     allRoomListTmp.map(function (item) {
@@ -143,7 +143,6 @@ class MessageListBox extends React.Component{
                     break;
                 case 'get_room_users':
                     // console.log(dataJson.data);
-                    //有人离开房间时需要更新AllRoomList
                     allRoomListTmp = state.homeState.allRoomList;
                     // console.log(allRoomListTmp);
                     allRoomListTmp.map(function (item) {

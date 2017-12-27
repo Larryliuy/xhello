@@ -33,11 +33,15 @@ store.subscribe(function () {
     state = store.getState()
 });
 let userId = 0,
-    userName = '';
+    userName = '',
+    sex=0,
+    level=0;
 if(decodeURI(window.location.href).indexOf('?{') !== -1){
     console.log(decodeURI(window.location.href));
     console.log(userId);
     userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?{')+1,decodeURI(window.location.href).length)).id
+}else{
+    location.replace('#/');
 }
 // console.log('href:'+userId);
 
@@ -48,16 +52,21 @@ class HomeLayout extends React.Component {
         this.state={sendData:'',sliderWidth:240};
     }
     componentWillMount(){
-        userId = JSON.parse(decodeURI(this.props.location.search.substring(1))).id;
+        /*userId = JSON.parse(decodeURI(this.props.location.search.substring(1))).id;
         userName = JSON.parse(decodeURI(this.props.location.search.substring(1))).name;
-        if(!userId){
+        sex = JSON.parse(decodeURI(this.props.location.search.substring(1))).sex;
+        level = JSON.parse(decodeURI(this.props.location.search.substring(1))).level;*/
+        //这里的用户信息需要从服务器获取
+        // 对比url里面的，如果一直则往下执行，不一致则返回登陆界面
+        /*if(!userId){
             userId = JSON.parse(decodeURI(cookieUtil.get('userData'))).id || 0;
-        }
-        console.log(userId+','+userName);
-        store.dispatch({type:CONSTANT.USERINFO,val:{id:userId,name:userName,sex:1,level:1,avatar:'./images/avatar.png'}})
+        }*/
+        // console.log(userId+','+userName+','+sex+','+level);
+        // store.dispatch({type:CONSTANT.USERINFO,val:{id:userId,name:userName,sex:parseInt(sex),level:parseInt(level),avatar:'./images/avatar.png'}})
 
     }
     componentDidMount(){
+        //左右拖动
         let startPos,
             endPos,
             moveLen,
@@ -113,8 +122,10 @@ class HomeLayout extends React.Component {
 
                     <Sider width={this.state.sliderWidth} collapsible = {false} style={Object.assign({},sliderStyle,{borderRight: '1px solid #eee'})}>
                         <div id={'resizable'} className={'ui-resizable'}></div>
-                        <UserSearchBox></UserSearchBox>
-                        <ChannelListBox></ChannelListBox>
+                        <div className={'channelContents'}>
+                            <UserSearchBox></UserSearchBox>
+                            <ChannelListBox></ChannelListBox>
+                        </div>
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
                         <div className= 'content_show'>
@@ -141,7 +152,7 @@ class HomeLayout extends React.Component {
                 </Layout>
                 <Footer>
                     {/*底部功能区*/}
-                    <FooterBottomBox userName={JSON.parse(decodeURI(this.props.location.search.substring(1))).name}></FooterBottomBox>
+                    <FooterBottomBox userName={state.homeState.userInfo.name}></FooterBottomBox>
                 </Footer>
                 <RightClickPanelBox></RightClickPanelBox>
             </Layout>

@@ -13,8 +13,25 @@ class FooterBottom extends React.Component{
         // alert(e.target)
         if(!e.target.id) return;
         console.log(e.target.id);
-        if(e.target.id === 'avatar-img'){
-            this.setState({visible: true})
+        switch (e.target.id){
+            case 'avatar-img':
+                this.setState({visible: true});
+                break;
+            case 'audio-img':
+                alert('控制音量');
+                break;
+            case 'microphone-img':
+                alert('控制麦克风');
+                break;
+            case 'cheer-span':
+                alert('欢呼');
+                break;
+            case 'applause-span':
+                alert('鼓掌');
+                break;
+            case 'open-microphone-btn':
+                alert('开启麦克风');
+                break;
         }
     }
     handOk(){
@@ -28,7 +45,7 @@ class FooterBottom extends React.Component{
             <div>
                 <span className={'user-info'}>
                     <img id='avatar-img' src={'./images/avatar.png'}></img>
-                    {this.props.userName}
+                    <span>{this.props.userName}</span>
                 </span>
                 <UploadAvatar visible={this.state.visible}
                               handleOk={this.handOk.bind(this)}
@@ -54,8 +71,8 @@ class FooterBottom extends React.Component{
                 <span style={{marginLeft:80}}><Button id='open-microphone-btn' type='primary'>点击开麦</Button></span>
             </div>
             <div>
-                <span id='huanhu-span' style={{marginLeft:80}}>欢呼</span>
-                <span id='guzhang-span' style={{marginLeft:10}}>鼓掌</span>
+                <span id='cheer-span' style={{marginLeft:80}}>欢呼</span>
+                <span id='applause-span' style={{marginLeft:10}}>鼓掌</span>
             </div>
             <div className='play-sound'>
                 <span><img id='play-img' src='./images/icons/music.png' />播放</span>
