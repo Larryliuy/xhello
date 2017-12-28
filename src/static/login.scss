@@ -126,6 +126,20 @@ html,body{
     height: 18px;
     margin-right: 1px;
   }
+  .modify-username{
+    display: inline-block;
+    input{
+      display: inline-block;
+      width: 100px;
+      height: 20px;
+      padding: 1px;
+    }
+  }
+  #user-name{
+    display: inline-block;
+    width: 100px;
+    height: 20px;
+  }
   .user-info{
     font-size: 14px;
     margin-right: 40px;
@@ -137,7 +151,7 @@ html,body{
   }
   .sound-slider{
     display: inline-block;
-    width: 60px;
+    width: 100px;
     height: 20px;
   }
   .play-sound{

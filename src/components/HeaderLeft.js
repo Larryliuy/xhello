@@ -68,7 +68,7 @@ class HeaderLeft extends Component{
             <Input onChange={e=>this.passwordChange(e)} placeholder={'请输入密码'}/>
             <br/>
             <br/>
-            <span>
+            <span style={{display:'flex',justifyContent:'space-between'}}>
                 <Button onClick={()=>this.planeCancelHandle()}>取消</Button>
                 <Button type={'primary'} onClick={()=>this.planeOkHandle()}>确定</Button>
             </span>

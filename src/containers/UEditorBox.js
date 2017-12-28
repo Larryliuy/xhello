@@ -64,6 +64,7 @@ class UEditorBox extends React.Component {
                     message.warning('您已被禁止发送文字和图片');
                     return false;
                 }
+                break;
             case '123':
                 if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img>') !== -1){
                     message.warning('您已被禁止发送文字和图片');

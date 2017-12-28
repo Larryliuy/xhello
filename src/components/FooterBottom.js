@@ -1,12 +1,14 @@
 import React,{ Component } from 'react';
-import { Icon ,message, Button, Slider } from 'antd';
+import { message ,Input, Button, Slider } from 'antd';
 import UploadAvatar from './UploadAvatar';
 
 class FooterBottom extends React.Component{
     constructor(props){
         super(props);
         this.state={
-            visible: false
+            visible: false,
+            inputVisible:false,
+            inputValue:''
         }
     }
     clickHandle(e){
@@ -32,6 +34,9 @@ class FooterBottom extends React.Component{
             case 'open-microphone-btn':
                 alert('开启麦克风');
                 break;
+            case 'user-name':
+                this.setState({inputVisible:true});
+                break;
         }
     }
     handOk(){
@@ -40,12 +45,26 @@ class FooterBottom extends React.Component{
     handleCancel(){
         this.setState({visible: false});
     }
+    onchangeHandle(e){
+        this.setState({inputValue:e.target.value});
+    }
+    onblurHandle(){
+        this.setState({inputVisible:false});
+        //请求修改用户名API
+        if(!this.state.inputValue)return;
+        console.log(this.state.inputValue);
+        message.success('修改成功');
+    }
     render(){
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
             <div>
                 <span className={'user-info'}>
                     <img id='avatar-img' src={'./images/avatar.png'}></img>
-                    <span>{this.props.userName}</span>
+                    <span>
+                        {this.state.inputVisible ?
+                            <span className={'modify-username'}><Input onChange={e=>this.onchangeHandle(e)} onPressEnter={()=>this.onblurHandle()} onBlur={()=>this.onblurHandle()} placeholder={'请输入用户名'}/></span>:
+                            <span id={'user-name'}>{this.props.userName}</span>}
+                    </span>
                 </span>
                 <UploadAvatar visible={this.state.visible}
                               title={'修改头像'}
