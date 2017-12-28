@@ -45,7 +45,7 @@ const Login = (props) => {
                 body:arg//JSON.stringify(args)
             }).then((response) => {/*console.log(response);*/return response.json()})
               .then(data=>{
-                  console.log(data.data);
+                  // console.log(data.data);
                   if(data.status === 'ok'){
                       message.success('登录成功');
                       props.login(true,{name:userName,level:data.data.Type,id:data.data.Id,sex:data.data.Sex,limit:data.data.Limit});

@@ -516,7 +516,20 @@ ul{
   height: 100%;
   background-color: #cccccc;
   //background-attachment: scroll;
-  z-index: 10;
+  z-index: 8;
   //-webkit-overflow-scrolling:touch;
   cursor: ew-resize;
+}
+
+//撤回消息按钮
+#withdraw{
+  position: fixed;
+  cursor: pointer;
+  width: 100px;
+  height: 40px;
+  line-height: 40px;
+  background-color: #eee;
+  border-radius: 3px;
+  text-align: center;
+  color: rgba(0,0,0,.5);
 }

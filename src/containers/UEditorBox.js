@@ -1,7 +1,7 @@
 import React,{Component} from 'react'
 import store,{ CONSTANT } from '../reducer/reducer';
 import UEditor from '../components/UEditor';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import '../static/login.scss'
 import WS,{ getSendData } from  '../static/wsInstace';
 
@@ -40,18 +40,56 @@ class UEditorBox extends React.Component {
             value:value
         });
     }
+    limitTextOrImg(){
+        // console.log(this.state.value);
+        // console.log(typeof state.homeState.userInfo.limit +':' + state.homeState.userInfo.limit);
+        switch(state.homeState.userInfo.limit){
+            case '1':
+                if(this.state.value.indexOf('<p><img') !== -1 && this.state.value.indexOf('><\/p>') !== -1){
+                    return true;
+                }
+                if(this.state.value.indexOf('<p>') !== -1){
+                    message.warning('您已被禁止发送文字');
+                    return false;
+                }
+                break;
+            case '2':
+                if(this.state.value.indexOf('<img>') !== -1){
+                    message.warning('您已被禁止发送图片');
+                    return false;
+                }
+                break;
+            case '12':
+                if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img>') !== -1){
+                    message.warning('您已被禁止发送文字和图片');
+                    return false;
+                }
+            case '123':
+                if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img>') !== -1){
+                    message.warning('您已被禁止发送文字和图片');
+                    return false;
+                }
+                break;
+            default:
+                return true;
+                break;
+        }
+    }
     sendClickhandle(){
         if(!this.state.value)return;
         //通过websocket发送给服务器
         // WS.emit('message',message);
         // console.log('ueditor:'+state.homeState.currentRoomInfo.id);
+        if(!this.limitTextOrImg())return;
         this.props.setData(this.state.value);
         let msg = getSendData('msg',
             state.homeState.currentRoomInfo.id,
             state.homeState.currentRoomInfo.title,
             state.homeState.userInfo,
             this.state.value);
+        msg.timeStamp = new Date().getTime();
         WS.send(JSON.stringify(msg));
+        this.setState({value:''});
         this.state.textareaDom.innerHTML = '';
     }
     keydownHandle(e){
@@ -61,6 +99,7 @@ class UEditorBox extends React.Component {
         };
         //ctrl+enter发送，enter发送需要做字符串处理
         if(e.keyCode === 13 && !e.ctrlKey){
+            if(!this.limitTextOrImg())return;
             // console.log(this.state.value);
             // alert(this.state.value);
             e.target.innerHTML = '';
@@ -70,7 +109,9 @@ class UEditorBox extends React.Component {
                 state.homeState.currentRoomInfo.title,
                 state.homeState.userInfo,
                 this.state.value);
+            msg.timeStamp = new Date().getTime();
             WS.send(JSON.stringify(msg));
+            this.setState({value:''});
         }else if(e.keyCode === 13 && e.ctrlKey){
             e.target.innerHTML = this.state.value;
         }

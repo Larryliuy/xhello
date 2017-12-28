@@ -21,16 +21,14 @@ class UEditor extends React.Component {
                     {color:['white','red','orange','yellow','green','blue','purple','black']},
                     {background:['white','red','orange','yellow','green','blue','purple','black']},
                      'image'],
-                history: {          // Enable with custom configurations
-                    delay: 2500,
-                    userOnly: true
-                },
+
             },
             placeholder: '请输入文本...',
             readOnly: false,
             theme: 'snow'
         };
         const editor =this.editor= new Quill(textbox,options);
+        //将输入区dom传给父组件
         this.props.setDom(editor.root);
         const {value}=this.state;
         let BackgroundClass = Quill.import('attributors/class/background');
@@ -39,6 +37,7 @@ class UEditor extends React.Component {
         Quill.register(BackgroundClass, true);
         Quill.register(ColorClass, true);
         Quill.register(SizeClass, true);
+        // console.log(editor.clipboard);
         if (value) editor.clipboard.dangerouslyPasteHTML(value);
         editor.on('text-change', this.handleChange.bind(this));
 

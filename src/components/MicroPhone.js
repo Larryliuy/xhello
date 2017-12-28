@@ -64,9 +64,9 @@ class MicroPhone extends React.Component {
                         tips('您不在麦序');
                         return;
                     }
-                    console.log(state.homeState.roomMicrophoneUser);
+                    // console.log(state.homeState.roomMicrophoneUser);
                     state.homeState.roomMicrophoneUser.map(function(item){
-                        console.log(typeof item.id+','+typeof state.homeState.userInfo.id);
+                        // console.log(typeof item.id+','+typeof state.homeState.userInfo.id);
                         if(item.id === state.homeState.userInfo.id){
                             filter = false;
                         }

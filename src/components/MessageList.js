@@ -1,18 +1,66 @@
 import React,{ Component } from 'react';
-import { List, Avatar } from 'antd';
-
-
+import { List, Avatar, message } from 'antd';
+import WS, {send, timeStamp} from "../static/wsInstace";
+import store from "../reducer/reducer";
+let state = store.getState();
+store.subscribe(function () {
+    state = store.getState();
+});
 class MessageList extends React.Component{
     constructor(props) {
         super(props);
-
+        this.state={
+            top:'0px',
+            left:'0px',
+            display:'none',
+            timeStamp:0,
+        }
     }
     componentDidMount(){
 
     }
+    rightClickHanle(e){
+        //副房主以下级别没有撤回消息权限
+        if(state.homeState.userInfo.level > 3)return;
+        if(e.button === 2){
+            let msgDiv = null;
+            if(e.target.nodeName === 'P'){
+                msgDiv = e.target.parentNode;
+            }
+            if(e.target.nodeName === 'IMG'){
+                msgDiv = e.target.parentNode.parentNode;
+            }
+            if(msgDiv.id){
+                let timestampMsg =msgDiv.id.substring(msgDiv.id.indexOf('id')+2);
+                //如果消息不是自己发的则返回
+                if(parseInt(msgDiv.id) !== parseInt(state.homeState.userInfo.id))return;
+                //如果发送消息时间超过一分钟则返回
+                if(new Date().getTime() - parseInt(timestampMsg) > 60000){
+                    console.log('over');
+                    console.log(new Date().getTime());
+                    return;
+                }
+                this.setState({display:'block',top:e.clientY+10,left:e.clientX,timeStamp:timestampMsg});
+            }
+        }
+    }
+    withdrawHandle(){
+        this.setState({display:'none'});
+        let micrpMsg = {
+            type:'msg',
+            typeString:'withdraw',
+            roomId: state.homeState.currentRoomInfo.id,		//房 间唯一标识符
+            roomName: state.homeState.currentRoomInfo.title,
+            user:state.homeState.userInfo,
+            timeStamp:this.state.timeStamp
+        };
+        send(JSON.stringify(micrpMsg),function(){
+            message.info('撤回成功');
+        });
+    }
     render(){
         // console.log(this.props.data);
-        return (<List
+        return (<div><List
             size="small"
             itemLayout="horizontal"
             dataSource={this.props.data}
@@ -21,11 +69,15 @@ class MessageList extends React.Component{
                     <List.Item.Meta
                         avatar={<Avatar src="./images/avatar.png" />}
                         title={<p>{item.userName} {item.time}</p>}
-                        description={<div dangerouslySetInnerHTML={{__html:item.data}} />}
+                        description={<div onMouseDown={e=>this.rightClickHanle(e)} id={item.timeStamp && state.homeState.userInfo.id +'id' + item.timeStamp} dangerouslySetInnerHTML={{__html:item.data}} />}
                     />
                 </List.Item>
             )}
-        />)
+        />
+            <div id={'withdraw'}
+                 onClick={()=>this.withdrawHandle()}
+                 style={{top:this.state.top,left:this.state.left,display:this.state.display}}>撤回消息</div>
+        </div>)
     }
 }
 

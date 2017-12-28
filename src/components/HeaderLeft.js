@@ -80,7 +80,9 @@ class HeaderLeft extends Component{
                             <Icon style={{fontSize:'28px',color:'#fff'}} type="home" />
                         </Popover>
                         <label style={{paddingLeft:'10px'}}>{state.homeState.currentRoomInfo.title}</label>
-                        <RoomManager handleCancel={() => this.handleCancel()} visible={this.state.visible}></RoomManager>
+                        <RoomManager handleCancel={() => this.handleCancel()}
+                                     title={'房间管理'}
+                                     visible={this.state.visible}></RoomManager>
                     </div>
                     <div style={{height:'50%',width:'100%',color:'white',fontSize:'14px',lineHeight:'24px'}}>
                         在线:

@@ -38,21 +38,7 @@ class MessageListBox extends React.Component{
         uSex = state.homeState.userInfo.sex;
 
         //data为消息数据
-        let data = [{username:'larry',time:'2017-12-11 13:12'},
-            {username:'larry',time:'2017-12-11 13:12',data:'321'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dsfs'},
-            {username:'larry',time:'2017-12-11 13:12',data:'sdfd'},
-            {username:'larry',time:'2017-12-11 13:12',data:'ddd'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dddd'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dsds'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dsdf'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dd'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dsf'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dd'},
-            {username:'larry',time:'2017-12-11 13:12',data:'dsd'},
-            {username:'larry',time:'2017-12-11 13:12',data:'d'},
-            {username:'larry',time:'2017-12-11 13:12',data:'s'},
-            {username:'larry',time:'2017-12-11 13:12',data:'sfds'}];
+        let data = [{username:'larry',time:'2017-12-11 13:12',data:'sfds'}];
         let _this = this;
         this.setState({data:data});
         this.scrollToBottom();
@@ -83,24 +69,43 @@ class MessageListBox extends React.Component{
                         return;
                     }
                     if(dataJson.typeString === '禁麦'){
-                        console.log('禁麦');
+                        // console.log('禁麦');
                         return;
                     }
-                    console.log(dataJson);
-                    if(dataJson.data === '消息成功发出'){
-                        data.push({userName:dataJson.user.name,
-                            time:getDateString(),
-                            data:_this.props.sendData});
-                    }else{
-                        data.push({userName:dataJson.user.name,
-                            time:getDateString(),
-                            data:dataJson.data});
-                        // console.log(data);
-                        // console.log(dataJson.data);
+                    if(dataJson.typeString === 'withdraw'){
+                        console.log(data);
+                        console.log(dataJson);
+                        data = data.filter(function (item) {
+                            if(item.timeStamp && item.timeStamp.toString() === dataJson.timeStamp){
+                                console.log(item.timeStamp.toString() === dataJson.timeStamp);
+                                return;
+                            }else{
+                                return item;
+                            }
+                        });
+                        // return;
+                    }
+                    // console.log(dataJson);
+                    if (dataJson.typeString !== 'withdraw') {
+                        if (dataJson.data === '消息成功发出') {
+                            data.push({
+                                userName: dataJson.user.name,
+                                time: getDateString(),
+                                data: _this.props.sendData,
+                                timeStamp: dataJson.timeStamp
+                            });
+                        } else {
+                        data.push({
+                            userName: dataJson.user.name,
+                            time: getDateString(),
+                            data: dataJson.data,
+                            timeStamp: dataJson.timeStamp
+                        });
+                        }
                     }
                     break;
                 case 'enter_room':
-                    console.log(dataJson);
+                    // console.log(dataJson);
                     if(response.data === '房间不存在'){
                         alert('房间不存在需要创建房间');
                         console.log('并进入房间');
@@ -125,7 +130,7 @@ class MessageListBox extends React.Component{
                         data:'<p>'+ dataJson.user.name + '已进入房间' +'</p>'});
                     break;
                 case 'leave_room':
-                    console.log(dataJson);
+                    // console.log(dataJson);
                     //有人离开房间时需要更新AllRoomList
                     allRoomListTmp = state.homeState.allRoomList;
                     allRoomListTmp.map(function (item) {

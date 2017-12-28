@@ -55,7 +55,7 @@ class UploadAvatar extends React.Component{
     render(){
         return (<div>
             <Modal
-                title="修改头像"
+                title={this.props.title}
                 visible={this.props.visible}
                 onOk={this.props.handleOk}
                 onCancel={this.props.handleCancel}

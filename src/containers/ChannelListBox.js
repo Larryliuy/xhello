@@ -7,7 +7,6 @@ import store,{ CONSTANT } from '../reducer/reducer';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
-    // console.log(store.getState())
 });
 
 const rightClickHandle = (e) => {
@@ -17,7 +16,7 @@ const rightClickHandle = (e) => {
         //如果点击的不是右键则隐藏弹窗
         store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
     }else{
-        const id = e.target.getAttribute('id');
+        const id = e.target.getAttribute('id') || '';
         store.dispatch({type:CONSTANT.LOCATION,val:{x:e.clientX,y:e.clientY,display:'block',obj:id.indexOf('r') === -1?'user':'room'}});
         /*if(id){
             if(id.indexOf('r') !== -1){

@@ -78,7 +78,7 @@ class RoomManager extends React.Component{
         }];
         return (<div>
             <Modal
-                title="房间管理"
+                title={this.props.title}
                 visible={this.props.visible}
                 onOk={this.HandleOk}
                 onCancel={this.props.handleCancel}

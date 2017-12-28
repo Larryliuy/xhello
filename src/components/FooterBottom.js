@@ -48,6 +48,7 @@ class FooterBottom extends React.Component{
                     <span>{this.props.userName}</span>
                 </span>
                 <UploadAvatar visible={this.state.visible}
+                              title={'修改头像'}
                               handleOk={this.handOk.bind(this)}
                               handleCancel={this.handleCancel.bind(this)}
                 >
