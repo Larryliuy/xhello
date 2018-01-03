@@ -44,7 +44,7 @@ class UploadAvatar extends React.Component{
             document.selection.empty();
             img.src = nfile;
             img.width = 200;
-            img.onload=function(){
+            img.onload = function(){
                 alert(nfile+","+img.fileSize + " bytes");
             };
             fileList.removeChild(fileList.querySelector('img'));
@@ -59,10 +59,12 @@ class UploadAvatar extends React.Component{
                 visible={this.props.visible}
                 onOk={this.props.handleOk}
                 onCancel={this.props.handleCancel}
+                okText={'确认'}
+                cancelText={'取消'}
             >
                 <div className='upload-btn'>
                     <label htmlFor="file-input">选择图片<input onChange={(e) => {this.handleFiles(e)}} id='file-input' type='file' /></label>
-                    <span>提示：支持jpg gif png 格式图片,不能超过5M</span>
+                    <span>提示：推荐jpg gif png 格式图片,不能超过2M</span>
                 </div>
                 <div id='pre-show'>
                     <img src='./images/avatar.png'/>
