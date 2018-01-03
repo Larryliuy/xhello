@@ -79,14 +79,14 @@ class HeaderLeft extends Component{
                                   content={ <div onClick={this.showModal} ><span className='menu-logo'><img src='./images/icons/menu.png' /> 主菜单</span></div>}   trigger="click">
                             <Icon style={{fontSize:'28px',color:'#fff'}} type="home" />
                         </Popover>
-                        <label style={{paddingLeft:'10px'}}>{state.homeState.currentRoomInfo.title}</label>
+                        <label style={{paddingLeft:'10px'}}>{state.homeState.currentRoomInfo.roomName}</label>
                         <RoomManager handleCancel={() => this.handleCancel()}
                                      title={'房间管理'}
                                      visible={this.state.visible}></RoomManager>
                     </div>
                     <div style={{height:'50%',width:'100%',color:'white',fontSize:'14px',lineHeight:'24px'}}>
                         在线:
-                        <label style={{paddingRight:'23px'}}>{state.homeState.currentRoomInfo.online}</label>
+                        <label style={{paddingRight:'23px'}}>{state.homeState.currentRoomInfo.totalClients}</label>
                         <img onClick={collectImgClick}
                              style={headLeftImg}
                              src="./images/icons/star.png"

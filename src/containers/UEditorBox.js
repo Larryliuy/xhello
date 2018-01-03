@@ -45,6 +45,25 @@ class UEditorBox extends React.Component {
         // console.log(typeof state.homeState.userInfo.limit +':' + state.homeState.userInfo.limit);
         switch(state.homeState.userInfo.limit){
             case '1':
+                let value = this.state.value;
+                console.log(value);
+                function removeHTMLTag(str) {
+                    str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+                    str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+                    //str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+                    str=str.replace(/ /ig,'');//去掉
+                    if(str.length>0){
+                        str=true
+                    }else {
+                        str=false
+                    }
+                    return str;
+                }
+                if(this.state.value.indexOf('<img') !== -1 && removeHTMLTag(value)){
+                    message.warning('您已被禁止发送文字');
+                    return false;
+                }
+                //检测<p>()<img , ">()<img , ">()</p> 这3组字符串括号内不能存在文本(数字，字母，汉字)即可
                 if(this.state.value.indexOf('<p><img') !== -1 && this.state.value.indexOf('><\/p>') !== -1){
                     return true;
                 }
@@ -52,11 +71,14 @@ class UEditorBox extends React.Component {
                     message.warning('您已被禁止发送文字');
                     return false;
                 }
+                // return true;
                 break;
             case '2':
-                if(this.state.value.indexOf('<img>') !== -1){
+                if(this.state.value.match(/\<img(\s|\S)+?\>/g)){
                     message.warning('您已被禁止发送图片');
                     return false;
+                }else{
+                    return true;
                 }
                 break;
             case '12':
@@ -66,7 +88,7 @@ class UEditorBox extends React.Component {
                 }
                 break;
             case '123':
-                if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img>') !== -1){
+                if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img') !== -1){
                     message.warning('您已被禁止发送文字和图片');
                     return false;
                 }
@@ -84,8 +106,8 @@ class UEditorBox extends React.Component {
         if(!this.limitTextOrImg())return;
         this.props.setData(this.state.value);
         let msg = getSendData('msg',
-            state.homeState.currentRoomInfo.id,
-            state.homeState.currentRoomInfo.title,
+            state.homeState.currentRoomInfo.roomId,
+            state.homeState.currentRoomInfo.roomName,
             state.homeState.userInfo,
             this.state.value);
         msg.timeStamp = new Date().getTime();
@@ -106,8 +128,8 @@ class UEditorBox extends React.Component {
             e.target.innerHTML = '';
             this.props.setData(this.state.value);
             let msg = getSendData('msg',
-                state.homeState.currentRoomInfo.id,
-                state.homeState.currentRoomInfo.title,
+                state.homeState.currentRoomInfo.roomId,
+                state.homeState.currentRoomInfo.roomName,
                 state.homeState.userInfo,
                 this.state.value);
             msg.timeStamp = new Date().getTime();

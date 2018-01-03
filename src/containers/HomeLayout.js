@@ -51,44 +51,40 @@ class HomeLayout extends React.Component {
         super(props);
         this.state={sendData:'',sliderWidth:240};
     }
-    componentWillMount(){
-        /*userId = JSON.parse(decodeURI(this.props.location.search.substring(1))).id;
-        userName = JSON.parse(decodeURI(this.props.location.search.substring(1))).name;
-        sex = JSON.parse(decodeURI(this.props.location.search.substring(1))).sex;
-        level = JSON.parse(decodeURI(this.props.location.search.substring(1))).level;*/
-        //这里的用户信息需要从服务器获取
-        // 对比url里面的，如果一直则往下执行，不一致则返回登陆界面
-        /*if(!userId){
-            userId = JSON.parse(decodeURI(cookieUtil.get('userData'))).id || 0;
-        }*/
-        // console.log(userId+','+userName+','+sex+','+level);
-        // store.dispatch({type:CONSTANT.USERINFO,val:{id:userId,name:userName,sex:parseInt(sex),level:parseInt(level),avatar:'./images/avatar.png'}})
-
-    }
     componentDidMount(){
         //左右拖动
         let isChanging = false,
             _this = this,
             dragBar = document.getElementById('resizable');
-        dragBar.addEventListener('mousedown',function(event){
+        dragBar.onmousedown =  function(event){
+            document.body.style.userSelect = 'none';
             document.body.style.cursor = 'ew-resize';
             isChanging = true;
-            document.addEventListener('mousemove',function(event){
+            document.onmousemove = function(event){
                 if(isChanging && event.clientX > 240 && event.clientX < winWidth/3){
                     _this.setState({sliderWidth:event.clientX});
                 }
-            });
-            document.addEventListener('mouseup',function(event){
+            };
+            document.onmouseup = function(event){
+                console.log('docup');
                 document.body.style.cursor = 'default';
+                document.body.style.userSelect = 'text';
                 isChanging = false;
                 document.onmousemove = null;
                 document.onmouseup = null;
-            });
-        });
+                // dragBar.onmousedown = null;
+            };
+        };
+        dragBar.onmouseup = function(event){
+            document.onmousemove = null;
+        };
     }
     componentWillUnmount(){
         //解绑事件监听
         let dragBar = document.getElementById('resizable');
+        dragBar.onmousedown = null;
+        document.onmousemove = null;
+        document.onmouseup = null;
         dragBar.onmousedown = null;
 
     }

@@ -171,7 +171,9 @@ html,body{
     background-color: white;
     overflow: hidden;
 }
-
+.ant-list-item-meta-description{
+  color: #666 !important;
+}
 //消息展示框样式
 .message-box{
   width: 100%;
@@ -280,6 +282,10 @@ ul{
     padding: 5px 1px;
     border-top: 1px solid #eee;
 }
+.channel-list > ul > li > ul > li > ul > li{
+  padding: 4px 1px;
+  //border-top: 1px solid #eee;
+}
 #editor{min-height:200px;}
 
 .channel-list-box{
@@ -294,6 +300,7 @@ ul{
     user-select: none;
     -webkit-user-drag: none;
     -webkit-user-select: none;
+    z-index: 9;
 }
 .icon-location{
     color:#1890ff;
@@ -445,14 +452,17 @@ ul{
 .right-click{
   display: flex;
   justify-content: left;
+  z-index: 10;
 }
 .right-panel,.right-panel-item{
   cursor: pointer;
+  //z-index: 10;
   .ant-list-item:hover{
     background-color: #1890ff;
   }
 }
 .ant-card-bordered{
+  z-index: 10;
   height: 100% !important;
   cursor: pointer;
 }
@@ -530,7 +540,7 @@ ul{
   height: 100%;
   background-color: #cccccc;
   //background-attachment: scroll;
-  z-index: 8;
+  z-index: 10;
   //-webkit-overflow-scrolling:touch;
   cursor: ew-resize;
 }

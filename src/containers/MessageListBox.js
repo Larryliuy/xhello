@@ -38,7 +38,7 @@ class MessageListBox extends React.Component{
         uSex = state.homeState.userInfo.sex;
 
         //data为消息数据
-        let data = [{username:'larry',time:'2017-12-11 13:12',data:'sfds'}];
+        let data = [{username:'larry',time:'2017-12-11 13:12',data:'欢迎欢迎'}];
         let _this = this;
         this.setState({data:data});
         this.scrollToBottom();
@@ -72,6 +72,7 @@ class MessageListBox extends React.Component{
                         // console.log('禁麦');
                         return;
                     }
+                    //消息撤回
                     if(dataJson.typeString === 'withdraw'){
                         console.log(data);
                         console.log(dataJson);
@@ -85,10 +86,11 @@ class MessageListBox extends React.Component{
                         });
                         // return;
                     }
-                    // console.log(dataJson);
+                    console.log(dataJson);
                     if (dataJson.typeString !== 'withdraw') {
                         if (dataJson.data === '消息成功发出') {
                             data.push({
+                                userId:dataJson.user.id,
                                 userName: dataJson.user.name,
                                 time: getDateString(),
                                 data: _this.props.sendData,
@@ -96,6 +98,7 @@ class MessageListBox extends React.Component{
                             });
                         } else {
                         data.push({
+                            userId:dataJson.user.id,
                             userName: dataJson.user.name,
                             time: getDateString(),
                             data: dataJson.data,
@@ -112,54 +115,68 @@ class MessageListBox extends React.Component{
                     }
                     //有人进入房间时需要更新AllRoomList
                     allRoomListTmp = state.homeState.allRoomList;
+                    // console.log(dataJson);
                     allRoomListTmp.map(function (item) {
-                        if(item.id === dataJson.roomId){
-                            item.childNode.push({
-                                name:dataJson.user.name,
-                                id:dataJson.user.id,
-                                level:dataJson.user.level,
-                                sex:dataJson.user.sex,
-                                avatar:dataJson.user.avatar
-                            })
+                        if(item.childNode.length !== 0){
+                            item.childNode.map(function (item) {
+                                if(item.roomId === dataJson.roomId.toString()){
+                                    item.childNode.push({
+                                        name:dataJson.user.name,
+                                        id:dataJson.user.id,
+                                        level:dataJson.user.level,
+                                        sex:dataJson.user.sex,
+                                        avatar:dataJson.user.avatar
+                                    });
+                                }
+                            });
                         }
                     });
+                    // console.log(allRoomListTmp);
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
                     // console.log(dataJson);
                     data.push({userName:dataJson.user.name,
                         time:getDateString(),
-                        data:'<p>'+ dataJson.user.name + '已进入房间' +'</p>'});
+                        data:'<p>'+ dataJson.user.name + '已进入房间'+ dataJson.roomName  +'</p>'});
                     break;
                 case 'leave_room':
                     // console.log(dataJson);
                     //有人离开房间时需要更新AllRoomList
                     allRoomListTmp = state.homeState.allRoomList;
                     allRoomListTmp.map(function (item) {
-                        if(item.id === dataJson.roomId){
-                            item.childNode = item.childNode.filter(function(item){
-                                return item.id !== dataJson.user.id;
-                            })
+                        if(item.childNode){
+                            item.childNode.map(function (item) {
+                                if(item.roomId === dataJson.roomId.toString()){
+                                    item.childNode = item.childNode.filter(function(item){
+                                        return item.id !== dataJson.user.id;
+                                    })
+                                }
+                            });
                         }
                     });
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
                     // console.log(allRoomListTmp);
                     data.push({userName:dataJson.user.name,
                         time:getDateString(),
-                        data:'<p>'+ dataJson.user.name + '已离开房间' +'</p>'});
+                        data:'<p>'+ dataJson.user.name + '已离开房间'+ dataJson.roomName +'</p>'});
                     break;
                 case 'get_room_users':
                     // console.log(dataJson.data);
                     allRoomListTmp = state.homeState.allRoomList;
                     // console.log(allRoomListTmp);
                     allRoomListTmp.map(function (item) {
-                        if(item.id === dataJson.roomId){
-                            // console.log(dataJson.data.length);
-                            for(let i in dataJson.data){
-                                // console.log(dataJson.data[i]);
-                                //需要排除空数据，如果用户数据存在才加入列表
-                                if(dataJson.data[i] && dataJson.data[i].id  !== uId){
-                                    item.childNode.push(dataJson.data[i]);
+                        if(item.childNode){
+                            item.childNode.map(function (item) {
+                                if(item.roomId === dataJson.roomId){
+                                    // console.log(dataJson.data.length);
+                                    for(let i in dataJson.data){
+                                        // console.log(dataJson.data[i]);
+                                        //需要排除空数据，如果用户数据存在才加入列表
+                                        if(dataJson.data[i] && dataJson.data[i].id  !== state.homeState.userInfo.id){
+                                            item.childNode.push(dataJson.data[i]);
+                                        }
+                                    }
                                 }
-                            }
+                            });
                         }
                     });
                     // console.log(allRoomListTmp)
@@ -167,7 +184,40 @@ class MessageListBox extends React.Component{
                     // console.log(allRoomListTmp);
                     break;
                 case 'get_rooms':
+                    // console.log(dataJson.data);
+                    let dataTmp = [],
+                        i=0;
+                    let ids = [];
+                    /*console.log(typeof dataTmp);
+                    console.log(dataTmp instanceof Array);*/
+                    dataJson.data.map(function (item) {
+                        ids.push(item.roomId);
+                       if(item.parentId === '0'){
+                           dataTmp[i] = item;
+                           dataTmp[i++].childNode = [];
+                       }else{
+                           item.childNode=[];
+                       }
+                    });
+                    dataTmp.map(function (item) {
+                        dataJson.data.map(function (itm) {
+                            if (item.roomId === itm.parentId) {
+                                item.childNode.push(itm);
+                            }
+                        })
+                    });
+                    // console.log(dataTmp);
+                    // console.log(ids);
+                    store.dispatch({type:CONSTANT.ALLROOMLIST,val:dataTmp});
+                    store.dispatch({type:CONSTANT.CURRENTROOMINFO,
+                        val:dataTmp[0].childNode[0]});
+                    store.dispatch({type:CONSTANT.LASTROOMINFO,
+                        val:dataTmp[0].childNode[0]});
+                    break;
+                case 'create_room':
                     console.log(dataJson);
+                    console.log(dataJson.data);
+
                     break;
                 default:
                     break;

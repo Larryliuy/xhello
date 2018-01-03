@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import ChannelList from '../components/ChannelList';
 import store,{ CONSTANT } from '../reducer/reducer';
-
+import WS,{ getSendData, send } from  '../static/wsInstace.js';
 
 
 let state = store.getState();
@@ -14,29 +14,60 @@ const rightClickHandle = (e) => {
     if(state.homeState.userInfo.level > 4)return;
     if(e.button !== 2){
         //如果点击的不是右键则隐藏弹窗
+        // console.log('no-right');
         store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
     }else{
         const id = e.target.getAttribute('id') || '';
-        store.dispatch({type:CONSTANT.LOCATION,val:{x:e.clientX,y:e.clientY,display:'block',obj:id.indexOf('r') === -1?'user':'room'}});
-        /*if(id){
-            if(id.indexOf('r') !== -1){
-                alert('对房间进行操作');
-                //弹出创建频道列表
-            }else{
-                alert('对用户进行操作');
-                //弹出创建房间或子房间列表
-            }
-        }*/
+        console.log(id);
+        if(id.indexOf('rc') !== -1) {
+            store.dispatch({
+                type: CONSTANT.LOCATION,
+                val: {x: e.clientX, y: e.clientY, display: 'block', obj: id}
+            });
+        }else if(id.indexOf('u') !== -1) {
+            store.dispatch({
+                type: CONSTANT.LOCATION,
+                val: {x: e.clientX, y: e.clientY, display: 'block', obj: id}
+            });
+        }else if(id.indexOf('r') !== -1 && id.indexOf('rc') === -1) {
+            //这里为一级房间
+            store.dispatch({
+                type: CONSTANT.LOCATION,
+                val: {x: e.clientX, y: e.clientY, display: 'block', obj: id}
+            });
+        }else{
+            store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
+            return;
+        }
         let classArr = e.target;
         console.log(classArr);
     }
 };
 
-const ChannelListBox = () => (
-                        <div className='channel-list-box'
-                             onMouseDown={e => rightClickHandle(e)}
-                        >
-                            <ChannelList/>
-                        </div>);
+class ChannelListBox extends  React.Component{
+    /*state = {
+        data:[]
+    };*/
+    componentDidMount(){
+        //发送get_rooms消息
+        let getRoomsMsg = {
+            type:'get_rooms',
+            user:state.homeState.userInfo,
+            data:''
+        };
+        send(JSON.stringify(getRoomsMsg),function () {
+            // console.log('get_rooms');
+        });
+
+    }
+    render(){
+        return(
+        <div className='channel-list-box'
+             onMouseDown={e => rightClickHandle(e)}
+        >
+            <ChannelList/>
+        </div>);
+    }
+}
 
 export default ChannelListBox;

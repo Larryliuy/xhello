@@ -14,14 +14,14 @@ class SearchResult extends React.Component{
     componentDidMount(){
     }
     handleClickUser(e){
-        console.log(e.target.id.substring(1));
+        // console.log(e.target.id);
         //定位到id为e.target.id的元素位置;
-        let selfDom = document.getElementById(e.target.id.substring(1).toString());
+        let selfDom = document.getElementById('u'+e.target.id.substring(1));
         if(!selfDom) {
             message.error('用户所在的房间未展开或不在公共房间');
             return;
         }
-        console.log(selfDom);
+        // console.log(selfDom);
         store.dispatch({type:CONSTANT.SEARCHKEYWORD,val:''});
         selfDom.scrollIntoView();
         selfDom.style.color = 'green';

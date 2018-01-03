@@ -24,14 +24,19 @@ class UserSearch extends React.Component{
         // console.log(AllRoomData)
         AllRoomData.map(function(item){
             if(item.childNode.length !== 0){
-                return item.childNode.filter(function(item){
-                    if(item.name && item.name.indexOf(e.target.value) !== -1){
-                        resultData.push(item);
+                item.childNode.map(function (itm) {
+                    if(itm.childNode.length !== 0){
+                        return itm.childNode.filter(function(itm){
+                            if(itm.name && itm.name.indexOf(e.target.value) !== -1){
+                                resultData.push(itm);
+                            }
+                            return itm.name && itm.name.indexOf(e.target.value) !== -1
+                        });
+                    }else{
+                        return ;
                     }
-                    return item.name && item.name.indexOf(e.target.value) !== -1
-                });
-            }else{
-                return ;
+                })
+
             }
         });
         store.dispatch({type:CONSTANT.SEARCHKEYWORD,val:e.target.value});
@@ -39,7 +44,7 @@ class UserSearch extends React.Component{
     }
     // 定位自己
     clickLocationHandle(){
-        let selfDom = document.getElementById(state.homeState.userInfo.id.toString());
+        let selfDom = document.getElementById('u'+state.homeState.userInfo.id);
         if(!selfDom) {
             message.warn('自己所在的房间未展开');
             return;

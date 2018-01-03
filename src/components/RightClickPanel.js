@@ -1,14 +1,21 @@
 import React,{ Component } from 'react';
-import { Card, Popover, List } from 'antd';
+import { Card, Popover, List, Modal } from 'antd';
+const confirm = Modal.confirm;
 import CreateRoom from './CreateRoom';
-
+import WS,{ getSendData, send } from  '../static/wsInstace.js';
+import store from "../reducer/reducer";
+let state = store.getState();
+store.subscribe(function () {
+    state = store.getState();
+    // console.log(store.getState())
+});
 
 
 
 class RightClickPanel extends React.Component{
     constructor(props){
         super(props);
-        this.state = {display:'none',operate:[],createRoom:false}
+        this.state = {display:'none',operate:[],createRoom:false,roomType:1}
     }
     setCreateRoomVisible(){
         this.setState({createRoom:false})
@@ -86,12 +93,46 @@ class RightClickPanel extends React.Component{
                 case '禁止文字':
                     alert(text);
                     break;
-                case '新建房间':
+                case '创建同级别房间':
                     // alert(text);
                     _this.setState({createRoom:true});
                     break;
+                case '创建子房间':
+                    // alert(text);
+                    _this.setState({createRoom:true});
+                    _this.setState({roomType:2});
+                    break;
                 case '删除房间':
-                    alert(text);
+                    let roomId = state.homeState.location.obj;
+                    console.log(roomId);
+                    if(roomId.indexOf('rc')){
+                        roomId = roomId.substring(2);
+                    }else if(roomId.indexOf('r')){
+                        roomId = roomId.substring(1);
+                    }else{
+                        return;
+                    }
+                    console.log(roomId);
+                    confirm({
+                        title:'删除房间会影响房间内用户，确认删除吗？',
+                        // content: '',
+                        okText: '确认',
+                        okType: 'danger',
+                        cancelText: '取消',
+                        onOk() {
+                            console.log('OK');
+                            let deleteMsg = {
+                                type:'delete_room',
+                                roomId:roomId,
+                                user:state.homeState.userInfo
+                            };
+                            /*send(JSON.stringify(deleteMsg),function () {
+
+                            });*/
+                        },
+                        onCancel() {
+                            console.log('Cancel');
+                        },});
                     break;
                 case '房间设置':
                     alert(text);
@@ -131,7 +172,7 @@ class RightClickPanel extends React.Component{
                         dataSource={this.state.operate}
                         renderItem={item => (<List.Item>{item}</List.Item>)}
                     /> </Card>
-            {this.state.createRoom && <CreateRoom setVisible={this.setCreateRoomVisible.bind(this)}></CreateRoom>}
+            {this.state.createRoom && <CreateRoom roomType={this.state.roomType} setVisible={this.setCreateRoomVisible.bind(this)}></CreateRoom>}
 
         </div>)
     }

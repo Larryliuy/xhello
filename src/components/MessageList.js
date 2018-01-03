@@ -25,6 +25,7 @@ class MessageList extends React.Component{
         if(e.button === 2){
             let msgDiv = null;
             if(e.target.nodeName === 'P'){
+                // console.log(e.target.parentNode);
                 msgDiv = e.target.parentNode;
             }
             if(e.target.nodeName === 'IMG'){
@@ -49,8 +50,8 @@ class MessageList extends React.Component{
         let micrpMsg = {
             type:'msg',
             typeString:'withdraw',
-            roomId: state.homeState.currentRoomInfo.id,		//房 间唯一标识符
-            roomName: state.homeState.currentRoomInfo.title,
+            roomId: state.homeState.currentRoomInfo.roomId,		//房 间唯一标识符
+            roomName: state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
             timeStamp:this.state.timeStamp
         };
@@ -69,7 +70,7 @@ class MessageList extends React.Component{
                     <List.Item.Meta
                         avatar={<Avatar src="./images/avatar.png" />}
                         title={<p>{item.userName} {item.time}</p>}
-                        description={<div onMouseDown={e=>this.rightClickHanle(e)} id={item.timeStamp && state.homeState.userInfo.id +'id' + item.timeStamp} dangerouslySetInnerHTML={{__html:item.data}} />}
+                        description={<div onMouseDown={e=>this.rightClickHanle(e)} id={item.timeStamp && item.userId +'id' + item.timeStamp} dangerouslySetInnerHTML={{__html:item.data}} />}
                     />
                 </List.Item>
             )}
