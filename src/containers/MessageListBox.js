@@ -217,11 +217,15 @@ class MessageListBox extends React.Component{
                 case 'create_room':
                     console.log(dataJson);
                     console.log(dataJson.data);
-
+                    //更新allRoomList
+                    break;
+                case 'delete_room':
+                    console.log(dataJson);
+                    console.log(dataJson.data);
+                    //更新allRoomList
                     break;
                 default:
                     break;
-
             }
 
             _this.setState({data:data});

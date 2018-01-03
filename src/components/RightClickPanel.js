@@ -104,11 +104,19 @@ class RightClickPanel extends React.Component{
                     break;
                 case '删除房间':
                     let roomId = state.homeState.location.obj;
-                    console.log(roomId);
-                    if(roomId.indexOf('rc')){
-                        roomId = roomId.substring(2);
-                    }else if(roomId.indexOf('r')){
-                        roomId = roomId.substring(1);
+                    if(roomId.indexOf('rc') !== -1){
+                        if(parseInt(roomId)){
+                            roomId = roomId.substring(0,roomId.indexOf('rc'));
+                        }else{
+                            roomId = roomId.substring(2);
+                        }
+
+                    }else if(roomId.indexOf('r') !== -1){
+                        if(parseInt(roomId)){
+                            roomId = roomId.substring(0,roomId.indexOf('r'));
+                        }else{
+                            roomId = roomId.substring(1);
+                        }
                     }else{
                         return;
                     }
@@ -126,9 +134,9 @@ class RightClickPanel extends React.Component{
                                 roomId:roomId,
                                 user:state.homeState.userInfo
                             };
-                            /*send(JSON.stringify(deleteMsg),function () {
+                            send(JSON.stringify(deleteMsg),function () {
 
-                            });*/
+                            });
                         },
                         onCancel() {
                             console.log('Cancel');
