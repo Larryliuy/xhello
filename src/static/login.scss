@@ -253,6 +253,13 @@ html,body{
     position: absolute;
     right: 0px;
     bottom: -30px;
+  #we-chat{
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index: 10;
+    background-color: #eee;
+  }
 }
 
 

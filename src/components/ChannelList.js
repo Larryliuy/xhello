@@ -27,6 +27,7 @@ class ChannelList extends React.Component{
         setTimeout(function () {
             if(state.homeState.allRoomList.length !== 0){
                 const datas = state.homeState.allRoomList;
+                console.log(datas);
                 if(datas.length === 0)return;
                 //更新当前房间信息
                 /*console.log(state.homeState.userInfo);

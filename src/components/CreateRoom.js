@@ -16,37 +16,42 @@ class CreateRoom extends React.Component{
 
     handleOk(){
         let roomType = this.props.roomType,
-            createMsg;
+            createMsg,
+            parentId=0;
         if(roomType === 2){
-            createMsg = {
-                type:'create_room',
-                parentId:state.homeState.location.obj.substring(1),
-                roomName: this.state.title,
-                userId:state.homeState.userInfo.id,
-                userName:state.homeState.userInfo.name,
-                user:state.homeState.userInfo,
-                color:this.state.color,
-                password:this.state.password,
-            };
-        }else if(roomType === 1){
-            //这里请求创建房间
-            createMsg = {
-                type:'create_room',
-                roomName: this.state.title,
-                userId:state.homeState.userInfo.id,
-                userName:state.homeState.userInfo.name,
-                user:state.homeState.userInfo,
-                color:this.state.color,
-                password:this.state.password,
-            };
-        }else{
-            return;
+            parentId = state.homeState.location.obj.substring(1);
         }
-        console.log(roomType);
+        console.log(roomType+';'+parentId);
+        createMsg = {
+            type:'create_room',
+            parentId:parentId,
+            roomName: this.state.title,
+            userId:state.homeState.userInfo.id,
+            userName:state.homeState.userInfo.name,
+            color:this.state.color,
+            password:this.state.password,
+        };
+        // console.log(roomType);
         console.log(createMsg);
-
+        //这里请求创建房间
         send(JSON.stringify(createMsg),function () {
+            //创建完成后获取最新的房间列表
+            let getRoomsMsg = {
+                type:'get_rooms',
+                user:state.homeState.userInfo,
+                data:''
+            };
+            send(JSON.stringify(getRoomsMsg),function () {
+                let enterMsg = getSendData(
+                    'enter_room',
+                    state.homeState.currentRoomInfo.roomId,
+                    state.homeState.currentRoomInfo.roomName,
+                    state.homeState.userInfo);
+                // WS.send(JSON.stringify(enterMsg));
+                send(JSON.stringify(enterMsg),function(){
 
+                });
+            });
         });
         // console.log(this.state);
         this.props.setVisible();

@@ -184,7 +184,7 @@ class MessageListBox extends React.Component{
                     // console.log(allRoomListTmp);
                     break;
                 case 'get_rooms':
-                    // console.log(dataJson.data);
+                    console.log(dataJson.data);
                     let dataTmp = [],
                         i=0;
                     let ids = [];
@@ -192,7 +192,7 @@ class MessageListBox extends React.Component{
                     console.log(dataTmp instanceof Array);*/
                     dataJson.data.map(function (item) {
                         ids.push(item.roomId);
-                       if(item.parentId === '0'){
+                       if(item.parentId.toString() === '0'){
                            dataTmp[i] = item;
                            dataTmp[i++].childNode = [];
                        }else{
@@ -206,22 +206,30 @@ class MessageListBox extends React.Component{
                             }
                         })
                     });
-                    // console.log(dataTmp);
-                    // console.log(ids);
+
+                    console.log(dataTmp);
+                    console.log(ids);
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:dataTmp});
                     store.dispatch({type:CONSTANT.CURRENTROOMINFO,
                         val:dataTmp[0].childNode[0]});
                     store.dispatch({type:CONSTANT.LASTROOMINFO,
                         val:dataTmp[0].childNode[0]});
+
                     break;
                 case 'create_room':
-                    console.log(dataJson);
-                    console.log(dataJson.data);
+                    // console.log(dataJson);
+                    // console.log(dataJson.data);
                     //更新allRoomList
+                   /* let allRoomListTmp = state.homeState.allRoomList;
+                    allRoomListTmp.map(function (item) {
+                        if(item.parentId === 0){
+                            item.push()
+                        }
+                    });*/
                     break;
                 case 'delete_room':
-                    console.log(dataJson);
-                    console.log(dataJson.data);
+                    // console.log(dataJson);
+                    // console.log(dataJson.data);
                     //更新allRoomList
                     break;
                 default:

@@ -18,7 +18,7 @@ const rightClickHandle = (e) => {
         store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
     }else{
         const id = e.target.getAttribute('id') || '';
-        console.log(id);
+        // console.log(id);
         if(id.indexOf('rc') !== -1) {
             store.dispatch({
                 type: CONSTANT.LOCATION,

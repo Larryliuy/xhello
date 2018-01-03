@@ -11,24 +11,38 @@ const iconStyle = {
     height: '20px'
 };
 
-const Login = (props) => {
-    let userName = '';
-    let password = '';
-    const handleSubmit = (e) => {
+
+class Login extends React.Component {
+    constructor(props){
+        super(props);
+        this.state = {wechatVisible:'hidden',userName:'',password:''}
+    }
+    componentDidMount(){
+        setTimeout(function () {
+            let obj = new WxLogin({
+                id:"we-chat",
+                appid: "wx592e917bee49160b",
+                scope: "snsapi_login",
+                redirect_uri: "http%3a%2f%2fwww.xtell.cn%2findex.html%23a"
+            });
+        },200);
+    }
+    handleSubmit(e){
         e.preventDefault();
         // console.log('register:'+userName)
     };
-    const onChangeUserName = (e) => {
+    onChangeUserName(e){
         // console.log('userName:' + e.target.value)
-        userName = e.target.value;
+        this.setState({userName:e.target.value});
     };
-    const onChangePassword = (e) => {
+    onChangePassword(e){
         // console.log('password:' + e.target.value)
-        password = e.target.value;
+        this.setState({password:e.target.value});;
     };
-    const onClickHandle =() =>{
-        userName = document.getElementById('user').value;
-        password = document.getElementById('pwd').value;
+    onClickHandle(){
+        let userName = this.state.userName,
+            password = this.state.password,
+            _this = this;
         // let url = 'http://192.168.6.3:82/softwares/xtell_projects_dev/24_YUN_VIDEO/server/app/api/user/login.php';
         let args = {};//'LoginName='+userName+'&Password='+password;
         let arg = 'LoginName='+userName+'&Password='+password;
@@ -53,7 +67,7 @@ const Login = (props) => {
                       console.log(datatmp);
                       if(datatmp.status === 'ok'){
                           message.success('登录成功');
-                          props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
+                          _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
                       }else {
                           message.error('用户名与密码不匹配');
                       }
@@ -63,7 +77,7 @@ const Login = (props) => {
                       console.log(datatmp);
                       if(datatmp.status === 'ok'){
                           message.success('登录成功');
-                          props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
+                          _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
                       }else {
                           message.error('用户名与密码不匹配');
                       }
@@ -75,7 +89,7 @@ const Login = (props) => {
               });
 
     };
-    const onChangeCheckBox =(e) => {
+    onChangeCheckBox(e){
         // if(!cookieUtil.get('loginChecked')){
             cookieUtil.set('loginChecked',e.target.checked);
             console.log(document.cookie);
@@ -87,45 +101,50 @@ const Login = (props) => {
         }*/
         // }
     };
-    const content = (<a href="https://api.weixin.qq.com/sns/oauth2/access_token?appid=wx592e917bee49160b&secret=6825956c197d4f23dbe2d06202f80bef&code=0018ZQ880FCj3I1ziN580KUJ8808ZQ8X&grant_type=authorization_code">参数</a>);
-    return (<Form onSubmit={handleSubmit} className="login-form">
-                <FormItem>
-                    <Input id='user' onChange = {(e) => onChangeUserName(e)}
-                           prefix={<Icon type="user" className={'login-form-input-logo'} />}
-                           defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('userName'):''}  placeholder="Username" />
-                </FormItem>
-                <FormItem>
-                    <Input id='pwd' onChange = {(e) => onChangePassword(e)}
-                           prefix={<Icon type="lock" className={'login-form-input-logo'} />}
-                           type="password" defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('password'):''} placeholder="Password" />
-                </FormItem>
-                <FormItem>
-                    <Checkbox defaultChecked={cookieUtil.get('loginChecked')=='true'}
-                              onChange={(e)=>onChangeCheckBox(e)}
-                              style = {{float:'left'}}>记住密码</Checkbox>
-                    {/*<a className="login-form-forgot" href="">忘记密码</a>*/}
-                    <br/>
-                    <Button type="primary" htmlType="submit" className="login-form-button" onClick={()=>onClickHandle()}>
-                        登 录
-                    </Button>
-                    {/*Or <Link to="/register" >现在注册<Icon type="right"/></Link>
-                    <Link to="/register" >忘记密码<Icon type="question"/></Link>*/}
-                </FormItem>
-                <FormItem>
-                    <div className={'register-forget-box'}>
-                    <Link to="/register" >现在注册<Icon type="right"/></Link>
-                    <Link to="/register" >邀请登录<Icon type="question"/></Link>
+    onMouseHoverHandle(){
+        console.log('hover');
+        this.setState({wechatVisible:'visible'});
+    }
+    onMouseOutHandle(){
+        this.setState({wechatVisible:'hidden'});
+    }
+    render(){
+        return (<Form onSubmit={this.handleSubmit} className="login-form">
+                    <FormItem>
+                        <Input id='user' onChange = {(e) => this.onChangeUserName(e)}
+                               prefix={<Icon type="user" className={'login-form-input-logo'} />}
+                               defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('userName'):''}  placeholder="Username" />
+                    </FormItem>
+                    <FormItem>
+                        <Input id='pwd' onChange = {(e) => this.onChangePassword(e)}
+                               prefix={<Icon type="lock" className={'login-form-input-logo'} />}
+                               type="password" defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('password'):''} placeholder="Password" />
+                    </FormItem>
+                    <FormItem>
+                        <Checkbox defaultChecked={cookieUtil.get('loginChecked')=='true'}
+                                  onChange={(e)=>this.onChangeCheckBox(e)}
+                                  style = {{float:'left'}}>记住密码</Checkbox>
+                        {/*<a className="login-form-forgot" href="">忘记密码</a>*/}
+                        <br/>
+                        <Button type="primary" htmlType="submit" className="login-form-button" onClick={()=>this.onClickHandle()}>
+                            登 录
+                        </Button>
+                        {/*Or <Link to="/register" >现在注册<Icon type="right"/></Link>
+                        <Link to="/register" >忘记密码<Icon type="question"/></Link>*/}
+                    </FormItem>
+                    <FormItem>
+                        <div className={'register-forget-box'}>
+                        <Link to="/register" >现在注册<Icon type="right"/></Link>
+                        <Link to="/register" >邀请登录<Icon type="question"/></Link>
+                        </div>
+                    </FormItem>
+                    <div className='fast_login'>
+                        <span className='icon_qq' onMouseOver={()=>this.onMouseHoverHandle()}><Icon type="wechat" style={iconStyle}/></span>
+                        <div id={'we-chat'} onMouseOut={()=>this.onMouseOutHandle()} style={{visibility:this.state.wechatVisible}}></div>
+                        <span className='icon_wechat'><Icon type="qq" style={iconStyle}/></span>
                     </div>
-                </FormItem>
-                <div className='fast_login'>
-                    <Popover content={content} trigger="hover">
-                    <span className='icon_qq'><Icon type="wechat" style={iconStyle}/></span>
-                    </Popover>
-                    <span className='icon_wechat'><Icon type="qq" style={iconStyle}/></span>
-                </div>
-        </Form>
-    );
+            </Form>
+        );
+    }
 };
-
 export default Login;
-

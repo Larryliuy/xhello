@@ -135,7 +135,23 @@ class RightClickPanel extends React.Component{
                                 user:state.homeState.userInfo
                             };
                             send(JSON.stringify(deleteMsg),function () {
+                                //删除完成后获取最新的房间列表
+                                let getRoomsMsg = {
+                                    type:'get_rooms',
+                                    user:state.homeState.userInfo,
+                                    data:''
+                                };
+                                send(JSON.stringify(getRoomsMsg),function () {
+                                    let enterMsg = getSendData(
+                                        'enter_room',
+                                        state.homeState.currentRoomInfo.roomId,
+                                        state.homeState.currentRoomInfo.roomName,
+                                        state.homeState.userInfo);
+                                    // WS.send(JSON.stringify(enterMsg));
+                                    send(JSON.stringify(enterMsg),function(){
 
+                                    });
+                                });
                             });
                         },
                         onCancel() {

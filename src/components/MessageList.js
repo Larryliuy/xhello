@@ -27,9 +27,11 @@ class MessageList extends React.Component{
             if(e.target.nodeName === 'P'){
                 // console.log(e.target.parentNode);
                 msgDiv = e.target.parentNode;
-            }
-            if(e.target.nodeName === 'IMG'){
+            }else if(e.target.nodeName === 'IMG'){
                 msgDiv = e.target.parentNode.parentNode;
+            }else{
+                msgDiv = e.target.parentNode.parentNode || {id:false};
+                console.log(msgDiv);
             }
             if(msgDiv.id){
                 let timestampMsg =msgDiv.id.substring(msgDiv.id.indexOf('id')+2);
