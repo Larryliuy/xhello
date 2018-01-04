@@ -76,6 +76,43 @@ class RightClickPanel extends React.Component{
                 // console.log(allRoomList);
                 store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
             }
+            function limitFetch(args) {
+                fetch(generalApi,{
+                    method:'POST',
+                    // credentials: "include",
+                    headers:{
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body:args//JSON.stringify(args)
+                }).then((response) => {/*console.log(response);*/return response.text()})
+                    .then(data=>{
+                        console.log(data);
+                        let datatmp;
+                        try {
+                            datatmp = JSON.parse(data);
+                            //JSON.parse没问题的情况
+                            console.log(datatmp);
+                            if(datatmp.status === 'ok'){
+                                message.success('设置成功');
+                            }else {
+                                message.error('设置失败');
+                            }
+                        }catch (e){
+                            //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
+                            datatmp = JSON.parse(data.substring(data.indexOf('{')));
+                            console.log(datatmp);
+                            if(datatmp.status === 'ok'){
+                                message.success('设置成功');
+                            }else {
+                                message.error('设置失败');
+                            }
+                        }
+
+                    }).catch(err=>{
+                    console.log(err);
+                });
+            }
+            let args ='';
             // console.log(text);
             switch(text){
                 case '移动到本房间':
@@ -99,8 +136,11 @@ class RightClickPanel extends React.Component{
                         limit:2
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        //http请求修改数据
+                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=2';
+                        limitFetch(args);
                     });
+
                     break;
                 case '禁止此人语音':
                     Msg = {
@@ -112,8 +152,11 @@ class RightClickPanel extends React.Component{
                         limit:3
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        //http请求修改数据
+                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=3';
+                        limitFetch(args);
                     });
+
                     break;
                 case '禁止此人文字':
                     Msg = {
@@ -125,44 +168,11 @@ class RightClickPanel extends React.Component{
                         limit:1
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        //http请求修改数据
+                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=1';
+                        limitFetch(args);
                     });
-                    //http请求修改数据
-                    let args = 'action=update&table=xuser&cond=id='+parseInt(objId.substring(1))+'&Limit=1';
-                    fetch(generalApi,{
-                        method:'POST',
-                        // credentials: "include",
-                        headers:{
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body:args//JSON.stringify(args)
-                    }).then((response) => {/*console.log(response);*/return response.text()})
-                        .then(data=>{
-                            console.log(data);
-                            let datatmp;
-                            try {
-                                datatmp = JSON.parse(data);
-                                //JSON.parse没问题的情况
-                                console.log(datatmp);
-                                if(datatmp.status === 'ok'){
-                                    message.success('修改成功');
-                                }else {
-                                    message.error('修改失败');
-                                }
-                            }catch (e){
-                                //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
-                                datatmp = JSON.parse(data.substring(data.indexOf('{')));
-                                console.log(datatmp);
-                                if(datatmp.status === 'ok'){
-                                    message.success('修改成功');
-                                }else {
-                                    message.error('修改失败');
-                                }
-                            }
 
-                        }).catch(err=>{
-                        console.log(err);
-                    });
                     break;
                 case '一级管理员':
                     Msg = {
@@ -174,9 +184,12 @@ class RightClickPanel extends React.Component{
                         level:3
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        updateByPower(3);
+                        //http请求修改数据
+                        let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=3';
+                        limitFetch(args);
                     });
-                    updateByPower(3);
+
                     break;
                 case '二级管理员':
                     Msg = {
@@ -188,9 +201,12 @@ class RightClickPanel extends React.Component{
                         level:4
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        updateByPower(4);
+                        //http请求修改数据
+                        let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=4';
+                        limitFetch(args);
                     });
-                    updateByPower(4);
+
                     break;
                 case '副房主':
                     Msg = {
@@ -202,9 +218,12 @@ class RightClickPanel extends React.Component{
                         level:2
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        updateByPower(2);
+                        //http请求修改数据
+                        let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=2';
+                        limitFetch(args);
                     });
-                    updateByPower(2);
+
                     break;
                 case 'VIP':
                     Msg = {
@@ -216,9 +235,11 @@ class RightClickPanel extends React.Component{
                         level:5
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        updateByPower(5);
+                        //http请求修改数据
+                        let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=5';
+                        limitFetch(args);
                     });
-                    updateByPower(5);
                     break;
                 case '会员':
                     Msg = {
@@ -230,9 +251,12 @@ class RightClickPanel extends React.Component{
                         level:6
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        updateByPower(6);
+                        //http请求修改数据
+                        let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=6';
+                        limitFetch(args);
                     });
-                    updateByPower(6);
+
                     break;
                 case '撤销级别':
                     Msg = {
@@ -244,9 +268,12 @@ class RightClickPanel extends React.Component{
                         level:7
                     };
                     send(JSON.stringify(Msg),function(){
-                        message.warn('设置成功');
+                        updateByPower(7);
+                        //http请求修改数据
+                        let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=7';
+                        limitFetch(args);
                     });
-                    updateByPower(7);
+
                 break;
                 case '禁止图片':
                     alert(text);
