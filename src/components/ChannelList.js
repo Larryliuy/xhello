@@ -257,6 +257,7 @@ class ChannelList extends React.Component{
                     }else{
                         src = 'vip_female2.png';
                     }
+                    break;
                 case 7:
                     if(sex === 1){
                         src = 'c_man.png';
@@ -265,6 +266,7 @@ class ChannelList extends React.Component{
                     }
                     break;
             }
+            // console.log(src);
             return "./images/icons/"+src;
         };
         // console.log(state.homeState.allRoomList);

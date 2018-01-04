@@ -8,51 +8,17 @@ store.subscribe(function () {
     state = store.getState();
     // console.log(store.getState())
 });
-class CreateRoom extends React.Component{
+class SetRoom extends React.Component{
     constructor(props){
         super(props);
         this.state = {visible:true,color:'red',title:'',password:''};
     }
 
     handleOk(){
-        let roomType = this.props.roomType,
-            createMsg,
-            parentId=0;
-        if(roomType === 2){
-            parentId = state.homeState.location.obj.substring(1);
-        }
-        console.log(roomType+';'+parentId);
-        createMsg = {
-            type:'create_room',
-            parentId:parentId,
-            roomName: this.state.title,
-            userId:state.homeState.userInfo.id,
-            userName:state.homeState.userInfo.name,
-            color:this.state.color,
-            password:this.state.password,
-        };
-        // console.log(roomType);
-        console.log(createMsg);
-        //这里请求创建房间
-        send(JSON.stringify(createMsg),function () {
-            //创建完成后获取最新的房间列表
-            let getRoomsMsg = {
-                type:'get_rooms',
-                user:state.homeState.userInfo,
-                data:''
-            };
-            send(JSON.stringify(getRoomsMsg),function () {
-                let enterMsg = getSendData(
-                    'enter_room',
-                    state.homeState.currentRoomInfo.roomId,
-                    state.homeState.currentRoomInfo.roomName,
-                    state.homeState.userInfo);
-                // WS.send(JSON.stringify(enterMsg));
-                send(JSON.stringify(enterMsg),function(){
-
-                });
-            });
-        });
+        let roomId = this.props.roomInfo.id,
+            createMsg;
+        console.log(roomId+';');
+        //这里请求修改房间
         // console.log(this.state);
         this.props.setVisible();
     }
@@ -72,7 +38,7 @@ class CreateRoom extends React.Component{
     render(){
         return (<div>
             <Modal className={'create-room'}
-                title="新建房间"
+                title="设置房间"
                 okText={'确定'}
                 cancelText={'取消'}
                 visible={this.state.visible}
@@ -102,4 +68,4 @@ class CreateRoom extends React.Component{
     }
 }
 
-export default CreateRoom;
+export default SetRoom;

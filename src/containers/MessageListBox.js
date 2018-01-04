@@ -1,6 +1,6 @@
 import React,{ Component } from 'react'
 import MessageList from '../components/MessageList'
-import WS,{ getDateString } from "../static/wsInstace";
+import WS, {getDateString, getSendData, send} from "../static/wsInstace";
 
 
 import store,{ CONSTANT } from '../reducer/reducer';
@@ -72,10 +72,56 @@ class MessageListBox extends React.Component{
                         // console.log('禁麦');
                         return;
                     }
+                    //调整用户限制
+                    // console.log(dataJson);
+                    if(dataJson.typeString === 'uLimit'){
+                        console.log(dataJson);
+                        console.log(state.homeState.userInfo);
+                        if(dataJson.objUserId === state.homeState.userInfo.id){
+                            //设置state.homeState.userInfo
+                            let userInfoTmp = state.homeState.userInfo;
+                            userInfoTmp.limit = dataJson.limit;
+                            store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                        }
+                        return;
+                    }
+                    //调整房间限制
+                    if(dataJson.typeString === 'rLimit'){
+                        console.log(dataJson);
+                        return;
+                    }
+                    if(dataJson.typeString === 'uPower'){
+                        console.log(dataJson);
+                        console.log(state.homeState.userInfo);
+                        if(dataJson.objUserId === state.homeState.userInfo.id){
+                            //设置state.homeState.userInfo
+                            let userInfoTmp = state.homeState.userInfo,
+                                allRoomList = state.homeState.allRoomList;
+                            userInfoTmp.level = dataJson.level;
+                            store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                            //设置state.homeState.allRoomList
+                            allRoomList.map(function (item1) {
+                                item1.childNode.map(function (item) {
+                                    // console.log(item.roomId+','+dataJson.roomId);
+                                    if(item.roomId === dataJson.roomId){
+                                        item.childNode.map(function (itm) {
+                                            // console.log(itm.id+','+dataJson.objUserId);
+                                            if(itm.id === dataJson.objUserId){
+                                                itm.level = dataJson.level;
+                                            }
+                                        })
+                                    }
+                                })
+                            });
+                            // console.log(allRoomList);
+                            store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
+                        }
+                        return;
+                    }
                     //消息撤回
                     if(dataJson.typeString === 'withdraw'){
-                        console.log(data);
-                        console.log(dataJson);
+                        /*console.log(data);
+                        console.log(dataJson);*/
                         data = data.filter(function (item) {
                             if(item.timeStamp && item.timeStamp.toString() === dataJson.timeStamp){
                                 console.log(item.timeStamp.toString() === dataJson.timeStamp);
@@ -184,7 +230,7 @@ class MessageListBox extends React.Component{
                     // console.log(allRoomListTmp);
                     break;
                 case 'get_rooms':
-                    console.log(dataJson.data);
+                    // console.log(dataJson.data);
                     let dataTmp = [],
                         i=0;
                     let ids = [];
@@ -207,8 +253,8 @@ class MessageListBox extends React.Component{
                         })
                     });
 
-                    console.log(dataTmp);
-                    console.log(ids);
+                    // console.log(dataTmp);
+                    // console.log(ids);
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:dataTmp});
                     store.dispatch({type:CONSTANT.CURRENTROOMINFO,
                         val:dataTmp[0].childNode[0]});

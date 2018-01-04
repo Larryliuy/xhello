@@ -20,7 +20,7 @@ class UEditor extends React.Component {
                     'bold', 'italic', 'underline', 'strike',
                     {color:['white','red','orange','yellow','green','blue','purple','black']},
                     {background:['white','red','orange','yellow','green','blue','purple','black']},
-                     'image'],
+                    'image'],
 
             },
             placeholder: '请输入文本...',

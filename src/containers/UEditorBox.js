@@ -43,7 +43,7 @@ class UEditorBox extends React.Component {
     limitTextOrImg(){
         // console.log(this.state.value);
         // console.log(typeof state.homeState.userInfo.limit +':' + state.homeState.userInfo.limit);
-        switch(state.homeState.userInfo.limit){
+        switch(state.homeState.userInfo.limit.toString()){
             case '1':
                 let value = this.state.value;
                 console.log(value);
