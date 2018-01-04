@@ -5,6 +5,7 @@ import CreateRoom from './CreateRoom';
 import SetRoom from './SetRoom';
 import WS,{ getSendData, send } from  '../static/wsInstace.js';
 import store, {CONSTANT} from "../reducer/reducer";
+import {generalApi} from "../static/apiInfo";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -125,6 +126,42 @@ class RightClickPanel extends React.Component{
                     };
                     send(JSON.stringify(Msg),function(){
                         message.warn('设置成功');
+                    });
+                    //http请求修改数据
+                    let args = 'action=update&table=xuser&cond=id='+parseInt(objId.substring(1))+'&Limit=1';
+                    fetch(generalApi,{
+                        method:'POST',
+                        // credentials: "include",
+                        headers:{
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body:args//JSON.stringify(args)
+                    }).then((response) => {/*console.log(response);*/return response.text()})
+                        .then(data=>{
+                            console.log(data);
+                            let datatmp;
+                            try {
+                                datatmp = JSON.parse(data);
+                                //JSON.parse没问题的情况
+                                console.log(datatmp);
+                                if(datatmp.status === 'ok'){
+                                    message.success('修改成功');
+                                }else {
+                                    message.error('修改失败');
+                                }
+                            }catch (e){
+                                //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
+                                datatmp = JSON.parse(data.substring(data.indexOf('{')));
+                                console.log(datatmp);
+                                if(datatmp.status === 'ok'){
+                                    message.success('修改成功');
+                                }else {
+                                    message.error('修改失败');
+                                }
+                            }
+
+                        }).catch(err=>{
+                        console.log(err);
                     });
                     break;
                 case '一级管理员':
