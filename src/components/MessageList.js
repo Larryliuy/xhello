@@ -58,7 +58,7 @@ class MessageList extends React.Component{
             timeStamp:this.state.timeStamp
         };
         send(JSON.stringify(micrpMsg),function(){
-            message.info('撤回成功');
+            message.success('撤回成功');
         });
     }
     render(){

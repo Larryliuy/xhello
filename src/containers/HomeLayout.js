@@ -92,7 +92,7 @@ class HomeLayout extends React.Component {
         this.setState({sendData:value});
     }
     render() {
-        console.log(state.homeState.currentRoomInfo);
+        // console.log(state.homeState.currentRoomInfo);
         return (
             <Layout style={layoutStyle}>
                 <Header style={{ backgroundColor:state.homeState.skinColor,padding: 0,textAlign:'center',borderBottom:'1px solid #ececec' }} >

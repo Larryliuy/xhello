@@ -99,8 +99,8 @@ class ChannelList extends React.Component{
         //离开后标记离开的房间为最后一次房间
         store.dispatch({type:CONSTANT.LASTROOMINFO,val:state.homeState.currentRoomInfo});
         // 进入该房间聊天室
-        console.log(state.homeState.lastRoomInfo);
-        console.log(roomIdInt+','+roomName);
+        // console.log(state.homeState.lastRoomInfo);
+        // console.log(roomIdInt+','+roomName);
         data ="<p>"+ state.homeState.userInfo.name + "进入了房间" + roomName +"</p>";
         let enterMsg = getSendData(
             'enter_room',

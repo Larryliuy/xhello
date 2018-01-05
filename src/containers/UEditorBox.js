@@ -40,10 +40,10 @@ class UEditorBox extends React.Component {
             value:value
         });
     }
-    limitTextOrImg(){
+    limitTextOrImg(limit,type){
         // console.log(this.state.value);
         // console.log(typeof state.homeState.userInfo.limit +':' + state.homeState.userInfo.limit);
-        switch(state.homeState.userInfo.limit.toString()){
+        switch(limit){
             case '1':
                 let value = this.state.value;
                 console.log(value);
@@ -60,7 +60,11 @@ class UEditorBox extends React.Component {
                     return str;
                 }
                 if(this.state.value.indexOf('<img') !== -1 && removeHTMLTag(value)){
-                    message.warning('您已被禁止发送文字');
+                    if(type === 1){
+                        message.warning('您已被禁止发送文字');
+                    }else {
+                        message.warning('此房间已被禁止发送文字');
+                    }
                     return false;
                 }
                 //检测<p>()<img , ">()<img , ">()</p> 这3组字符串括号内不能存在文本(数字，字母，汉字)即可
@@ -68,14 +72,22 @@ class UEditorBox extends React.Component {
                     return true;
                 }
                 if(this.state.value.indexOf('<p>') !== -1){
-                    message.warning('您已被禁止发送文字');
+                    if(type === 1){
+                        message.warning('您已被禁止发送文字');
+                    }else {
+                        message.warning('此房间已被禁止发送文字');
+                    }
                     return false;
                 }
                 // return true;
                 break;
             case '2':
                 if(this.state.value.match(/\<img(\s|\S)+?\>/g)){
-                    message.warning('您已被禁止发送图片');
+                    if(type === 1){
+                        message.warning('您已被禁止发送图片');
+                    }else {
+                        message.warning('此房间已被禁止发送图片');
+                    }
                     return false;
                 }else{
                     return true;
@@ -83,13 +95,21 @@ class UEditorBox extends React.Component {
                 break;
             case '12':
                 if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img>') !== -1){
-                    message.warning('您已被禁止发送文字和图片');
+                    if(type === 1){
+                        message.warning('您已被禁止发送文字和图片');
+                    }else {
+                        message.warning('此房间已被禁止发送文字和图片');
+                    }
                     return false;
                 }
                 break;
             case '123':
                 if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img') !== -1){
-                    message.warning('您已被禁止发送文字和图片');
+                    if(type === 1){
+                        message.warning('您已被禁止发送文字和图片');
+                    }else {
+                        message.warning('此房间已被禁止发送文字和图片');
+                    }
                     return false;
                 }
                 break;
@@ -103,7 +123,11 @@ class UEditorBox extends React.Component {
         //通过websocket发送给服务器
         // WS.emit('message',message);
         // console.log('ueditor:'+state.homeState.currentRoomInfo.id);
-        if(!this.limitTextOrImg())return;
+        console.log(state.homeState.currentRoomInfo.limited);
+        if(!this.limitTextOrImg(state.homeState.userInfo.limit.toString(),1))return;
+        if(state.homeState.currentRoomInfo.limited){
+            if(!this.limitTextOrImg(state.homeState.currentRoomInfo.limited.toString(),2))return;
+        }
         this.props.setData(this.state.value);
         let msg = getSendData('msg',
             state.homeState.currentRoomInfo.roomId,
@@ -122,9 +146,10 @@ class UEditorBox extends React.Component {
         };
         //ctrl+enter发送，enter发送需要做字符串处理
         if(e.keyCode === 13 && !e.ctrlKey){
-            if(!this.limitTextOrImg())return;
-            // console.log(this.state.value);
-            // alert(this.state.value);
+            if(!this.limitTextOrImg(state.homeState.userInfo.limit.toString(),1))return;
+            if(state.homeState.currentRoomInfo.limited){
+                if(!this.limitTextOrImg(state.homeState.currentRoomInfo.limited.toString(),2))return;
+            }
             e.target.innerHTML = '';
             this.props.setData(this.state.value);
             let msg = getSendData('msg',

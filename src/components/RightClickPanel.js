@@ -115,9 +115,16 @@ class RightClickPanel extends React.Component{
             let args ='';
             // console.log(text);
             switch(text){
-                case '移动到本房间':
+                case '移动到我所在房间':
                     //移动时需要确认
-                    alert(text);
+                    Msg = {
+                        type:'msg',
+                        typeString:'enterMyRoom',
+                        roomId:state.homeState.currentRoomInfo.roomId,
+                        roomName:state.homeState.currentRoomInfo.roomName,
+                        objUserId:objId.substring(1),
+                        limit:2
+                    };
                     break;
                 case '封IP':
                     alert(text);
@@ -276,13 +283,51 @@ class RightClickPanel extends React.Component{
 
                 break;
                 case '禁止图片':
-                    alert(text);
+                    Msg = {
+                        type:'msg',
+                        typeString:'rLimit',
+                        roomId:state.homeState.currentRoomInfo.roomId,
+                        roomName:state.homeState.currentRoomInfo.roomName,
+                        objRoomId:parseInt(objId) || objId.substring(2),//这里只有子房间才有效
+                        limit:2
+                    };
+                    send(JSON.stringify(Msg),function(){
+                        //http请求修改数据
+                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=2';
+                        limitFetch(args);
+                    });
                     break;
                 case '禁止语音':
-                    alert(text);
+                    Msg = {
+                        type:'msg',
+                        typeString:'rLimit',
+                        roomId:state.homeState.currentRoomInfo.roomId,
+                        roomName:state.homeState.currentRoomInfo.roomName,
+                        objRoomId:parseInt(objId) || objId.substring(2),
+                        limit:3
+                    };
+                    send(JSON.stringify(Msg),function(){
+                        //http请求修改数据
+                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=3';
+                        limitFetch(args);
+                    });
                     break;
                 case '禁止文字':
-                    alert(text);
+                    console.log(objId);
+                    Msg = {
+                        type:'msg',
+                        typeString:'rLimit',
+                        roomId:state.homeState.currentRoomInfo.roomId,
+                        roomName:state.homeState.currentRoomInfo.roomName,
+                        objRoomId:parseInt(objId) || objId.substring(2),
+                        limit:1
+                    };
+                    send(JSON.stringify(Msg),function(){
+                        //http请求修改数据
+                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=1';
+                        limitFetch(args);
+                        console.log(args)
+                    });
                     break;
                 case '创建同级别房间':
                     // alert(text);
@@ -354,14 +399,14 @@ class RightClickPanel extends React.Component{
                     // let id = state.homeState.location.obj;
                     if(objId.indexOf('rc') !== -1){
                         if(parseInt(objId)){
-                            objId = objId.substring(0,id.indexOf('rc'));
+                            objId = objId.substring(0,objId.indexOf('rc'));
                         }else{
                             objId = objId.substring(2);
                         }
 
                     }else if(objId.indexOf('r') !== -1){
                         if(parseInt(objId)){
-                            objId = objId.substring(0,id.indexOf('r'));
+                            objId = objId.substring(0,objId.indexOf('r'));
                         }else{
                             objId = objId.substring(1);
                         }

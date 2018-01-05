@@ -1,7 +1,13 @@
 import React,{ Component } from 'react';
 import { message ,Input, Button, Slider } from 'antd';
 import UploadAvatar from './UploadAvatar';
-
+import {generalApi} from "../static/apiInfo";
+import store, {CONSTANT} from "../reducer/reducer";
+let state = store.getState();
+store.subscribe(function () {
+    state = store.getState();
+    // console.log(store.getState())
+});
 class FooterBottom extends React.Component{
     constructor(props){
         super(props);
@@ -50,10 +56,54 @@ class FooterBottom extends React.Component{
     }
     onblurHandle(){
         this.setState({inputVisible:false});
-        //请求修改用户名API
         if(!this.state.inputValue)return;
+        //请求修改用户名API
+        let args = 'action=update&table=xuser&cond=id='+state.homeState.userInfo.id+'&LoginName='+this.state.inputValue,
+            _this = this;
+        fetch(generalApi,{
+            method:'POST',
+            // credentials: "include",
+            headers:{
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body:args//JSON.stringify(args)
+        }).then((response) => {/*console.log(response);*/return response.text()})
+            .then(data=>{
+                console.log(data);
+                let datatmp;
+                try {
+                    datatmp = JSON.parse(data);
+                    //JSON.parse没问题的情况
+                    console.log(datatmp);
+                    if(datatmp.status === 'ok'){
+                        message.success('修改成功');
+                        let userInfoTmp = state.homeState.userInfo;
+                        userInfoTmp.name = _this.state.inputValue;
+                        store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                        //这里还需要更新allRoomList中的name
+                    }else {
+                        message.error('修改失败');
+                    }
+                }catch (e){
+                    //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
+                    datatmp = JSON.parse(data.substring(data.indexOf('{')));
+                    console.log(datatmp);
+                    if(datatmp.status === 'ok'){
+                        message.success('修改成功');
+                        let userInfoTmp = state.homeState.userInfo;
+                        userInfoTmp.name = _this.state.inputValue;
+                        store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                        //这里还需要更新allRoomList中的name
+                    }else {
+                        message.error('修改失败');
+                    }
+                }
+
+            }).catch(err=>{
+            console.log(err);
+        });
         console.log(this.state.inputValue);
-        message.success('修改成功');
+        // message.success('修改成功');
     }
     render(){
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>

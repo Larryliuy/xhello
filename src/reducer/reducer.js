@@ -43,14 +43,14 @@ export const loginState = (state = loginInitState,action) => {
     }
 };
 const homeInitState = {viewModel:false,skinColor:'#108ee9',
-    lastRoomInfo:{},
-    currentRoomInfo :{},
-    roomMicrophoneUser:[],
-    userInfo:{},
-    allRoomList:[],
-    searchResult:[],
-    searchKeyword:'',
-    location:{x:0,y:0,display:'none',obj:0}
+    lastRoomInfo:{},//上次房间信息
+    currentRoomInfo :{},//当前房间信息
+    roomMicrophoneUser:[],//房间麦序列表
+    userInfo:{},//用户信息
+    allRoomList:[],//所有房间用户数据
+    searchResult:[],//用户查找结果
+    searchKeyword:'',//用户查找关键字
+    location:{x:0,y:0,display:'none',obj:0}//房间列表右键点击定位及目标
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;

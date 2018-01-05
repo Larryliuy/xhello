@@ -88,6 +88,15 @@ class MessageListBox extends React.Component{
                     //调整房间限制
                     if(dataJson.typeString === 'rLimit'){
                         console.log(dataJson);
+                        console.log(dataJson.objRoomId+','+state.homeState.currentRoomInfo.roomId);
+                        if(dataJson.objRoomId === state.homeState.currentRoomInfo.roomId){
+                            //设置state.homeState.userInfo
+                            let currentRoomInfoTmp = state.homeState.currentRoomInfo;
+                            console.log(currentRoomInfoTmp);
+                            currentRoomInfoTmp.limited = dataJson.limit;
+                            store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfoTmp});
+                            //可能需要更新allRoomList中的user
+                        }
                         return;
                     }
                     if(dataJson.typeString === 'uPower'){
@@ -124,7 +133,7 @@ class MessageListBox extends React.Component{
                         console.log(dataJson);*/
                         data = data.filter(function (item) {
                             if(item.timeStamp && item.timeStamp.toString() === dataJson.timeStamp){
-                                console.log(item.timeStamp.toString() === dataJson.timeStamp);
+                                // console.log(item.timeStamp.toString() === dataJson.timeStamp);
                                 return;
                             }else{
                                 return item;
@@ -132,7 +141,7 @@ class MessageListBox extends React.Component{
                         });
                         // return;
                     }
-                    console.log(dataJson);
+                    // console.log(dataJson);
                     if (dataJson.typeString !== 'withdraw') {
                         if (dataJson.data === '消息成功发出') {
                             data.push({

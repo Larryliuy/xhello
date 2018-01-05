@@ -135,7 +135,7 @@ class Login extends React.Component {
                     <FormItem>
                         <div className={'register-forget-box'}>
                         <Link to="/register" >现在注册<Icon type="right"/></Link>
-                        <Link to="/register" >邀请登录<Icon type="question"/></Link>
+                        <Link to="/register" >忘记密码<Icon type="question"/></Link>
                         </div>
                     </FormItem>
                     <div className='fast_login'>
