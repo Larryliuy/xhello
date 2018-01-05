@@ -10,6 +10,7 @@ store.subscribe(function () {
     state = store.getState();
     // console.log(store.getState())
 });
+
 let tRoomStatus = {};//本地所有房间的开关状态
 class ChannelList extends React.Component{
     constructor(props){

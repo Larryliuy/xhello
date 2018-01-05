@@ -9,10 +9,7 @@ import {generalApi} from "../static/apiInfo";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
-    // console.log(store.getState())
 });
-
-
 
 class RightClickPanel extends React.Component{
     constructor(props){
@@ -54,7 +51,8 @@ class RightClickPanel extends React.Component{
         if(e.target.getAttribute('class').indexOf('ant-list-item') === 0) {
             let text = e.target.firstChild.innerText || e.target.innerText,
                 objId = state.homeState.location.obj,
-                Msg;
+                Msg,
+                allRoomListTmp = state.homeState.allRoomList;
             if(parseInt(objId.substring(1)) <= state.homeState.userInfo.id){
                 message.warning('不能操作等级相同或比您高的用户');
                 return;
@@ -116,15 +114,46 @@ class RightClickPanel extends React.Component{
             // console.log(text);
             switch(text){
                 case '移动到我所在房间':
-                    //移动时需要确认
-                    Msg = {
+                    //移动时需要确认，先离开原先的房间，进入到我所在的当前房间
+                    let objRoomInfo={},objUserInfo={};
+                    state.homeState.allRoomList.map(function (item) {
+                        item.childNode.map(function (cItem) {
+                            if(cItem.childNode){
+                                cItem.childNode.map(function (uItem) {
+                                    if(uItem.id === objId.substring(1)){
+                                        objRoomInfo = cItem;
+                                        objUserInfo = uItem;
+                                    }
+                                })
+                            }
+                        })
+                    });
+                    console.log(objRoomInfo);
+                    console.log(objUserInfo);
+                    Msg={
                         type:'msg',
-                        typeString:'enterMyRoom',
-                        roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
-                        objUserId:objId.substring(1),
-                        limit:2
+                        typeString:'moveToRoom',
+                        roomId:objRoomInfo.roomId,
+                        roomName:objRoomInfo.roomName,
+                        user:objUserInfo,
+                        objRoomInfo:state.homeState.currentRoomInfo
                     };
+                    send(JSON.stringify(Msg),function(){
+                        //删除自己，更新下allRoomList
+                        allRoomListTmp.map(function (item) {
+                            item.childNode.map(function (cTtem) {
+                                if(cTtem.roomId === objRoomInfo.roomId){
+                                    cTtem.childNode = cTtem.childNode.filter(function (uItem) {
+                                        console.log(uItem.id+','+objUserInfo.id);
+                                        return uItem.id !== objUserInfo.id;
+                                    })
+                                }
+                            })
+                        });
+                        console.log(allRoomListTmp);
+                        store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
+                    });
+
                     break;
                 case '封IP':
                     alert(text);

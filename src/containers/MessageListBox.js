@@ -74,6 +74,26 @@ class MessageListBox extends React.Component{
                     }
                     //调整用户限制
                     // console.log(dataJson);
+                    if(dataJson.typeString === 'moveToRoom'){
+                        let Msg = {
+                            type:'leave_room',
+                            roomId:state.homeState.currentRoomInfo.roomId,
+                            roomName:state.homeState.currentRoomInfo.roomName,
+                            user:state.homeState.userInfo
+                        };
+                        send(JSON.stringify(Msg),function(){
+                            Msg = {
+                                type:'enter_room',
+                                roomId:dataJson.objRoomInfo.roomId,
+                                roomName:dataJson.objRoomInfo.roomName,
+                                user:state.homeState.userInfo
+                            };
+                            send(JSON.stringify(Msg),function(){
+                            });
+                        });
+                        return;
+                    }
+                    // console.log(dataJson);
                     if(dataJson.typeString === 'uLimit'){
                         console.log(dataJson);
                         console.log(state.homeState.userInfo);

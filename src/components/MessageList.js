@@ -72,7 +72,9 @@ class MessageList extends React.Component{
                     <List.Item.Meta
                         avatar={<Avatar src="./images/avatar.png" />}
                         title={<p>{item.userName} {item.time}</p>}
-                        description={<div onMouseDown={e=>this.rightClickHanle(e)} id={item.timeStamp && item.userId +'id' + item.timeStamp} dangerouslySetInnerHTML={{__html:item.data}} />}
+                        description={<div onMouseDown={e=>this.rightClickHanle(e)}
+                                          id={item.timeStamp && item.userId +'id' + item.timeStamp}
+                                          dangerouslySetInnerHTML={{__html:item.data}} />}
                     />
                 </List.Item>
             )}
