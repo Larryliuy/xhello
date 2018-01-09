@@ -1,6 +1,6 @@
 import React,{ Component } from 'react';
 import ReactDom from 'react-dom';
-import {BrowserRouter, HashRouter, Route, withRouter} from 'react-router-dom';
+import {BrowserRouter, HashRouter, Route, withRouter, Switch} from 'react-router-dom';
 import { connect,Provider } from 'react-redux';
 import store,{collapsed,CONSTANT} from './reducer/reducer';
 import LoginBox from './containers/LoginBox';
@@ -14,12 +14,23 @@ const h4Style = {
 };
 
 class App extends React.Component {
+    componentDidMount(){
+        // history.back();
+        if(location.href.indexOf('code=') !== -1){
+            console.log(location.href);
+            debugger;
+        }
+    }
 render(){
+    // console.log(location.href);
     return (
             <div style={h4Style}>
-                <Route exact path='/' component={LoginBox}/>
-                <Route path='/register' component={RegisterBox}/>
-                <Route path='/home' component={HomeLayout}/>
+                <Switch>
+                    {/*<Route exact path='/login' component={LoginBox}/>*/}
+                    <Route path='/register' component={RegisterBox}/>
+                    <Route path='/home' component={HomeLayout}/>
+                    <Route exact path='/' component={LoginBox}/>
+                </Switch>
             </div>
         )
 }

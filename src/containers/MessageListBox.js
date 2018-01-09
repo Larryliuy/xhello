@@ -97,7 +97,7 @@ class MessageListBox extends React.Component{
                     if(dataJson.typeString === 'uLimit'){
                         console.log(dataJson);
                         console.log(state.homeState.userInfo);
-                        if(dataJson.objUserId === state.homeState.userInfo.id){
+                        if(dataJson.objUserId == state.homeState.userInfo.id){
                             //设置state.homeState.userInfo
                             let userInfoTmp = state.homeState.userInfo;
                             userInfoTmp.limit = dataJson.limit;
@@ -107,9 +107,10 @@ class MessageListBox extends React.Component{
                     }
                     //调整房间限制
                     if(dataJson.typeString === 'rLimit'){
-                        console.log(dataJson);
-                        console.log(dataJson.objRoomId+','+state.homeState.currentRoomInfo.roomId);
-                        if(dataJson.objRoomId === state.homeState.currentRoomInfo.roomId){
+                        /*console.log(dataJson);
+                        console.log(typeof dataJson.objRoomId+','+typeof state.homeState.currentRoomInfo.roomId);
+                        console.log(dataJson.objRoomId===state.homeState.currentRoomInfo.roomId);*/
+                        if(dataJson.objRoomId == state.homeState.currentRoomInfo.roomId){
                             //设置state.homeState.userInfo
                             let currentRoomInfoTmp = state.homeState.currentRoomInfo;
                             console.log(currentRoomInfoTmp);
@@ -122,7 +123,7 @@ class MessageListBox extends React.Component{
                     if(dataJson.typeString === 'uPower'){
                         console.log(dataJson);
                         console.log(state.homeState.userInfo);
-                        if(dataJson.objUserId === state.homeState.userInfo.id){
+                        if(dataJson.objUserId == state.homeState.userInfo.id){
                             //设置state.homeState.userInfo
                             let userInfoTmp = state.homeState.userInfo,
                                 allRoomList = state.homeState.allRoomList;
@@ -152,7 +153,7 @@ class MessageListBox extends React.Component{
                         /*console.log(data);
                         console.log(dataJson);*/
                         data = data.filter(function (item) {
-                            if(item.timeStamp && item.timeStamp.toString() === dataJson.timeStamp){
+                            if(item.timeStamp && item.timeStamp.toString() == dataJson.timeStamp){
                                 // console.log(item.timeStamp.toString() === dataJson.timeStamp);
                                 return;
                             }else{
@@ -195,13 +196,24 @@ class MessageListBox extends React.Component{
                         if(item.childNode.length !== 0){
                             item.childNode.map(function (item) {
                                 if(item.roomId === dataJson.roomId.toString()){
-                                    item.childNode.push({
-                                        name:dataJson.user.name,
-                                        id:dataJson.user.id,
-                                        level:dataJson.user.level,
-                                        sex:dataJson.user.sex,
-                                        avatar:dataJson.user.avatar
-                                    });
+                                    let flag = true;//flag表示是否可以插入用户
+                                    if(item.childNode){
+                                        item.childNode.map(function (uItem) {
+                                            if(uItem.id == dataJson.user.id){
+                                                //如果用户存在列表则不让插入
+                                                flag = false;
+                                            }
+                                        })
+                                    }
+                                    if(flag){
+                                        item.childNode.push({
+                                            name:dataJson.user.name,
+                                            id:dataJson.user.id,
+                                            level:dataJson.user.level,
+                                            sex:dataJson.user.sex,
+                                            avatar:dataJson.user.avatar
+                                        });
+                                    }
                                 }
                             });
                         }
@@ -310,9 +322,10 @@ class MessageListBox extends React.Component{
                 default:
                     break;
             }
-
-            _this.setState({data:data});
-            _this.scrollToBottom();
+            if(_this){
+                _this.setState({data:data});
+                _this.scrollToBottom();
+            }
         };
     }
     render(){

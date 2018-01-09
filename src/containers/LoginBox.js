@@ -17,6 +17,9 @@ const divStyle = {
 
 
 class LoginBox extends React.Component {
+    constructor(props){
+        super(props)
+    }
     state = {
         login:false,
         data:''
@@ -29,6 +32,10 @@ class LoginBox extends React.Component {
     componentDidMount(){
         if(cookieUtil.get('userName') && cookieUtil.get('password')){
             this.setState({login:true,data:cookieUtil.get('userData')})
+        }
+        // console.log(this.props.codeUrl);
+        if(this.props.codeUrl){
+            console.log(this.props.codeUrl);
         }
     }
     render(){

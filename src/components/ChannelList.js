@@ -86,6 +86,7 @@ class ChannelList extends React.Component{
         }
     }
     enterRoom(roomIdInt,roomName){
+        if(!roomIdInt || !roomName) return;
             //离开上一个聊天室
         let data = state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
             leaveMsg = getSendData(

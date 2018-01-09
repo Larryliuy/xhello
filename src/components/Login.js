@@ -4,7 +4,9 @@ import { Form, Icon, Input, Button, Checkbox, message, Popover } from 'antd';
 const FormItem = Form.Item;
 import cookieUtil from '../libs/cookieUtil';
 import '../static/login.scss'
-import { loginApi } from "../static/apiInfo";
+import { loginApi, redirect_uri } from "../static/apiInfo";
+import {CONSTANT} from "../reducer/reducer";
+import store from "../reducer/reducer";
 
 const iconStyle = {
     width: '20px',
@@ -15,17 +17,95 @@ const iconStyle = {
 class Login extends React.Component {
     constructor(props){
         super(props);
-        this.state = {wechatVisible:'hidden',userName:'',password:''}
+        this.state = {wechatVisible:'hidden',userName:'',password:'',loginComponent:true}
     }
     componentDidMount(){
-        setTimeout(function () {
-            let obj = new WxLogin({
-                id:"we-chat",
-                appid: "wx592e917bee49160b",
-                scope: "snsapi_login",
-                redirect_uri: "http%3a%2f%2fwww.xtell.cn%2findex.html%23a"
-            });
-        },200);
+        if(this.state.loginComponent){
+            setTimeout(function () {
+                let obj = new WxLogin({
+                    id:"we-chat",
+                    appid: "wx592e917bee49160b",
+                    scope: "snsapi_login",
+                    redirect_uri: redirect_uri
+                });
+            },300);
+        }
+    }
+    componentWillMount(){
+        //QQ快捷登录
+        let locationUrl = window.location.href,
+            code,accessToken,_this=this;
+        window.addEventListener('hashchange',function (ev) {
+            if(ev.oldURL.indexOf('code=')){
+                console.log(ev.oldURL);
+                locationUrl = ev.oldURL;
+                code = GetQueryString(ev.oldURL.substring(ev.oldURL.indexOf('?')).substr(1),'code');
+                //uri参数截取函数
+                function GetQueryString(str,name) {
+                    let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                    let r = str.match(reg);
+                    if (r != null) return decodeURI(r[2]);
+                    return null;
+                }
+                // console.log(code);
+                if(code){
+                    _this.setState({loginComponent:false});
+                    let args = 'grant_type=authorization_code&client_id=101454868&client_secret=4811cade40988ad7094119ef56f9a5bd&code='+code+'&redirect_uri='+redirect_uri;
+                    //获取access token值
+                    fetch('https://graph.qq.com/oauth2.0/token?'+args)
+                        .then((response) => {return response.text()})
+                        .then(data=>{
+                            console.log(data);
+                            if(GetQueryString(data,'access_token')){
+                                accessToken = GetQueryString(data,'access_token');
+                                console.log(accessToken);
+                                args = 'access_token='+accessToken;
+                                //根据accessToken获取openID
+                                fetch('https://graph.qq.com/oauth2.0/me?'+args)
+                                    .then((response) => {return response.text()})
+                                    .then(data=>{
+                                        // console.log(data);
+                                        data = data.substring(10,data.length-4);
+                                        data = JSON.parse(data);
+                                        // console.log(data);
+                                        if(data.openid){
+                                            //openid 需要和用户绑定在一起
+                                            let clientId = data.client_id,
+                                                openId = data.openid,
+                                                args = 'access_token='+accessToken+'&oauth_consumer_key='+clientId+'&openid='+openId;
+                                            // console.log(clientId+','+openId);
+                                            fetch('https://graph.qq.com/user/get_user_info?'+args)
+                                                .then((response) => {return response.json()})
+                                                .then(data=>{
+                                                    //这里获取用户信息
+                                                    console.log(data);
+                                                    if(data.ret === 0){
+                                                        location.replace("#/home");
+                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:Math.ceil(Math.random()*20000+10000),name:data.nickname,sex:parseInt(data.gender),level:7,limit:0,avatar:data.figureurl_2}});
+                                                    }
+                                                })
+                                                .catch(err=>{
+                                                    console.log(err);
+                                                })
+
+                                        }else {
+                                            message.error('用户名与密码不匹配');
+                                        }
+                                    })
+                                    .catch(err=>{
+                                        console.log(err);
+                                    });
+                            }else {
+                                message.error('用户名与密码不匹配');
+                            }
+                        })
+                        .catch(err=>{
+                            console.log(err);
+                        });
+                }
+            }
+        });
+
     }
     handleSubmit(e){
         e.preventDefault();
@@ -101,6 +181,24 @@ class Login extends React.Component {
         }*/
         // }
     };
+    qqSpanHandle(){
+        let url = 'https://graph.qq.com/oauth2.0/authorize?';
+        let args = 'response_type=code&client_id=101454868&redirect_uri='+redirect_uri+'&state=test';
+        fetch(url+args).then((response) => {
+            // console.log(response);
+            // console.log(response.location);
+            location.replace(response.url);
+            return response.text()})
+            .then(data=>{
+                // document.
+                // history.back();
+                // console.log(data)
+            }).catch(err=>{
+            console.log(err);
+            // props.login(true,{name:'haha',level:1,id:7,sex:2,limit:0});
+        });
+
+    }
     onMouseHoverHandle(){
         console.log('hover');
         this.setState({wechatVisible:'visible'});
@@ -109,6 +207,7 @@ class Login extends React.Component {
         this.setState({wechatVisible:'hidden'});
     }
     render(){
+        if(!this.state.loginComponent)return (<div></div>);
         return (<Form onSubmit={this.handleSubmit} className="login-form">
                     <FormItem>
                         <Input id='user' onChange = {(e) => this.onChangeUserName(e)}
@@ -139,9 +238,9 @@ class Login extends React.Component {
                         </div>
                     </FormItem>
                     <div className='fast_login'>
-                        <span className='icon_qq' onMouseOver={()=>this.onMouseHoverHandle()}><Icon type="wechat" style={iconStyle}/></span>
+                        <span className='icon_wechat' onMouseOver={()=>this.onMouseHoverHandle()}><Icon type="wechat" style={iconStyle}/></span>
                         <div id={'we-chat'} onMouseOut={()=>this.onMouseOutHandle()} style={{visibility:this.state.wechatVisible}}></div>
-                        <span className='icon_wechat'><Icon type="qq" style={iconStyle}/></span>
+                        <span id={'qqSpan'} className='icon_qq'><a href="https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101454868&redirect_uri=http%3a%2f%2fa701.xtell.cn%3a82%2fsoftwares%2fxtell_projects_dev%2f24_YUN_VIDEO%2fsrc%2fweb%2findex.html%23%2f&state=test"><Icon type="qq" style={iconStyle}/></a></span>
                     </div>
             </Form>
         );

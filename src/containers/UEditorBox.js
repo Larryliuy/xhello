@@ -41,12 +41,11 @@ class UEditorBox extends React.Component {
         });
     }
     limitTextOrImg(limit,type){
-        // console.log(this.state.value);
-        // console.log(typeof state.homeState.userInfo.limit +':' + state.homeState.userInfo.limit);
+        //type=1表示用户限制，type=2表示房间限制
         switch(limit){
             case '1':
                 let value = this.state.value;
-                console.log(value);
+                // console.log(value);
                 function removeHTMLTag(str) {
                     str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
                     str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白

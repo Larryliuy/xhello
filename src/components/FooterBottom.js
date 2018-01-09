@@ -109,7 +109,7 @@ class FooterBottom extends React.Component{
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
             <div>
                 <span className={'user-info'}>
-                    <img id='avatar-img' src={'./images/avatar.png'}></img>
+                    <img id='avatar-img' src={state.homeState.userInfo.avatar}></img>
                     <span>
                         {this.state.inputVisible ?
                             <span className={'modify-username'}><Input onChange={e=>this.onchangeHandle(e)} onPressEnter={()=>this.onblurHandle()} onBlur={()=>this.onblurHandle()} placeholder={'请输入用户名'}/></span>:
