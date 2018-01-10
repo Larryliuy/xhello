@@ -14,11 +14,11 @@ const h4Style = {
 };
 
 class App extends React.Component {
-    componentDidMount(){
+    componentWillMount(){
         // history.back();
         if(location.href.indexOf('code=') !== -1){
             console.log(location.href);
-            debugger;
+            alert('before-router');
         }
     }
 render(){

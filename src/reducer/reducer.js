@@ -15,7 +15,9 @@ export const CONSTANT = {
     ALLROOMLIST:'ALLROOMLIST',
     LOCATION:'LOCATION',
     USERINFO:'USERINFO',
-    ROOMMICROPHONEUSER:'ROOMMICROPHONEUSER'
+    ROOMMICROPHONEUSER:'ROOMMICROPHONEUSER',
+    ROOMSTATUS:'ROOMSTATUS',
+    MESSAGEDATA:'MESSAGEDATA'
 };
 function toggleLogin() {
     return {
@@ -50,7 +52,9 @@ const homeInitState = {viewModel:false,skinColor:'#108ee9',
     allRoomList:[],//所有房间用户数据
     searchResult:[],//用户查找结果
     searchKeyword:'',//用户查找关键字
-    location:{x:0,y:0,display:'none',obj:0}//房间列表右键点击定位及目标
+    location:{x:0,y:0,display:'none',obj:0},//房间列表右键点击定位及目标
+    roomStatus:{},//用于存储各房间打开/关闭状态
+    messageData:[],//用于存储各房间打开/关闭状态
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
@@ -73,6 +77,10 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{userInfo:action.val});
         case CONSTANT.ROOMMICROPHONEUSER:
             return Object.assign({},tmpState,{roomMicrophoneUser:action.val});
+        case CONSTANT.ROOMSTATUS:
+            return Object.assign({},tmpState,{roomStatus:action.val});
+        case CONSTANT.MESSAGEDATA:
+            return Object.assign({},tmpState,{messageData:action.val});
         default:
             // console.log('default');
             return homeInitState;

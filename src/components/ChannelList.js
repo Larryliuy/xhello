@@ -66,7 +66,8 @@ class ChannelList extends React.Component{
                 }else{
                     console.log('房间id不存在');
                 }
-                _this.setState({roomStatus:tRoomStatus});
+                // _this.setState({roomStatus:tRoomStatus});
+                store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
             }
         },300);
 
@@ -127,12 +128,13 @@ class ChannelList extends React.Component{
             }
         });
 
-        let tRoomState = this.state.roomStatus;
-        if(!this.state.roomStatus['rc'+roomIdInt]){
+        // let tRoomState = this.state.roomStatus;
+        let tRoomState = state.homeState.roomStatus;
+        if(!state.homeState.roomStatus['rc'+roomIdInt]){
             tRoomState['rc'+roomIdInt] = true;
         }
-        this.setState({roomStatus:tRoomState});
-
+        // this.setState({roomStatus:tRoomState});
+        store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
         //获取房间里用户列表信息
         let getUsersInfo = getSendData(
             'get_room_users',
@@ -183,13 +185,14 @@ class ChannelList extends React.Component{
     clickOpenHandle  = (e) => {
         const roomId = e.target.parentNode.parentNode.getAttribute('id');
         // console.log(roomId);
-        let tRoomState = this.state.roomStatus;
-        if(this.state.roomStatus[roomId]){
+        let tRoomState = state.homeState.roomStatus;
+        if(state.homeState.roomStatus[roomId]){
             tRoomState[roomId] = false;
         }else{
             tRoomState[roomId] = true;
         }
-        this.setState({roomStatus:tRoomState});
+        // this.setState({roomStatus:tRoomState});
+        store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
             //打开本地房间列表
         // console.log(this.state.roomStatus);
     };
@@ -213,7 +216,7 @@ class ChannelList extends React.Component{
         this.setState({passwordModal:false})
     }
     render(){
-        const { roomStatus } = this.state;
+        const { roomStatus } = state.homeState;
         const clickOpenHandle = this.clickOpenHandle;
         const getUserIconSrc = (sex,level) =>{
             let src = '';

@@ -26,7 +26,7 @@ class Login extends React.Component {
                     id:"we-chat",
                     appid: "wx592e917bee49160b",
                     scope: "snsapi_login",
-                    redirect_uri: redirect_uri
+                    redirect_uri: 'http://www.xtell.cn'
                 });
             },300);
         }
@@ -39,7 +39,7 @@ class Login extends React.Component {
             if(ev.oldURL.indexOf('code=')){
                 console.log(ev.oldURL);
                 locationUrl = ev.oldURL;
-                code = GetQueryString(ev.oldURL.substring(ev.oldURL.indexOf('?')).substr(1),'code');
+                code = GetQueryString(ev.oldURL.substring(ev.oldURL.indexOf('?')).substr(1),'code');//截取URL中的code值
                 //uri参数截取函数
                 function GetQueryString(str,name) {
                     let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
@@ -81,7 +81,7 @@ class Login extends React.Component {
                                                     console.log(data);
                                                     if(data.ret === 0){
                                                         location.replace("#/home");
-                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:Math.ceil(Math.random()*20000+10000),name:data.nickname,sex:parseInt(data.gender),level:7,limit:0,avatar:data.figureurl_2}});
+                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:new Date().getTime(),name:data.nickname,sex:parseInt(data.gender),level:7,limit:0,avatar:data.figureurl_2}});
                                                     }
                                                 })
                                                 .catch(err=>{
@@ -152,8 +152,13 @@ class Login extends React.Component {
                           message.error('用户名与密码不匹配');
                       }
                   }catch (e){
-                      //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
-                      datatmp = JSON.parse(data.substring(data.indexOf('{')));
+                      //JSON.parse有问题的情况,手动截取返回信息中JSON字符串,此处不严格，如果严格需要使用正则
+                      console.log(data.substring(data.indexOf('>{'),data.indexOf('}<br')+1));
+                      try{
+                        datatmp = JSON.parse(data.substring(data.indexOf('{')));
+                      }catch (e){
+                          datatmp = JSON.parse(data.substring(data.indexOf('{'),data.indexOf('}<br')+1));
+                      }
                       console.log(datatmp);
                       if(datatmp.status === 'ok'){
                           message.success('登录成功');

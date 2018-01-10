@@ -33,7 +33,7 @@ const waitForConnection = function (callback, interval) {
     if (WS.readyState === 1) {
         callback();
     } else {
-        // optional: implement backoff for interval here
+            // optional: implement backoff for interval here
         setTimeout(function () {
             waitForConnection(callback, interval);
         }, interval);
