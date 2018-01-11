@@ -120,16 +120,18 @@ class RightClickPanel extends React.Component{
                         item.childNode.map(function (cItem) {
                             if(cItem.childNode){
                                 cItem.childNode.map(function (uItem) {
-                                    if(uItem.id === objId.substring(1)){
+                                    // console.log(uItem.id+','+objId.substring(1));
+                                    if(uItem.id.toString() === objId.substring(1)){
                                         objRoomInfo = cItem;
                                         objUserInfo = uItem;
+                                        // console.log(objUserInfo);
                                     }
                                 })
                             }
                         })
                     });
-                    console.log(objRoomInfo);
-                    console.log(objUserInfo);
+                    // console.log(objRoomInfo);
+                    // console.log(objUserInfo);
                     Msg={
                         type:'msg',
                         typeString:'moveToRoom',

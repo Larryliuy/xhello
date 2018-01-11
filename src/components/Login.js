@@ -37,7 +37,7 @@ class Login extends React.Component {
             code,accessToken,_this=this;
         window.addEventListener('hashchange',function (ev) {
             if(ev.oldURL.indexOf('code=')){
-                console.log(ev.oldURL);
+                // console.log(ev.oldURL);
                 locationUrl = ev.oldURL;
                 code = GetQueryString(ev.oldURL.substring(ev.oldURL.indexOf('?')).substr(1),'code');//截取URL中的code值
                 //uri参数截取函数
@@ -55,10 +55,10 @@ class Login extends React.Component {
                     fetch('https://graph.qq.com/oauth2.0/token?'+args)
                         .then((response) => {return response.text()})
                         .then(data=>{
-                            console.log(data);
+                            // console.log(data);
                             if(GetQueryString(data,'access_token')){
                                 accessToken = GetQueryString(data,'access_token');
-                                console.log(accessToken);
+                                // console.log(accessToken);
                                 args = 'access_token='+accessToken;
                                 //根据accessToken获取openID
                                 fetch('https://graph.qq.com/oauth2.0/me?'+args)
@@ -78,10 +78,10 @@ class Login extends React.Component {
                                                 .then((response) => {return response.json()})
                                                 .then(data=>{
                                                     //这里获取用户信息
-                                                    console.log(data);
+                                                    // console.log(data);
                                                     if(data.ret === 0){
                                                         location.replace("#/home");
-                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:new Date().getTime(),name:data.nickname,sex:parseInt(data.gender),level:7,limit:0,avatar:data.figureurl_2}});
+                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:new Date().getTime(),name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2}});
                                                     }
                                                 })
                                                 .catch(err=>{
@@ -212,7 +212,7 @@ class Login extends React.Component {
         this.setState({wechatVisible:'hidden'});
     }
     render(){
-        if(!this.state.loginComponent)return (<div></div>);
+        if(!this.state.loginComponent)return (<div style={{textAlign:'center'}}><p>正在验证中...,请稍候</p></div>);
         return (<Form onSubmit={this.handleSubmit} className="login-form">
                     <FormItem>
                         <Input id='user' onChange = {(e) => this.onChangeUserName(e)}

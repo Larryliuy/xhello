@@ -58,12 +58,11 @@ class HomeLayout extends React.Component {
         }
     }
     componentDidMount(){
-        //QQ快捷登录
-        //QQ快捷登录
+        /*//QQ快捷登录
         let locationUrl = window.location.href,
             code,accessToken;
-        /*console.log(locationUrl);
-        console.log(locationUrl);*/
+        /!*console.log(locationUrl);
+        console.log(locationUrl);*!/
         if(locationUrl.indexOf('code=') !== -1){
             code = locationUrl.substring(locationUrl.indexOf('code=')+5);
             let getAccessTokenApi = 'grant_type=authorization_code&client_id=101454868&client_secret=4811cade40988ad7094119ef56f9a5bd&code=Authorization Code&redirect_uri=http%3a%2f%2fa701.xtell.cn%3a82%2fsoftwares%2fxtell_projects_dev%2f24_YUN_VIDEO%2fsrc%2fweb%2findex.html%23%2f'
@@ -129,7 +128,7 @@ class HomeLayout extends React.Component {
                 .catch(err=>{
                     console.log(err);
                 });
-        }
+        }*/
         //左右拖动
         let isChanging = false,
             _this = this,
@@ -200,31 +199,51 @@ class HomeLayout extends React.Component {
                         // console.log('禁麦');
                         return;
                     }
-                    //调整用户限制
+                    //移动到我所在房间
                     // console.log(dataJson);
                     if(dataJson.typeString === 'moveToRoom'){
-                        let Msg = {
-                            type:'leave_room',
-                            roomId:state.homeState.currentRoomInfo.roomId,
-                            roomName:state.homeState.currentRoomInfo.roomName,
-                            user:state.homeState.userInfo
-                        };
-                        send(JSON.stringify(Msg),function(){
-                            Msg = {
-                                type:'enter_room',
-                                roomId:dataJson.objRoomInfo.roomId,
-                                roomName:dataJson.objRoomInfo.roomName,
+                        let roomStatueTmp = state.homeState.roomStatus,rId;
+                            allRoomListTmp = state.homeState.allRoomList;
+                        allRoomListTmp.map(function (item) {
+                            if(item.childNode){
+                                item.childNode.map(function (cItem) {
+                                    if(cItem.roomId == state.homeState.currentRoomInfo.roomId){
+                                        rId = item.roomId;
+                                        //打开目标房间的父房间
+                                        roomStatueTmp['r'+rId] = true;
+                                    }
+                                })
+                            }
+                        });
+                        //打开目标房间
+                        roomStatueTmp['rc'+dataJson.objRoomInfo.roomId] = true;
+                        store.dispatch({type:CONSTANT.ROOMSTATUS,val:roomStatueTmp});
+                        if(dataJson.objRoomInfo.roomId != state.homeState.currentRoomInfo.roomId){
+                            let Msg = {
+                                type:'leave_room',
+                                roomId:state.homeState.currentRoomInfo.roomId,
+                                roomName:state.homeState.currentRoomInfo.roomName,
                                 user:state.homeState.userInfo
                             };
                             send(JSON.stringify(Msg),function(){
+                                Msg = {
+                                    type:'enter_room',
+                                    roomId:dataJson.objRoomInfo.roomId,
+                                    roomName:dataJson.objRoomInfo.roomName,
+                                    user:state.homeState.userInfo
+                                };
+                                send(JSON.stringify(Msg),function(){
+                                });
                             });
-                        });
+                        }
                         return;
                     }
-                    // console.log(dataJson);
+                    //调整用户限制
                     if(dataJson.typeString === 'uLimit'){
                         console.log(dataJson);
                         console.log(state.homeState.userInfo);
+
+                        //***********************
                         if(dataJson.objUserId == state.homeState.userInfo.id){
                             //设置state.homeState.userInfo
                             let userInfoTmp = state.homeState.userInfo;
@@ -293,12 +312,13 @@ class HomeLayout extends React.Component {
                     }
                     // console.log(dataJson);
                     if (dataJson.typeString !== 'withdraw') {
+                        console.log(dataJson);
                         if (dataJson.data === '消息成功发出') {
                             data.push({
                                 userId:dataJson.user.id,
                                 userName: dataJson.user.name,
                                 time: getDateString(),
-                                data: _this.props.sendData,
+                                data: _this.state.sendData,
                                 timeStamp: dataJson.timeStamp
                             });
                         } else {
@@ -469,7 +489,6 @@ class HomeLayout extends React.Component {
         this.setState({sendData:value});
     }
     render() {
-        console.log(state.homeState.currentRoomInfo);
         return (
             <Layout style={layoutStyle}>
                 <Header style={{ backgroundColor:state.homeState.skinColor,padding: 0,textAlign:'center',borderBottom:'1px solid #ececec' }} >
@@ -486,7 +505,6 @@ class HomeLayout extends React.Component {
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
                         <div className= 'content_show'>
-                            {console.log(state.homeState.currentRoomInfo.mode +','+state.homeState.currentRoomInfo.mode == 0)}
                             {state.homeState.currentRoomInfo.mode == 0 && <MessageListBox sendData={this.state.sendData}></MessageListBox>}
                             {state.homeState.currentRoomInfo.mode == 1 && <LivingBox></LivingBox>}
                         </div>

@@ -21,10 +21,6 @@ class MessageListBox extends React.Component{
         super(props);
         this.state={data:[]};
     }
-
-    componentWillUnmount(){
-        WS.onmessage = null;
-    }
     componentDidMount(){
         uId = state.homeState.userInfo.id;
         uName = state.homeState.userInfo.name;

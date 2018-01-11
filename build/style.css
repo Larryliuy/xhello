@@ -7594,14 +7594,18 @@ html, body {
       width: 100px;
       height: 20px;
       padding: 1px; }
-  .footer #user-name {
-    display: inline-block;
-    width: 100px;
-    height: 20px; }
   .footer .user-info {
     font-size: 14px;
     margin-right: 40px;
-    top: 3px; }
+    top: 3px;
+    display: flex;
+    justify-content: start;
+    align-items: center; }
+    .footer .user-info #user-name {
+      display: inline-block;
+      width: 100px;
+      height: 18px;
+      line-height: 18px; }
   .footer .audio {
     width: 0px;
     height: 0px; }
@@ -7693,7 +7697,7 @@ html, body {
   width: 100px;
   height: 60px;
   position: absolute;
-  right: 0px;
+  right: -30px;
   bottom: -30px; }
   .fast_login #we-chat {
     position: absolute;

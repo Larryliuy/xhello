@@ -42,6 +42,8 @@ class FooterBottom extends React.Component{
                 break;
             case 'user-name':
                 this.setState({inputVisible:true});
+                // console.log(this.refs.changeNameInput);
+                // document.getElementById('changeNameInput').querySelector('input')[0].focus();
                 break;
         }
     }
@@ -112,7 +114,8 @@ class FooterBottom extends React.Component{
                     <img id='avatar-img' src={state.homeState.userInfo.avatar}></img>
                     <span>
                         {this.state.inputVisible ?
-                            <span className={'modify-username'}><Input onChange={e=>this.onchangeHandle(e)} onPressEnter={()=>this.onblurHandle()} onBlur={()=>this.onblurHandle()} placeholder={'请输入用户名'}/></span>:
+                            <span className={'modify-username'}><Input onChange={e=>this.onchangeHandle(e)} onPressEnter={()=>this.onblurHandle()} onBlur={()=>this.onblurHandle()} placeholder={'请输入用户名'}/></span>
+                            :
                             <span id={'user-name'}>{this.props.userName}</span>}
                     </span>
                 </span>
