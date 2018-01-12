@@ -148,7 +148,9 @@ class RoomManager extends React.Component{
                     }
                 });
                 // console.log(datas);
-                _this.setState({tableColumns:columns,tableData:datas});
+                if(_this.refs.myRoomRef){
+                    _this.setState({tableColumns:columns,tableData:datas});
+                }
             })
             .catch(e=>console.log(e));
     }
@@ -264,7 +266,8 @@ class RoomManager extends React.Component{
         }
     }
     render(){
-        return (<div>
+        return (<div ref={'myRoomRef'}
+        >
             <Modal
                 title={this.props.title}
                 visible={this.props.visible}

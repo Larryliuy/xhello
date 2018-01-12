@@ -114,13 +114,15 @@ class RightClickPanel extends React.Component{
             // console.log(text);
             switch(text){
                 case '移动到我所在房间':
-                    //移动时需要确认，先离开原先的房间，进入到我所在的当前房间
+                    //移动时需要确认，先离开原先的房间，进入到我所在的当前房间,//健壮性
                     let objRoomInfo={},objUserInfo={};
+                    console.log(state.homeState.allRoomList);
                     state.homeState.allRoomList.map(function (item) {
                         item.childNode.map(function (cItem) {
-                            if(cItem.childNode){
+                            if(cItem.childNode.length !== 0){
                                 cItem.childNode.map(function (uItem) {
-                                    // console.log(uItem.id+','+objId.substring(1));
+                                    console.log(uItem.id+','+objId.substring(1));
+                                    if(!uItem.id)return;
                                     if(uItem.id.toString() === objId.substring(1)){
                                         objRoomInfo = cItem;
                                         objUserInfo = uItem;
@@ -140,8 +142,9 @@ class RightClickPanel extends React.Component{
                         user:objUserInfo,
                         objRoomInfo:state.homeState.currentRoomInfo
                     };
+                    console.log(Msg);
                     send(JSON.stringify(Msg),function(){
-                        //删除自己，更新下allRoomList
+                        //删除自己视图中目标对象，更新下allRoomList
                         allRoomListTmp.map(function (item) {
                             item.childNode.map(function (cTtem) {
                                 if(cTtem.roomId === objRoomInfo.roomId){

@@ -33,12 +33,22 @@ class LoginBox extends React.Component {
         if(cookieUtil.get('userName') && cookieUtil.get('password')){
             this.setState({login:true,data:cookieUtil.get('userData')})
         }
-        // console.log(this.props.codeUrl);
-        if(this.props.codeUrl){
-            console.log(this.props.codeUrl);
+        //uri参数截取函数
+        function GetQueryString(str,key) {
+            let reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+            let r = str.match(reg);
+            if (r != null) return decodeURI(r[2]);
+            return null;
+        }
+        if(this.props.location.search.indexOf('invited=') !== -1){
+            // let queryStr = location.href.substring(location.href.indexOf('invited')+8);
+            let username = GetQueryString(this.props.location.search,'userName');
+            console.log(username)
         }
     }
     render(){
+        // console.log(this.props.match);
+        // console.log(this.props.location);
         return(
         <div style={divStyle}>
             <Login login ={this.handleLogin.bind(this)}/>

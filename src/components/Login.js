@@ -35,11 +35,11 @@ class Login extends React.Component {
         //QQ快捷登录
         let locationUrl = window.location.href,
             code,accessToken,_this=this;
-        window.addEventListener('hashchange',function (ev) {
-            if(ev.oldURL.indexOf('code=')){
+        // window.addEventListener('hashchange',function (ev) {
+            if(locationUrl.indexOf('code=')){
                 // console.log(ev.oldURL);
-                locationUrl = ev.oldURL;
-                code = GetQueryString(ev.oldURL.substring(ev.oldURL.indexOf('?')).substr(1),'code');//截取URL中的code值
+                // locationUrl = ev.oldURL;
+                code = GetQueryString(locationUrl.substring(locationUrl.indexOf('?')).substr(1),'code');//截取URL中的code值
                 //uri参数截取函数
                 function GetQueryString(str,name) {
                     let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
@@ -104,7 +104,7 @@ class Login extends React.Component {
                         });
                 }
             }
-        });
+        // });
 
     }
     handleSubmit(e){

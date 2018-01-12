@@ -57,7 +57,7 @@ class HeaderLeft extends Component{
             this.setState({
                 planeVisible: false,
             });
-            Modal.info({title:'链接地址',content:(<a>www.baidu.com?userName={this.state.userName}</a>)})
+            Modal.info({title:'链接地址',content:(<a>http://localhost:3006/#/?invited&userName={this.state.userName}</a>)})
         }
     }
     render(){
@@ -65,14 +65,14 @@ class HeaderLeft extends Component{
             <Input onChange={(e)=>this.userNameChange(e)} placeholder={'请输入用户名'}/>
             <br/>
             <br/>
-            <Input onChange={e=>this.passwordChange(e)} placeholder={'请输入密码'}/>
+            <Input type={'password'} onChange={e=>this.passwordChange(e)} placeholder={'请输入密码'}/>
             <br/>
             <br/>
             <span style={{display:'flex',justifyContent:'space-between'}}>
                 <Button onClick={()=>this.planeCancelHandle()}>取消</Button>
                 <Button type={'primary'} onClick={()=>this.planeOkHandle()}>确定</Button>
             </span>
-        </div>)
+        </div>);
         return (<div style={{paddingLeft:'10px',display:'inline-block',width:'100%',height:'100%',fontSize:'0px'}}>
                     <div style={{height:'50%',width:'100%',fontSize:'14px',textAlign:'left',lineHeight:'20px',cursor:'pointer'}}>
                         <Popover  placement="bottomLeft"

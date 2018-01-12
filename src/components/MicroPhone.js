@@ -79,10 +79,11 @@ class MicroPhone extends React.Component {
                 let micrpMsg = {
                     type:'msg',
                     typeString:item,
-                    roomId: state.homeState.currentRoomInfo.id,		//房间唯一标识符
-                    roomName: state.homeState.currentRoomInfo.title,
+                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                    roomName: state.homeState.currentRoomInfo.roomName,
                     user:state.homeState.userInfo
                 };
+                console.log(micrpMsg);
                 send(JSON.stringify(micrpMsg),function(){});
             }
         })

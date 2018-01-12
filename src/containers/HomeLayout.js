@@ -36,13 +36,13 @@ let userId = 0,
     userName = '',
     sex=0,
     level=0;
-if(decodeURI(window.location.href).indexOf('?{') !== -1){
+/*if(decodeURI(window.location.href).indexOf('?{') !== -1){
     console.log(decodeURI(window.location.href));
     console.log(userId);
     userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?{')+1,decodeURI(window.location.href).length)).id
 }else{
     location.replace('#/');
-}
+}*/
 // console.log('href:'+userId);
 
 
@@ -58,77 +58,6 @@ class HomeLayout extends React.Component {
         }
     }
     componentDidMount(){
-        /*//QQ快捷登录
-        let locationUrl = window.location.href,
-            code,accessToken;
-        /!*console.log(locationUrl);
-        console.log(locationUrl);*!/
-        if(locationUrl.indexOf('code=') !== -1){
-            code = locationUrl.substring(locationUrl.indexOf('code=')+5);
-            let getAccessTokenApi = 'grant_type=authorization_code&client_id=101454868&client_secret=4811cade40988ad7094119ef56f9a5bd&code=Authorization Code&redirect_uri=http%3a%2f%2fa701.xtell.cn%3a82%2fsoftwares%2fxtell_projects_dev%2f24_YUN_VIDEO%2fsrc%2fweb%2findex.html%23%2f'
-            let args = 'grant_type=authorization_code&client_id=101454868&client_secret=4811cade40988ad7094119ef56f9a5bd&code='+code+'&redirect_uri=http%3a%2f%2fa701.xtell.cn%3a82%2fsoftwares%2fxtell_projects_dev%2f24_YUN_VIDEO%2fsrc%2fweb%2findex.html%23%2f'
-            //获取access token值
-            fetch(getAccessTokenApi,{
-                method:'POST',
-                headers:{
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body:args
-            })
-                .then((response) => {console.log(response);return response.text()})
-                .then(data=>{
-                    if(data.status === 'ok'){
-                        accessToken = data.access_token;
-                        args = 'access_token='+accessToken;
-                        //根据accessToken获取openID
-                        fetch('https://graph.qq.com/oauth2.0/me',{
-                            method:'POST',
-                            headers:{
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body:args
-                        })
-                            .then((response) => {console.log(response);return response.text()})
-                            .then(data=>{
-                                if(data.status === 'ok'){
-                                    //这里获取client_id，openid，再根据获取到的参数请求获取用户信息
-                                    let clientId = data.client_id,
-                                        openId = data.openid,
-                                        args = 'access_token='+accessToken+'&oauth_consumer_key='+clientId+'&openid='+openId;
-                                    fetch('https://graph.qq.com/user/get_user_info',{
-                                        method:'POST',
-                                        headers:{
-                                            'Content-Type': 'application/x-www-form-urlencoded'
-                                        },
-                                        body:args
-                                    })
-                                        .then((response) => {console.log(response);return response.text()})
-                                        .then(data=>{
-                                            //这里获取用户信息
-                                            console.log(data);
-                                            // _this.props.login(true,{name:data.nickname,level:7,id:clientId,sex:data.gender,limit:0,avatar:'http:/qzapp.qlogo.cn/qzapp/'+openId+'/'+clientId});
-                                        })
-                                        .catch(err=>{
-                                            console.log(err);
-                                        })
-
-                                }else {
-                                    message.error('用户名与密码不匹配');
-                                    return;
-                                }
-                            })
-                            .catch(err=>{
-                                console.log(err);
-                            });
-                    }else {
-                        message.error('用户名与密码不匹配');
-                        return;
-                    }
-                })
-                .catch(err=>{
-                    console.log(err);
-                });
-        }*/
         //左右拖动
         let isChanging = false,
             _this = this,
@@ -178,7 +107,7 @@ class HomeLayout extends React.Component {
             let allRoomListTmp = [];
             switch(dataJson.type){
                 case 'msg':
-                    // console.log(dataJson);
+                    console.log(dataJson);
                     if(dataJson.typeString === '放麦'){
                         let userData = state.homeState.roomMicrophoneUser;
                         // console.log(state.homeState.roomMicrophoneUser);
@@ -242,8 +171,6 @@ class HomeLayout extends React.Component {
                     if(dataJson.typeString === 'uLimit'){
                         console.log(dataJson);
                         console.log(state.homeState.userInfo);
-
-                        //***********************
                         if(dataJson.objUserId == state.homeState.userInfo.id){
                             //设置state.homeState.userInfo
                             let userInfoTmp = state.homeState.userInfo;
@@ -362,6 +289,14 @@ class HomeLayout extends React.Component {
                                             sex:dataJson.user.sex,
                                             avatar:dataJson.user.avatar
                                         });
+                                    }
+                                }else {
+                                    if(item.childNode){
+                                        item.childNode = item.childNode.filter(function (uItem) {
+                                            //删除其他房间中的该用户
+                                            return uItem.id != dataJson.user.id;
+
+                                        })
                                     }
                                 }
                             });
