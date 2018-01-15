@@ -147,7 +147,10 @@ class HomeLayout extends React.Component {
                         //打开目标房间
                         roomStatueTmp['rc'+dataJson.objRoomInfo.roomId] = true;
                         store.dispatch({type:CONSTANT.ROOMSTATUS,val:roomStatueTmp});
+                        //当目标房间和当前房间不一致时响应消息
+                        console.log(dataJson.objRoomInfo.roomId +','+ state.homeState.currentRoomInfo.roomId)
                         if(dataJson.objRoomInfo.roomId != state.homeState.currentRoomInfo.roomId){
+                            console.log('enter');
                             let Msg = {
                                 type:'leave_room',
                                 roomId:state.homeState.currentRoomInfo.roomId,
@@ -162,8 +165,13 @@ class HomeLayout extends React.Component {
                                     user:state.homeState.userInfo
                                 };
                                 send(JSON.stringify(Msg),function(){
+                                    //需要更新当前房间
                                 });
                             });
+                        }else{
+                            if(dataJson.data === '消息成功发出'){
+                                //
+                            }
                         }
                         return;
                     }
@@ -272,6 +280,8 @@ class HomeLayout extends React.Component {
                         if(item.childNode.length !== 0){
                             item.childNode.map(function (item) {
                                 if(item.roomId === dataJson.roomId.toString()){
+                                    //更新当前房间信息
+                                    store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:item});
                                     let flag = true;//flag表示是否可以插入用户
                                     if(item.childNode){
                                         item.childNode.map(function (uItem) {
