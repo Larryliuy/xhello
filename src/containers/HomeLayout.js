@@ -15,7 +15,7 @@ import FooterBottomBox from './FooterBottomBox';
 import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
 
-import WS, {getDateString, send} from "../static/wsInstace";
+import WS, {getDateString, getSendData, send} from "../static/wsInstace";
 
 const layoutStyle = {
     width:'100%',
@@ -159,7 +159,17 @@ class HomeLayout extends React.Component {
                                     user:state.homeState.userInfo
                                 };
                                 send(JSON.stringify(Msg),function(){
-                                    //需要更新当前房间
+                                    //需要更新当前房间用户列表
+                                    let getUsersInfo = getSendData(
+                                        'get_room_users',
+                                        dataJson.objRoomInfo.roomId,
+                                        dataJson.objRoomInfo.roomName,
+                                        state.homeState.userInfo,
+                                        data);
+                                    // WS.send(JSON.stringify(enterMsg));
+                                    send(JSON.stringify(getUsersInfo),function(){
+
+                                    });
                                 });
                             });
                         }else{
@@ -273,7 +283,7 @@ class HomeLayout extends React.Component {
                     allRoomListTmp.map(function (item) {
                         if(item.childNode.length !== 0){
                             item.childNode.map(function (item) {
-                                if(item.roomId === dataJson.roomId.toString()){
+                                if(item.roomId == dataJson.roomId.toString()){
                                     //更新当前房间信息
                                     store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:item});
                                     let flag = true;//flag表示是否可以插入用户
@@ -335,11 +345,11 @@ class HomeLayout extends React.Component {
                         data:'<p>'+ dataJson.user.name + '已离开房间'+ dataJson.roomName +'</p>'});
                     break;
                 case 'get_room_users':
-                    // console.log(dataJson);
+                    console.log(dataJson);
                     // console.log(dataJson.data);
                     allRoomListTmp = state.homeState.allRoomList;
                     // console.log(allRoomListTmp);
-                    const by = function(name,minor){
+                    let by = function(name,minor){
                         return function(o,p){
                             let a,b;
                             if(o && p && typeof o === 'object' && typeof p ==='object'){
@@ -362,16 +372,15 @@ class HomeLayout extends React.Component {
                             item.childNode.map(function (item) {
                                 if(item.roomId == dataJson.roomId){
                                     item.childNode=[];
-                                    // console.log(dataJson.data.length);
+                                    console.log(dataJson.data);
                                     for(let i in dataJson.data){
-                                        // console.log(dataJson.data[i].id);
-                                        // console.log(state.homeState.userInfo.id);
+                                        console.log(dataJson.data[i].id);
+                                        console.log(state.homeState.userInfo.id);
                                         //需要排除空数据，如果用户数据存在才加入列表
-                                        if(dataJson.data[i]){
+                                        if(dataJson.data[i].id){
                                             item.childNode.push(dataJson.data[i]);
                                         }
                                     }
-                                    //根据等级排序，等级一样再根据名称排序
                                     item.childNode.sort(by('level',by('name')));
                                 }
                             });
