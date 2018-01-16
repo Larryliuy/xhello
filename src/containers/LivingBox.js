@@ -4,7 +4,7 @@ import Living from '../components/Living';
 class LivingBox extends React.Component{
     render(){
         return (
-            <Living></Living>
+            <Living style={{textAlign:'center'}}></Living>
         )
     }
 }

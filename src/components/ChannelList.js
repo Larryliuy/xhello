@@ -81,9 +81,8 @@ class ChannelList extends React.Component{
                 state.homeState.currentRoomInfo.roomId,
                 state.homeState.currentRoomInfo.roomName,
                 state.homeState.userInfo,
-                data)),function(){});
+                data)),function(){WS.close();});
             // alert('close');
-            // WS.close();
         }
     }
     enterRoom(roomIdInt,roomName){

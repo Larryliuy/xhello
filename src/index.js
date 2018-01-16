@@ -3,9 +3,15 @@ import ReactDom from 'react-dom';
 import {BrowserRouter, HashRouter, Route, withRouter, Switch, Redirect} from 'react-router-dom';
 import { connect,Provider } from 'react-redux';
 import store,{collapsed,CONSTANT} from './reducer/reducer';
+import WS, {getDateString, getSendData, send} from "./static/wsInstace";
 import LoginBox from './containers/LoginBox';
 import RegisterBox from './containers/RegisterBox';
 import HomeLayout from './containers/HomeLayout';
+
+let state = store.getState();
+store.subscribe(function () {
+    state = store.getState()
+});
 
 //css
 const h4Style = {
@@ -14,8 +20,23 @@ const h4Style = {
 };
 
 class App extends React.Component {
-    componentWillMount(){
-        // history.back();
+    componentDidMount(){
+        //页面刷新时关闭socket
+        window.addEventListener('beforeunload', function (event) {
+            let data = state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
+                leaveMsg = getSendData(
+                    'leave_room',
+                    state.homeState.currentRoomInfo.roomId,
+                    state.homeState.currentRoomInfo.roomName,
+                    state.homeState.userInfo,
+                    data);
+            // WS.send(JSON.stringify(enterMsg));
+            send(JSON.stringify(leaveMsg),function(){
+            });
+            WS.close();
+            // event.returnValue = "离开页面将丢失信息";
+            // return "离开页面将丢失信息！";
+        });
     }
 render(){
     // console.log(location.href);
@@ -23,7 +44,7 @@ render(){
             <div style={h4Style}>
                 <Switch>
                     <Route path='/register' component={RegisterBox}/>
-                    <Route path='/home' component={HomeLayout}/>
+                    {state.homeState.userInfo.id && <Route path='/home' component={HomeLayout}/>}
                     <Route path='/' component={LoginBox}/>
                 </Switch>
             </div>

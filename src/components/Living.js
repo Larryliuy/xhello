@@ -1,13 +1,23 @@
 import React,{ Component } from 'react';
 
 class Living extends React.Component{
+    componentDidMount(){
+        let player =  new TcPlayer('idVideo', {
+            "m3u8": "http://www.ossrs.net:8080/live/livestream.m3u8",
+            "flv": "http://19657.liveplay.myqcloud.com/live/19657_ce032fcc56.flv", //增加了一个flv的播放地址，用于PC平台的播放 请替换成实际可用的播放地址
+            "autoplay" : true,      //iOS下safari浏览器，以及大部分移动端浏览器是不开放视频自动播放这个能力的
+            "coverpic" : "http://www.test.com/myimage.jpg",
+            "width" :  '480',//视频的显示宽度，请尽量使用视频分辨率宽度
+            "height" : '320'//视频的显示高度，请尽量使用视频分辨率高度
+        });
+    }
     render(){
         return (
-            <div style={{height:'100%'}}>
-                <video id='video' className='video-ele' src="movie.ogg" controls="controls">
-                    您的浏览器不支持 video 标签。
-                </video>
-                <div className='host-text'><p><a href={'http://www.baidu.com'}>打个小广告</a></p></div>
+            <div style={{height:'100%',textAlign:'center !important'}}>
+                <div id='idVideo' className='video-ele'>
+
+                </div>
+                <div className='host-text'><p><a href={'http://www.xtell.cn'}>打个小广告</a></p></div>
             </div>
         )
     }

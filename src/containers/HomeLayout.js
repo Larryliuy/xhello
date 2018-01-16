@@ -51,12 +51,6 @@ class HomeLayout extends React.Component {
         super(props);
         this.state={sendData:'',sliderWidth:240};
     }
-    componentWillMount(){
-        console.log(state.homeState.userInfo);
-        if(!state.homeState.userInfo.id){
-            location.replace('#/');
-        }
-    }
     componentDidMount(){
         //左右拖动
         let isChanging = false,
@@ -326,9 +320,9 @@ class HomeLayout extends React.Component {
                     allRoomListTmp.map(function (item) {
                         if(item.childNode){
                             item.childNode.map(function (item) {
-                                if(item.roomId === dataJson.roomId.toString()){
+                                if(item.roomId == dataJson.roomId.toString()){
                                     item.childNode = item.childNode.filter(function(item){
-                                        return item.id !== dataJson.user.id;
+                                        return item.id != dataJson.user.id;
                                     })
                                 }
                             });
@@ -341,21 +335,44 @@ class HomeLayout extends React.Component {
                         data:'<p>'+ dataJson.user.name + '已离开房间'+ dataJson.roomName +'</p>'});
                     break;
                 case 'get_room_users':
+                    // console.log(dataJson);
                     // console.log(dataJson.data);
                     allRoomListTmp = state.homeState.allRoomList;
                     // console.log(allRoomListTmp);
+                    const by = function(name,minor){
+                        return function(o,p){
+                            let a,b;
+                            if(o && p && typeof o === 'object' && typeof p ==='object'){
+                                a = o[name];
+                                b = p[name];
+                                if(a === b){
+                                    return typeof minor === 'function' ? minor(o,p):0;
+                                }
+                                if(typeof a === typeof b){
+                                    return a < b ? -1:1;
+                                }
+                                return typeof a < typeof b ? -1 : 1;
+                            }else{
+                                throw ("error");
+                            }
+                        }
+                    };
                     allRoomListTmp.map(function (item) {
                         if(item.childNode){
                             item.childNode.map(function (item) {
-                                if(item.roomId === dataJson.roomId){
+                                if(item.roomId == dataJson.roomId){
+                                    item.childNode=[];
                                     // console.log(dataJson.data.length);
                                     for(let i in dataJson.data){
-                                        // console.log(dataJson.data[i]);
+                                        // console.log(dataJson.data[i].id);
+                                        // console.log(state.homeState.userInfo.id);
                                         //需要排除空数据，如果用户数据存在才加入列表
-                                        if(dataJson.data[i] && dataJson.data[i].id  !== state.homeState.userInfo.id){
+                                        if(dataJson.data[i]){
                                             item.childNode.push(dataJson.data[i]);
                                         }
                                     }
+                                    //根据等级排序，等级一样再根据名称排序
+                                    item.childNode.sort(by('level',by('name')));
                                 }
                             });
                         }

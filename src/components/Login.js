@@ -78,10 +78,10 @@ class Login extends React.Component {
                                                 .then((response) => {return response.json()})
                                                 .then(data=>{
                                                     //这里获取用户信息
-                                                    // console.log(data);
+                                                    console.log(data);
                                                     if(data.ret === 0){
+                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:openId,name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2}});
                                                         location.replace("#/home");
-                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:new Date().getTime(),name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2}});
                                                     }
                                                 })
                                                 .catch(err=>{
