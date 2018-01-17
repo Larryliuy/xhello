@@ -141,9 +141,11 @@ class HomeLayout extends React.Component {
                         //打开目标房间
                         roomStatueTmp['rc'+dataJson.objRoomInfo.roomId] = true;
                         store.dispatch({type:CONSTANT.ROOMSTATUS,val:roomStatueTmp});
-                        //当目标房间和当前房间不一致时响应消息
+                        //当目标和我不在同一房间时时响应消息
                         console.log(dataJson.objRoomInfo.roomId +','+ state.homeState.currentRoomInfo.roomId)
                         if(dataJson.objRoomInfo.roomId != state.homeState.currentRoomInfo.roomId){
+                            //当不是目标用户时返回null
+                            if(dataJson.user.id != state.homeState.userInfo.id ) return;
                             console.log('enter');
                             let Msg = {
                                 type:'leave_room',
@@ -352,7 +354,7 @@ class HomeLayout extends React.Component {
                     let by = function(name,minor){
                         return function(o,p){
                             let a,b;
-                            if(o && p && typeof o === 'object' && typeof p ==='object'){
+                            if(o && p && typeof o === 'object' && typeof p === 'object'){
                                 a = o[name];
                                 b = p[name];
                                 if(a === b){
