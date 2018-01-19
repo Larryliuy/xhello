@@ -1,7 +1,8 @@
 import React,{ Component }  from 'react'
 import { Select, List, Icon,Modal } from 'antd';
 import store, {CONSTANT} from "../reducer/reducer";
-import WS,{ send } from  '../static/wsInstace.js';
+import WS, {getDateString, getSendData, send} from "../static/wsInstace";
+import { prepareConnection, onAnswer,  onCandidate, onOffer, startPeerConnection } from  '../webrtc/webRtcCom';
 const Option = Select.Option;
 
 let state = store.getState();
@@ -9,15 +10,7 @@ store.subscribe(function () {
     state = store.getState();
     // console.log(store.getState())
 });
-
 class MicroPhone extends React.Component {
-    componentDidMount(){
-        //这里需要获取每个房间的麦序列表，有多少人在麦
-        /*let userData = state.homeState.roomMicrophoneUser;
-        console.log(state.homeState.roomMicrophoneUser);
-        // userData.push(dataJson.user);
-        store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:userData});*/
-    }
     handleChange(e){
         console.log(e)
     }
@@ -53,7 +46,14 @@ class MicroPhone extends React.Component {
                             tips('您已经在排序了，请耐性等待');
                         }
                     });
-
+                    let Msg = {
+                        type:'msg',
+                        typeString:'webrtc',
+                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                        roomName: state.homeState.currentRoomInfo.roomName,
+                        user:state.homeState.userInfo
+                    };
+                    startPeerConnection(state.homeState.userInfo.id,Msg);
                 }
                 if(item === '禁麦'){
                     //管理员才可禁麦
@@ -83,7 +83,7 @@ class MicroPhone extends React.Component {
                     roomName: state.homeState.currentRoomInfo.roomName,
                     user:state.homeState.userInfo
                 };
-                console.log(micrpMsg);
+                // console.log(micrpMsg);
                 send(JSON.stringify(micrpMsg),function(){});
             }
         })

@@ -4,6 +4,7 @@ import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from  '../static/wsInstace.js';
 import '../static/login.scss';
+import {startPeerConnection} from "../webrtc/webRtcCom";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -54,12 +55,11 @@ class ChannelList extends React.Component{
                     let getUsersInfo = getSendData(
                         'get_room_users',
                         state.homeState.currentRoomInfo.roomId,
-                        state.homeState.currentRoomInfo.roomName,
+                            state.homeState.currentRoomInfo.roomName,
                         state.homeState.userInfo,
                         data);
                     // WS.send(JSON.stringify(enterMsg));
                     send(JSON.stringify(getUsersInfo),function(){
-
                     });
                     //需要默认将默认房间信息更新到当前房间
 
@@ -112,7 +112,6 @@ class ChannelList extends React.Component{
             data);
         // WS.send(JSON.stringify(enterMsg));
         send(JSON.stringify(enterMsg),function(){
-
         });
         //进入房间，更新当前房间信息
         state.homeState.allRoomList.map(function(item){

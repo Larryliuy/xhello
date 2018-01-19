@@ -26,13 +26,13 @@ class LoginBox extends React.Component {
     };
     handleLogin(bool,data){
         this.setState({login:bool,data:data});
-        location.replace("#/home");
         store.dispatch({type:CONSTANT.USERINFO,val:{id:data.id,name:data.name,sex:parseInt(data.sex),level:parseInt(data.level),limit:data.limit,avatar:'./images/avatar.png'}});
+        location.replace("#/home");
     }
     componentDidMount(){
-        if(cookieUtil.get('userName') && cookieUtil.get('password')){
-            this.setState({login:true,data:cookieUtil.get('userData')})
-        }
+        // if(cookieUtil.get('userName') && cookieUtil.get('password')){
+        //     this.setState({login:true,data:cookieUtil.get('userData')})
+        // }
         //uri参数截取函数
         function GetQueryString(str,key) {
             let reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");

@@ -7,7 +7,7 @@ import WS, {getDateString, getSendData, send} from "./static/wsInstace";
 import LoginBox from './containers/LoginBox';
 import RegisterBox from './containers/RegisterBox';
 import HomeLayout from './containers/HomeLayout';
-
+import {onLeave} from './webrtc/webRtcCom';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
@@ -34,6 +34,7 @@ class App extends React.Component {
             send(JSON.stringify(leaveMsg),function(){
             });
             WS.close();
+            onLeave();
             // event.returnValue = "离开页面将丢失信息";
             // return "离开页面将丢失信息！";
         });

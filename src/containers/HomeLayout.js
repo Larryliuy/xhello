@@ -16,6 +16,7 @@ import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
 
 import WS, {getDateString, getSendData, send} from "../static/wsInstace";
+import {onAnswer, onCandidate, onOffer, prepareConnection, startPeerConnection, onLeave, getPrepareConnectionState} from '../webrtc/webRtcCom';
 
 const layoutStyle = {
     width:'100%',
@@ -32,26 +33,18 @@ let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
 });
-let userId = 0,
-    userName = '',
-    sex=0,
-    level=0;
-/*if(decodeURI(window.location.href).indexOf('?{') !== -1){
-    console.log(decodeURI(window.location.href));
-    console.log(userId);
-    userId = JSON.parse(decodeURI(window.location.href).substring(decodeURI(window.location.href).indexOf('?{')+1,decodeURI(window.location.href).length)).id
-}else{
-    location.replace('#/');
-}*/
-// console.log('href:'+userId);
-
-
+let intval;//定时器
 class HomeLayout extends React.Component {
     constructor(props){
         super(props);
         this.state={sendData:'',sliderWidth:240};
     }
     componentDidMount(){
+        //准备webrtc连接
+        let videoBox = document.getElementById('videoBox');
+        // let theirVideo = document.getElementById('theirVideo');
+        prepareConnection(videoBox);
+        // startPeerConnection()
         //左右拖动
         let isChanging = false,
             _this = this,
@@ -101,12 +94,32 @@ class HomeLayout extends React.Component {
             let allRoomListTmp = [];
             switch(dataJson.type){
                 case 'msg':
-                    console.log(dataJson);
+                    // console.log(dataJson);
                     if(dataJson.typeString === '放麦'){
                         let userData = state.homeState.roomMicrophoneUser;
                         // console.log(state.homeState.roomMicrophoneUser);
                         userData.push(dataJson.user);
                         store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:userData});
+                        return;
+                    };
+                    if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出'){
+                        // console.log(dataJson);
+                        if(dataJson.offer){
+                            console.log('recive offer');
+                            onOffer(dataJson.offer)
+                        }
+                        if(dataJson.anwser){
+                            console.log('recive anwser');
+                            onAnswer(dataJson.anwser)
+                        }
+                        if(dataJson.candidate){
+                            console.log('recive candidate');
+                            // for(i=0; i<dataJson.candidate.length; i++){
+                                // dataJson.candidate;
+                                console.log('setCandidate');
+                                onCandidate(dataJson.candidate);
+                            // }
+                        }
                         return;
                     }
                     if(dataJson.typeString === '离麦'){
@@ -253,7 +266,10 @@ class HomeLayout extends React.Component {
                     }
                     // console.log(dataJson);
                     if (dataJson.typeString !== 'withdraw') {
-                        console.log(dataJson);
+                        // console.log(dataJson);
+                        if(dataJson.typeString === 'webrtc' && dataJson.data === '消息成功发出'){
+                            return;
+                        }//如果发送的是webrtc消息，则不需要显示在消息列表中
                         if (dataJson.data === '消息成功发出') {
                             data.push({
                                 userId:dataJson.user.id,
@@ -324,6 +340,30 @@ class HomeLayout extends React.Component {
                     data.push({userName:dataJson.user.name,
                         time:getDateString(),
                         data:'<p>'+ dataJson.user.name + '已进入房间'+ dataJson.roomName  +'</p>'});
+                    //建立webRtc连接
+                    let Msg = {
+                        type:'msg',
+                        typeString:'webrtc',
+                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                        roomName: state.homeState.currentRoomInfo.roomName,
+                        user:state.homeState.userInfo
+                    };
+                    // return;
+                     intval = setInterval(function () {
+                        if(getPrepareConnectionState()){
+                            // startPeerConnection(state.homeState.userInfo.id,Msg);
+                            console.log('clear');
+                            clearInterval(intval);
+                        }
+                    },500);
+                    //  setTimeout(function () {
+                    //     if(getPrepareConnectionState()){
+                    //         startPeerConnection(state.homeState.userInfo.id,Msg);
+                    //         // console.log('clear');
+                    //         // clearInterval(intval);
+                    //     }
+                    // },500);
+
                     break;
                 case 'leave_room':
                     // console.log(dataJson);
@@ -347,7 +387,7 @@ class HomeLayout extends React.Component {
                         data:'<p>'+ dataJson.user.name + '已离开房间'+ dataJson.roomName +'</p>'});
                     break;
                 case 'get_room_users':
-                    console.log(dataJson);
+                    // console.log(dataJson);
                     // console.log(dataJson.data);
                     allRoomListTmp = state.homeState.allRoomList;
                     // console.log(allRoomListTmp);
@@ -374,10 +414,10 @@ class HomeLayout extends React.Component {
                             item.childNode.map(function (item) {
                                 if(item.roomId == dataJson.roomId){
                                     item.childNode=[];
-                                    console.log(dataJson.data);
+                                    // console.log(dataJson.data);
                                     for(let i in dataJson.data){
-                                        console.log(dataJson.data[i].id);
-                                        console.log(state.homeState.userInfo.id);
+                                        // console.log(dataJson.data[i].id);
+                                        // console.log(state.homeState.userInfo.id);
                                         //需要排除空数据，如果用户数据存在才加入列表
                                         if(dataJson.data[i].id){
                                             item.childNode.push(dataJson.data[i]);
@@ -456,6 +496,7 @@ class HomeLayout extends React.Component {
         document.onmousemove = null;
         document.onmouseup = null;
         dragBar.onmousedown = null;
+        onLeave();
 
     }
     setSendData(value){
@@ -477,6 +518,12 @@ class HomeLayout extends React.Component {
                         </div>
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
+                        <div id={'videoBox'}>
+                            {/*<video id={'myVideo'} src={''} controls autoPlay="autoplay"*/}
+                                   {/*style={{position:'relative',width:'60px',height:'40px'}}>不支持video</video>*/}
+                            {/*<video id={'theirVideo'} src={''} controls autoPlay="autoplay"*/}
+                                   {/*style={{position:'relative',width:'60px',height:'40px'}}>不支持video</video>*/}
+                        </div>
                         <div className= 'content_show'>
                             {state.homeState.currentRoomInfo.mode == 0 && <MessageListBox sendData={this.state.sendData}></MessageListBox>}
                             {state.homeState.currentRoomInfo.mode == 1 && <LivingBox></LivingBox>}

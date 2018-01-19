@@ -30,7 +30,9 @@ class MessageListBox extends React.Component{
 
     }
     render(){
-        return (<div className='message-box' id='messageBox'><MessageList data={state.homeState.messageData}/></div>)
+        return (<div className='message-box' id='messageBox'>
+            <MessageList data={state.homeState.messageData}/>
+        </div>)
     }
 }
 

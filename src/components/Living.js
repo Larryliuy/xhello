@@ -14,8 +14,14 @@ class Living extends React.Component{
     render(){
         return (
             <div style={{height:'100%',textAlign:'center !important'}}>
-                <div id='idVideo' className='video-ele'>
+                {/*<div id='idVideo' className='video-ele'>*/}
 
+                {/*</div>*/}
+                <div>
+                        <video id={'myVideo'}
+                               style={{position:'relative',width:'100%',height:'100%'}}>不支持video</video>
+                        <video id={'theirVideo'}
+                               style={{position:'relative',width:'200px',height:'120px'}}>不支持video</video>
                 </div>
                 <div className='host-text'><p><a href={'http://www.xtell.cn'}>打个小广告</a></p></div>
             </div>

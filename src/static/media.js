@@ -1,4 +1,5 @@
 /*
+/!*
 let p = navigator.mediaDevices.getUserMedia({ audio: true, video: true });
 
 p.then(function(mediaStream) {
@@ -10,7 +11,7 @@ p.then(function(mediaStream) {
     };
 });
 
-p.catch(function(err) { console.log(err.name); }); // always check for errors at the end.*/
+p.catch(function(err) { console.log(err.name); }); // always check for errors at the end.*!/
 
 
 let promisifiedOldGUM = function(constraints) {
@@ -59,4 +60,4 @@ navigator.mediaDevices.getUserMedia(constraints)
     })
     .catch(function(err) {
         console.log(err.name + ": " + err.message);
-    });
+    });*/
