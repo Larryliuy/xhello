@@ -25,6 +25,7 @@ class LoginBox extends React.Component {
         data:''
     };
     handleLogin(bool,data){
+        if(!this.refs.loginRef) return;
         this.setState({login:bool,data:data});
         store.dispatch({type:CONSTANT.USERINFO,val:{id:data.id,name:data.name,sex:parseInt(data.sex),level:parseInt(data.level),limit:data.limit,avatar:'./images/avatar.png'}});
         location.replace("#/home");
@@ -50,7 +51,7 @@ class LoginBox extends React.Component {
         // console.log(this.props.match);
         // console.log(this.props.location);
         return(
-        <div style={divStyle}>
+        <div ref={'loginRef'} style={divStyle}>
             <Login login ={this.handleLogin.bind(this)}/>
         </div>
     )}

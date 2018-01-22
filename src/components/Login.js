@@ -20,16 +20,16 @@ class Login extends React.Component {
         this.state = {wechatVisible:'hidden',userName:'',password:'',loginComponent:true}
     }
     componentDidMount(){
-        if(this.state.loginComponent){
-            setTimeout(function () {
-                let obj = new WxLogin({
-                    id:"we-chat",
-                    appid: "wx592e917bee49160b",
-                    scope: "snsapi_login",
-                    redirect_uri: 'http://www.xtell.cn'
-                });
-            },300);
-        }
+        // if(this.state.loginComponent){
+        //     setTimeout(function () {
+        //         let obj = new WxLogin({
+        //             id:"we-chat",
+        //             appid: "wx592e917bee49160b",
+        //             scope: "snsapi_login",
+        //             redirect_uri: 'http://www.xtell.cn'
+        //         });
+        //     },300);
+        // }
     }
     componentWillMount(){
         //QQ快捷登录

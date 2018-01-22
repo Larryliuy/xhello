@@ -16,7 +16,7 @@ import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
 
 import WS, {getDateString, getSendData, send} from "../static/wsInstace";
-import {onAnswer, onCandidate, onOffer, prepareConnection, startPeerConnection, onLeave, getPrepareConnectionState} from '../webrtc/webRtcCom';
+import {onAnswer, onCandidate, startMyCam, offerPeerConnection, answerPeerConnection, onLeave, getPrepareConnectionState} from '../webrtc/webRtcCom';
 
 const layoutStyle = {
     width:'100%',
@@ -33,19 +33,16 @@ let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
 });
-let intval;//定时器
+let intval = null;//定时器
 class HomeLayout extends React.Component {
     constructor(props){
         super(props);
         this.state={sendData:'',sliderWidth:240};
     }
     componentDidMount(){
-        //准备webrtc连接
+        //获取自己音视频流
         let videoBox = document.getElementById('videoBox');
-        // let theirVideo = document.getElementById('theirVideo');
-        prepareConnection(videoBox);
-        // startPeerConnection()
-        //左右拖动
+        startMyCam(videoBox);
         let isChanging = false,
             _this = this,
             dragBar = document.getElementById('resizable');
@@ -84,7 +81,7 @@ class HomeLayout extends React.Component {
                 /*this.refs.messageBox.scrollTop = this.refs.messageBox.clientHeight;
                 // window.scrollTo(0,this.refs.messageBox.clientHeight);
                 console.log('hello:'+this.refs.messageBox.clientHeight);*/
-            },100);
+            },200);
         }
         WS.onmessage = function(response){
             if(!response) return ;
@@ -102,23 +99,34 @@ class HomeLayout extends React.Component {
                         store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:userData});
                         return;
                     };
-                    if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出'){
-                        // console.log(dataJson);
-                        if(dataJson.offer){
-                            console.log('recive offer');
-                            onOffer(dataJson.offer)
-                        }
-                        if(dataJson.anwser){
-                            console.log('recive anwser');
-                            onAnswer(dataJson.anwser)
-                        }
-                        if(dataJson.candidate){
-                            console.log('recive candidate');
-                            // for(i=0; i<dataJson.candidate.length; i++){
-                                // dataJson.candidate;
-                                console.log('setCandidate');
-                                onCandidate(dataJson.candidate);
-                            // }
+                    if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
+                        console.log(dataJson);
+                        if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
+                            if(dataJson.offer){
+                                console.log('recive offer from '+ dataJson.fromUser.id);
+                                console.log(dataJson);
+                                let Msg = {
+                                    type:'msg',
+                                    typeString:'webrtc',
+                                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                                    roomName: state.homeState.currentRoomInfo.roomName,
+                                    fromUser:state.homeState.userInfo,
+                                    toUser:dataJson.fromUser,
+                                    sessionId:state.homeState.userInfo.id+'-'+dataJson.fromUser.id,
+                                };
+                                console.log(getPrepareConnectionState());
+                                if(getPrepareConnectionState()) {
+                                    answerPeerConnection(Msg,dataJson.offer, videoBox);
+                                }
+                            }
+                            if(dataJson.answer){
+                                console.log('recive answer from '+dataJson.fromUser.id);
+                                onAnswer(dataJson.answer,dataJson.sessionId);
+                            }
+                            if(dataJson.candidate){
+                                // console.log('recive candidate and setCandidate');
+                                onCandidate(dataJson.candidate,dataJson.sessionId);
+                            }
                         }
                         return;
                     }
@@ -341,21 +349,28 @@ class HomeLayout extends React.Component {
                         time:getDateString(),
                         data:'<p>'+ dataJson.user.name + '已进入房间'+ dataJson.roomName  +'</p>'});
                     //建立webRtc连接
-                    let Msg = {
-                        type:'msg',
-                        typeString:'webrtc',
-                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                        roomName: state.homeState.currentRoomInfo.roomName,
-                        user:state.homeState.userInfo
-                    };
+                    // let Msg = {
+                    //     type:'msg',
+                    //     typeString:'webrtc',
+                    //     roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                    //     roomName: state.homeState.currentRoomInfo.roomName,
+                    //     fromUser:state.homeState.userInfo,
+                    //     toUser:dataJson.user,
+                    //     sessionId:state.homeState.userInfo.id+'-'+dataJson.user.id
+                    // };
+                    // console.log(Msg);
+                    //遍历人发offer
+                    // if(state.homeState.userInfo.id !=dataJson.user.id ){
+                    //     offerPeerConnection(Msg,videoBox);
+                    // }
                     // return;
-                     intval = setInterval(function () {
-                        if(getPrepareConnectionState()){
-                            // startPeerConnection(state.homeState.userInfo.id,Msg);
-                            console.log('clear');
-                            clearInterval(intval);
-                        }
-                    },500);
+                    //  intval = setInterval(function () {
+                    //     if(getPrepareConnectionState()){
+                    //         // startPeerConnection(state.homeState.userInfo.id,Msg);
+                    //         console.log('clear');
+                    //         clearInterval(intval);
+                    //     }
+                    // },500);
                     //  setTimeout(function () {
                     //     if(getPrepareConnectionState()){
                     //         startPeerConnection(state.homeState.userInfo.id,Msg);
@@ -363,7 +378,6 @@ class HomeLayout extends React.Component {
                     //         // clearInterval(intval);
                     //     }
                     // },500);
-
                     break;
                 case 'leave_room':
                     // console.log(dataJson);
@@ -387,6 +401,7 @@ class HomeLayout extends React.Component {
                         data:'<p>'+ dataJson.user.name + '已离开房间'+ dataJson.roomName +'</p>'});
                     break;
                 case 'get_room_users':
+                    console.log('get_room_users');
                     // console.log(dataJson);
                     // console.log(dataJson.data);
                     allRoomListTmp = state.homeState.allRoomList;
@@ -431,6 +446,37 @@ class HomeLayout extends React.Component {
                     // console.log(allRoomListTmp)
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
                     // console.log(allRoomListTmp);
+                    //给不是自己的所有人发offer
+                    //建立webRtc连接
+
+                    // 遍历人发offer
+                    // console.log(dataJson.data);
+                    // let intval=null;
+                    if(dataJson.data && Object.keys(dataJson.data).length > 1){
+                        intval = setInterval(function () {
+                            console.log('timer');
+                        for(let item in dataJson.data) {
+                            if(item != state.homeState.userInfo.id){
+                                let Msg = {
+                                    type:'msg',
+                                    typeString:'webrtc',
+                                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                                    roomName: state.homeState.currentRoomInfo.roomName,
+                                    fromUser:state.homeState.userInfo,
+                                    toUser:dataJson.data[item],
+                                    sessionId:state.homeState.userInfo.id+'-'+item
+                                };
+                                console.log(Msg);
+                                    if(getPrepareConnectionState()){
+                                        console.log("offerPeerConnection ......");
+                                        offerPeerConnection(Msg,videoBox);
+                                        clearInterval(intval);
+                                    }
+                            }
+                        };
+                        },500);
+                    }
+
                     break;
                 case 'get_rooms':
                     // console.log(dataJson.data);

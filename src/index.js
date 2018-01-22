@@ -33,6 +33,7 @@ class App extends React.Component {
             // WS.send(JSON.stringify(enterMsg));
             send(JSON.stringify(leaveMsg),function(){
             });
+            alert('leave');
             WS.close();
             onLeave();
             // event.returnValue = "离开页面将丢失信息";

@@ -5,14 +5,16 @@ if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
 }
 if (window.WebSocket) {
-        WS = new WebSocket('ws://192.168.6.3:5555');
+        // WS = new WebSocket('ws://192.168.6.3:5555');
+        WS = new WebSocket('wss://192.168.6.3:443/wss');
     // WS = new WebSocket('ws://localhost:5555');
 } else {
     alert("Your browser does not support Web Socket.");
 }
 
 export function instanceWS(){
-    return new WebSocket('ws://192.168.6.3:5555');
+    // return new WebSocket('ws://192.168.6.3:5555');
+    return new WebSocket('wss://192.168.6.3:443/wss');
     // return new WebSocket('ws://localhost:5555');
 }
 

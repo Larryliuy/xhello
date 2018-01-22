@@ -4,7 +4,7 @@ import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from  '../static/wsInstace.js';
 import '../static/login.scss';
-import {startPeerConnection} from "../webrtc/webRtcCom";
+import {offerPeerConnection, startPeerConnection} from "../webrtc/webRtcCom";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -85,6 +85,7 @@ class ChannelList extends React.Component{
             // alert('close');
         }
     }
+    //这里做分离自己进入房间事件，其他人进入房间进去，封装一个getList
     enterRoom(roomIdInt,roomName){
         if(!roomIdInt || !roomName) return;
             //离开上一个聊天室
