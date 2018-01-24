@@ -40,8 +40,8 @@ class HomeLayout extends React.Component {
         this.state={sendData:'',sliderWidth:240};
     }
     componentDidMount(){
-        //获取自己音视频流
-        let videoBox = document.getElementById('videoBox');
+        //获取自己音频流
+        let videoBox = document.getElementById('audioBox');
         startMyCam(videoBox);
         let isChanging = false,
             _this = this,
@@ -100,7 +100,7 @@ class HomeLayout extends React.Component {
                         return;
                     };
                     if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
-                        console.log(dataJson);
+                        // console.log(dataJson);
                         if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
                             if(dataJson.offer){
                                 console.log('recive offer from '+ dataJson.fromUser.id);
@@ -121,7 +121,7 @@ class HomeLayout extends React.Component {
                             }
                             if(dataJson.answer){
                                 console.log('recive answer from '+dataJson.fromUser.id);
-                                onAnswer(dataJson.answer,dataJson.sessionId);
+                                onAnswer(dataJson.answer,dataJson.sessionId,dataJson.fromUser.id);
                             }
                             if(dataJson.candidate){
                                 // console.log('recive candidate and setCandidate');
@@ -454,9 +454,11 @@ class HomeLayout extends React.Component {
                     // let intval=null;
                     if(dataJson.data && Object.keys(dataJson.data).length > 1){
                         intval = setInterval(function () {
-                            console.log('timer');
+                            // console.log('timer');
                         for(let item in dataJson.data) {
-                            if(item != state.homeState.userInfo.id){
+                            if(item != state.homeState.userInfo.id
+                                && dataJson.data[item].name === 'larry'
+                                ){
                                 let Msg = {
                                     type:'msg',
                                     typeString:'webrtc',
@@ -466,12 +468,13 @@ class HomeLayout extends React.Component {
                                     toUser:dataJson.data[item],
                                     sessionId:state.homeState.userInfo.id+'-'+item
                                 };
-                                console.log(Msg);
-                                    if(getPrepareConnectionState()){
-                                        console.log("offerPeerConnection ......");
-                                        offerPeerConnection(Msg,videoBox);
-                                        clearInterval(intval);
-                                    }
+                                // console.log(Msg);
+                                if(getPrepareConnectionState()){
+                                    console.log("offerPeerConnection ......");
+                                    offerPeerConnection(Msg,videoBox);
+                                    clearInterval(intval);
+                                    // break;
+                                }
                             }
                         };
                         },500);
@@ -542,7 +545,6 @@ class HomeLayout extends React.Component {
         document.onmousemove = null;
         document.onmouseup = null;
         dragBar.onmousedown = null;
-        onLeave();
 
     }
     setSendData(value){
@@ -564,7 +566,7 @@ class HomeLayout extends React.Component {
                         </div>
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
-                        <div id={'videoBox'}>
+                        <div id={'audioBox'}>
                             {/*<video id={'myVideo'} src={''} controls autoPlay="autoplay"*/}
                                    {/*style={{position:'relative',width:'60px',height:'40px'}}>不支持video</video>*/}
                             {/*<video id={'theirVideo'} src={''} controls autoPlay="autoplay"*/}

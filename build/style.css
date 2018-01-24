@@ -7945,6 +7945,14 @@ ul {
   border-radius: 3px;
   text-align: center;
   color: rgba(0, 0, 0, 0.5); }
+
+#audioBox {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  top: -500px;
+  left: -500px;
+  overflow: hidden; }
 /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
 /* stylelint-disable no-duplicate-selectors */
 /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors */

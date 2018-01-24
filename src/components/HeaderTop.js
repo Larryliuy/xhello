@@ -10,6 +10,7 @@ import Skin from './Skin';
 
 class HeaderTop extends React.Component{
     loginOut=()=>{
+        location.reload();
         message.success('退出成功！');
         cookieUtil.unset('userName');
         cookieUtil.unset('password');

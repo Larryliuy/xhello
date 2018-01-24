@@ -32,12 +32,11 @@ class App extends React.Component {
                     data);
             // WS.send(JSON.stringify(enterMsg));
             send(JSON.stringify(leaveMsg),function(){
+                WS.close();
+                onLeave();
             });
-            alert('leave');
-            WS.close();
-            onLeave();
             // event.returnValue = "离开页面将丢失信息";
-            // return "离开页面将丢失信息！";
+            return "离开页面将丢失信息！";
         });
     }
 render(){

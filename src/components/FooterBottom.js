@@ -3,6 +3,8 @@ import { message ,Input, Button, Slider } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import {generalApi} from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
+import { micphoneStream } from '../webrtc/webRtcCom';
+
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -14,7 +16,9 @@ class FooterBottom extends React.Component{
         this.state={
             visible: false,
             inputVisible:false,
-            inputValue:''
+            inputValue:'',
+            audioTrack:'',
+            microphoneOpen:true
         }
     }
     clickHandle(e){
@@ -26,10 +30,10 @@ class FooterBottom extends React.Component{
                 this.setState({visible: true});
                 break;
             case 'audio-img':
-                alert('控制音量');
+                // alert('控制音量');
                 break;
             case 'microphone-img':
-                alert('控制麦克风');
+                // alert('控制麦克风');
                 break;
             case 'cheer-span':
                 alert('欢呼');
@@ -38,7 +42,23 @@ class FooterBottom extends React.Component{
                 alert('鼓掌');
                 break;
             case 'open-microphone-btn':
-                alert('开启麦克风');
+                // alert('开启麦克风');
+                // myLocalStream
+                if(this.state.microphoneOpen){
+                    let audioTrack = micphoneStream.getAudioTracks();
+                    console.log(audioTrack.length +','+ audioTrack);
+                    if(audioTrack.length > 0){
+                        if(audioTrack[0]){
+                            this.setState({microphoneOpen:false,audioTrack:audioTrack[0]});
+                            micphoneStream.removeTrack(audioTrack[0]);
+                        }
+                    }
+                }else{
+                    if(this.state.audioTrack){
+                        micphoneStream.addTrack(this.state.audioTrack);
+                        this.setState({microphoneOpen:true,audioTrack:''});
+                    }
+                }
                 break;
             case 'user-name':
                 this.setState({inputVisible:true});
@@ -107,6 +127,30 @@ class FooterBottom extends React.Component{
         console.log(this.state.inputValue);
         // message.success('修改成功');
     }
+    handleSliderAudio(value){
+        // console.log(value);
+        if(!value) return;
+        //这里设置音频声量
+        let videoBox = document.getElementById('audioBox').getElementsByTagName('video'),newArr=[];
+        for(let i=0; i<videoBox.length; i++ ){
+            newArr.push(videoBox[i]);
+        }
+        newArr.map(function (item) {
+            item.volume = value/100;
+        })
+    }
+    handleSliderMicrophone(value){
+        // console.log(value);
+        if(!value) return;
+        //这里设置麦克风声量
+        // let videoBox = document.getElementById('audioBox').getElementsByTagName('video'),newArr=[];
+        // for(let i=0; i<videoBox.length; i++ ){
+        //     newArr.push(videoBox[i]);
+        // }
+        // newArr.map(function (item) {
+        //     item.volume = value/100;
+        // })
+    }
     render(){
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
             <div>
@@ -130,18 +174,18 @@ class FooterBottom extends React.Component{
                 <span>
                     <img id='audio-img' src='./images/icons/audio.png' />
                     <div className='sound-slider'>
-                        <Slider className='slider' defaultValue={30} />
+                        <Slider className='slider' onChange={this.handleSliderAudio} defaultValue={100} />
                     </div>
                 </span>
                 <span style={{marginLeft:10}}>
                     <img id='microphone-img' src='./images/icons/Microphone_open.png' />
                     <div className='sound-slider'>
-                        <Slider defaultValue={30} />
+                        <Slider defaultValue={100} onChange={this.handleSliderMicrophone} />
                     </div>
                 </span>
             </div>
             <div>
-                <span style={{marginLeft:80}}><Button id='open-microphone-btn' type='primary'>点击开麦</Button></span>
+                <span style={{marginLeft:80}}><Button id='open-microphone-btn' type='primary'>{this.state.microphoneOpen?'点击关麦':'点击开麦'}</Button></span>
             </div>
             <div>
                 <span id='cheer-span' style={{marginLeft:80}}>欢呼</span>

@@ -79,11 +79,11 @@ module.exports = {
         inline:true,
         port:3006,
         // host:'10.1.1.127'
-        proxy: {
-            '/': {
-                target: 'https://192.168.6.3/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/',
-                secure: false
-            }
-        }
+        // proxy: {
+        //     '/': {
+        //         target: 'https://192.168.6.3/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/',
+        //         secure: false
+        //     }
+        // }
     }
 };

@@ -570,3 +570,12 @@ ul{
   color: rgba(0,0,0,.5);
 }
 
+//音频包裹容器
+#audioBox{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  top: -500px;
+  left: -500px;
+  overflow: hidden;
+}
