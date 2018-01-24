@@ -7,7 +7,7 @@ store.subscribe(function () {
 
 let  micphoneStream, prepareState = false, rtcSessionList=[], pcMeshChain=[], remoteVidoeDom,Msg;
 //创建web audio实例,声明web Audio生成的stream
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)(),myWASource,mixedOutput, downStream, upStream, myVideo;
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)(),myWASource, remoteStream, myVideo;
 
 let stun_server = {
     urls: 'stun:turn.xtell.cn:3479'
@@ -82,7 +82,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
 
         let webAudio = new (window.AudioContext || window.webkitAudioContext)();
         myWASource = webAudio.createMediaStreamSource(micphoneStream);
-        mixedOutput  = webAudio.createMediaStreamDestination();
+        let mixedOutput  = webAudio.createMediaStreamDestination();
         myWASource.connect(mixedOutput);
         let localStream = mixedOutput.stream;
 
@@ -91,6 +91,22 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             remoteVidoeDom = document.querySelector('#'+remoteVidoeId);
             remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
             // console.log(e.stream);
+            rtcSessionList.map(function (item) {
+                if(item.pc != newConnection){
+                    let awTmpStream = item.wa.createMediaStreamSource(e.stream);
+                    awTmpStream.connect(item.mixer);
+                }else{
+                    item.pcOutStream = e.stream;
+                    rtcSessionList.map(function (item1) {
+                        if(item1 != item){
+                            let awTmpStream = item.wa.createMediaStreamSource(item1.pcOutStream);
+                            awTmpStream.connect(item.mixer);
+                        }
+                    })
+                }
+            });
+
+
             console.log(type);
             // if(type === 'answer'){
             //     console.log("onaddstream triggered! downStream is received");
@@ -127,7 +143,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 })
             }
         };
-        return {pc:newConnection,wa:webAudio};
+        return {pc:newConnection,wa:webAudio,mixer:mixedOutput,pcOutStream:null};
     }else{
         alert("NO WEBRTC"); return;
     }
@@ -155,7 +171,9 @@ function offerPeerConnection(wbMsg,videoBox) {
         status:'called',
         remoteVideoId:videoId,
         pc:xpc.pc,
-        wa:xpc.wa
+        wa:xpc.wa,
+        mixer:xpc.mixer,
+        pcOutStream:xpc.pcOutStream
     };
     let isExiat = false;//标记rtcSession是否存在
     rtcSessionList.map(function (item) {
@@ -206,7 +224,9 @@ function answerPeerConnection(wbMsg,offer,videoBox) {
         status:'answered',
         remoteVideoId:videoId,
         pc:xpc.pc,
-        wa:xpc.wa
+        wa:xpc.wa,
+        mixer:xpc.mixer,
+        pcOutStream:xpc.pcOutStream
     };
     let isExiat = false;//标记rtcSession是否存在
     rtcSessionList.map(function (item) {
@@ -291,12 +311,14 @@ function hasRTCPeerConnection() {
     return !!window.RTCPeerConnection;
 }
 
-function onLeave() {
-    console.log("onLeave!");
-    // connectedUser = null;
-    // theirVideo.src = null;
-    // yourConnection.close();
-    // yourConnection.onicecandidate = null;
-    // yourConnection.onaddstream = null;
+function onLeave(userInfo) {
+    console.log(userInfo.name+" onLeave!");
+    rtcSessionList.map(function (item) {
+        if(item.fromUser.id == userInfo.id){
+            item.pc.close();
+            // item.pc.onicecandidate = null;
+            // item.pc.onaddstream = null;
+        }
+    })
 };
 export { startMyCam, onAnswer, onCandidate, offerPeerConnection, answerPeerConnection, onLeave, getPrepareConnectionState, micphoneStream};

@@ -122,7 +122,7 @@ class UEditorBox extends React.Component {
         //通过websocket发送给服务器
         // WS.emit('message',message);
         // console.log('ueditor:'+state.homeState.currentRoomInfo.id);
-        console.log(state.homeState.currentRoomInfo.limited);
+        // console.log(state.homeState.currentRoomInfo.limited);
         if(!this.limitTextOrImg(state.homeState.userInfo.limit.toString(),1))return;
         if(state.homeState.currentRoomInfo.limited){
             if(!this.limitTextOrImg(state.homeState.currentRoomInfo.limited.toString(),2))return;

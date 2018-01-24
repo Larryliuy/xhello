@@ -10,24 +10,12 @@ store.subscribe(function () {
     // console.log(store.getState())
 });
 
-let uId = '',
-    uName = '',
-    uLevel = '',
-    uSex = '';
-
 // let _this = null;
 class MessageListBox extends React.Component{
     constructor(props) {
         super(props);
-        this.state={data:[]};
     }
     componentDidMount(){
-        uId = state.homeState.userInfo.id;
-        uName = state.homeState.userInfo.name;
-        uLevel = state.homeState.userInfo.level;
-        uSex = state.homeState.userInfo.sex;
-
-
     }
     render(){
         return (<div className='message-box' id='messageBox'>

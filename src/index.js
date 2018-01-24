@@ -21,23 +21,6 @@ const h4Style = {
 
 class App extends React.Component {
     componentDidMount(){
-        //页面刷新时关闭socket
-        window.addEventListener('beforeunload', function (event) {
-            let data = state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
-                leaveMsg = getSendData(
-                    'leave_room',
-                    state.homeState.currentRoomInfo.roomId,
-                    state.homeState.currentRoomInfo.roomName,
-                    state.homeState.userInfo,
-                    data);
-            // WS.send(JSON.stringify(enterMsg));
-            send(JSON.stringify(leaveMsg),function(){
-                WS.close();
-                onLeave();
-            });
-            // event.returnValue = "离开页面将丢失信息";
-            return "离开页面将丢失信息！";
-        });
     }
 render(){
     // console.log(location.href);

@@ -11,6 +11,7 @@ store.subscribe(function () {
     state = store.getState();
     // console.log(store.getState())
 });
+let intval = null;
 
 let tRoomStatus = {};//本地所有房间的开关状态
 class ChannelList extends React.Component{
@@ -26,7 +27,7 @@ class ChannelList extends React.Component{
         //数据从父组件来
         let _this = this;
         //暂时使用定时器解决，后续方案需使用redux-saga解决
-        setTimeout(function () {
+        intval = setInterval(function () {
             if(state.homeState.allRoomList.length !== 0){
                 const datas = state.homeState.allRoomList;
                 console.log(datas);
@@ -60,11 +61,13 @@ class ChannelList extends React.Component{
                         data);
                     // WS.send(JSON.stringify(enterMsg));
                     send(JSON.stringify(getUsersInfo),function(){
+                        clearInterval(intval);
                     });
                     //需要默认将默认房间信息更新到当前房间
 
                 }else{
                     console.log('房间id不存在');
+                    clearInterval(intval);
                 }
                 // _this.setState({roomStatus:tRoomStatus});
                 store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});

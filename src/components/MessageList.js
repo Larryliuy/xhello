@@ -62,7 +62,6 @@ class MessageList extends React.Component{
         });
     }
     render(){
-        // console.log(this.props.data);
         return (<div><List
             size="small"
             itemLayout="horizontal"

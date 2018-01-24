@@ -17,7 +17,8 @@ export const CONSTANT = {
     USERINFO:'USERINFO',
     ROOMMICROPHONEUSER:'ROOMMICROPHONEUSER',
     ROOMSTATUS:'ROOMSTATUS',
-    MESSAGEDATA:'MESSAGEDATA'
+    MESSAGEDATA:'MESSAGEDATA',
+    SENDDATA:'SENDDATA'
 };
 function toggleLogin() {
     return {
@@ -54,7 +55,8 @@ const homeInitState = {viewModel:false,skinColor:'#108ee9',
     searchKeyword:'',//用户查找关键字
     location:{x:0,y:0,display:'none',obj:0},//房间列表右键点击定位及目标
     roomStatus:{},//用于存储各房间打开/关闭状态
-    messageData:[],//用于存储各房间打开/关闭状态
+    messageData:[],//所有消息数据
+    sendData:'',//自己发送的消息数据
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
@@ -81,6 +83,8 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{roomStatus:action.val});
         case CONSTANT.MESSAGEDATA:
             return Object.assign({},tmpState,{messageData:action.val});
+        case CONSTANT.SENDDATA:
+            return Object.assign({},tmpState,{sendData:action.val});
         default:
             // console.log('default');
             return homeInitState;
