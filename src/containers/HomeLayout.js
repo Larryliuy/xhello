@@ -45,13 +45,14 @@ class HomeLayout extends React.Component {
         intval1 = setInterval(function () {
             let Msg = {
                 roomId:state.homeState.currentRoomInfo.id,
-                heart:1
+                typeString:'heartBeat',
+                check:1
             };
             send(JSON.stringify(Msg),function () {
             })
         },5000);
 
-        //获取自己音频流
+        //获取自己麦克音频流
         let videoBox = document.getElementById('audioBox');
         startMyCam(videoBox);
         let isChanging = false,

@@ -80,7 +80,7 @@ class Login extends React.Component {
                                                     //这里获取用户信息
                                                     console.log(data);
                                                     if(data.ret === 0){
-                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:openId,name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2}});
+                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:openId,name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2,maxChildren:2,Children:[]}});
                                                         location.replace("#/home");
                                                     }
                                                 })

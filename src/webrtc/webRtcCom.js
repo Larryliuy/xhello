@@ -1,5 +1,5 @@
 import WS, {getDateString, getSendData, send} from "../static/wsInstace";
-import store from "../reducer/reducer";
+import store, {CONSTANT} from "../reducer/reducer";
 let state = store.getState(),wbMsg;
 store.subscribe(function () {
     state = store.getState();
@@ -105,27 +105,6 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     })
                 }
             });
-
-
-            console.log(type);
-            // if(type === 'answer'){
-            //     console.log("onaddstream triggered! downStream is received");
-            //     //这里downStream可能需要数组
-            //     downStream= audioCtx.createMediaStreamSource(e.stream);
-            //     downStream.connect(mixedOutput);
-            //     myLocalStream = mixedOutput.stream;
-            //     newConnection.addStream(myLocalStream);
-            //     console.log(newConnection);
-            //     console.log(this);
-            //     remoteVidoeDom = document.querySelector('#'+remoteVidoeId);
-            //     remoteVidoeDom.src = window.URL.createObjectURL(mixedOutput.stream);
-            // }else{
-            //     console.log("onaddstream triggered! upStream is received");
-            //     //不是被呼叫端只接受stream,不混音
-            //     remoteVidoeDom = document.querySelector('#'+remoteVidoeId);
-            //     remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
-            // }
-            // myVideo.src = window.URL.createObjectURL(myLocalStream);
         };
         console.log("newConnection.onicecandidate");
         // Setup ice handling
@@ -142,6 +121,53 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     // console.log('sendCandidate');
                 })
             }
+        };
+        newConnection.oniceconnectionstatechange = function(event) {
+            console.log(type);
+            let userInfo = state.homeState.userInfo, updateUserMsg;
+            console.log(userInfo);
+            console.log(wbMsg.fromUser);
+            if (newConnection.iceConnectionState === "failed" ||
+                newConnection.iceConnectionState === "disconnected" ||
+                newConnection.iceConnectionState === "closed"){
+                //处理失败情况,根据失败的原因去重新连接,getRoomUser,主动断开的情况，连接失败的情况
+                console.log(wbMsg);
+                console.log(state.homeState.userInfo);
+                if(type === 'offer'){
+                    userInfo.parentNode = '';
+                    //重新去找新的节点连接
+                }else{
+                    userInfo.Children = userInfo.Children.filter(function (item) {
+                        return wbMsg.toUser.id != item;
+                    });
+                    //给儿子们发消息去重新找节点连接
+                }
+            }else{
+                // 处理成功的情况
+                console.log(wbMsg);
+                console.log(state.homeState.userInfo);
+                if(type === 'offer'){
+                    userInfo.parentNode = wbMsg.toUser.id;
+                }else{
+                    for(let i = 0; i < userInfo.Children.length; i++){
+                        if(userInfo.Children[i] == 0){
+                            userInfo.Children[i] = wbMsg.toUser.id;
+                        }
+                    }
+                    // userInfo.Children.push(wbMsg.toUser.id);
+                }
+            }
+            store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
+            updateUserMsg = {
+                type:'update_user',
+                roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                roomName: state.homeState.currentRoomInfo.roomName,
+                user:userInfo
+            };
+            if(!userInfo.seq)return;
+            send(JSON.stringify(updateUserMsg),function () {
+                console.log('send updateUserList to server');
+            })
         };
         return {pc:newConnection,wa:webAudio,mixer:mixedOutput,pcOutStream:null};
     }else{
@@ -183,12 +209,12 @@ function offerPeerConnection(wbMsg,videoBox) {
     });
     if(!isExiat){
         rtcSessionList.push(rtcsession);
-        let obj = {};
-        obj[state.homeState.userInfo.id]=[];
-        pcMeshChain.push(obj);
-        console.log('push Mesh offer');
+        // let obj = {};
+        // obj[state.homeState.userInfo.id]=[];
+        // pcMeshChain.push(obj);
+        // console.log('push Mesh offer');
     }
-    console.log(pcMeshChain);
+    // console.log(pcMeshChain);
     xpc.pc.createOffer(function (offer) {
         Msg = wbMsg;
         Msg.offer = offer;
@@ -236,13 +262,13 @@ function answerPeerConnection(wbMsg,offer,videoBox) {
     });
     if(!isExiat) {
         rtcSessionList.push(rtcSession);
-        let obj = {};
-        obj[wbMsg.toUser.id] = [];
-        pcMeshChain[wbMsg.toUser.id] = [];
-        pcMeshChain[wbMsg.toUser.id].push(obj);
-        console.log('push Mesh');
+        // let obj = {};
+        // obj[wbMsg.toUser.id] = [];
+        // pcMeshChain[wbMsg.toUser.id] = [];
+        // pcMeshChain[wbMsg.toUser.id].push(obj);
+        // console.log('push Mesh');
     }
-    console.log(pcMeshChain);
+    // console.log(pcMeshChain);
     xpc.pc.setRemoteDescription(new RTCSessionDescription(offer));
     xpc.pc.createAnswer(function (answer) {
         Msg = wbMsg;
@@ -266,13 +292,15 @@ function onAnswer(answer,sessionId,toUserId) {
     rtcSessionList.map(function (item) {
         if(item.sessionId == tmpStr){
             item.pc.setRemoteDescription(new RTCSessionDescription(answer));
-            let obj = {};
-            obj[state.homeState.userInfo.id] = [];
-            if(pcMeshChain[toUserId]){
-                pcMeshChain[toUserId].push(obj);
-                console.log('push '+ toUserId +' to Mesh ');
-            }
-            console.log(pcMeshChain);
+            //toUserId为父连接id，发送给服务器，更新userList
+
+            // let obj = {};
+            // obj[state.homeState.userInfo.id] = [];
+            // if(pcMeshChain[toUserId]){
+            //     pcMeshChain[toUserId].push(obj);
+            //     console.log('push '+ toUserId +' to Mesh ');
+            // }
+            // console.log(pcMeshChain);
         }
     });
 };
