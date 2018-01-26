@@ -4,18 +4,17 @@ import {
     answerPeerConnection, getPrepareConnectionState, offerPeerConnection, onAnswer,
     onCandidate
 } from "../webrtc/webRtcCom";
-import {CONSTANT} from "../reducer/reducer";
-import store from "../reducer/reducer";
+import store,{CONSTANT} from "../reducer/reducer";
 
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
 });
 
+
 if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
 }
-
 let WS = null,lockReconnect = false ,wsUrl = 'wss://192.168.6.3:443/wss' ;
 
 if (window.WebSocket) {
@@ -34,7 +33,7 @@ function createWebSocket(url) {
 }
 
 
-// 将WS.send方法封装成send方法
+// 将WS.send方法封装成send方法，防止消息未发送完成时调用
 const send = function (message, callback) {
     waitForConnection(function () {
         WS.send(message);
@@ -81,9 +80,9 @@ let heartCheck = {
         this.timeoutObj = setTimeout(function(){
             //这里发送一个心跳，后端收到后，返回一个心跳消息，
             //onmessage拿到返回的心跳就说明连接正常
-            // WS.send({type:'msg',roomId: state.homeState.currentRoomInfo.roomId,typeString:'heartBeat',check:1});
+            WS.send({type:'msg',roomId: state.homeState.currentRoomInfo.roomId,typeString:'heartBeat',check:1});
             self.serverTimeoutObj = setTimeout(function(){//如果超过一定时间还没重置，说明后端主动断开了
-                console.log('heartCheck.start');
+                console.log('heartCheck.start,server close ws');
                 WS.close();//如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
             }, self.timeout)
         }, this.timeout)
@@ -201,8 +200,8 @@ function onmessage(response){
         case 'msg':
             if(dataJson.typeString === 'preOffer'){
                 console.log('recive preOffer');
-                console.log(state.homeState.userInfo);
-                console.log(dataJson.fromUser);
+                // console.log(state.homeState.userInfo);
+                // console.log(dataJson.fromUser);
                 let preAnswerMsg;
                 if(state.homeState.userInfo.Children.length < state.homeState.userInfo.maxChildren){
                     //先占位
@@ -255,7 +254,7 @@ function onmessage(response){
                     // console.log(Msg);
                     intval = setInterval(function () {
                         if(getPrepareConnectionState()){
-                            console.log("offerPeerConnection ......");
+                            // console.log("offerPeerConnection ......");
                             offerPeerConnection(Msg,document.getElementById('audioBox'));
                             clearInterval(intval);
                             // break;
@@ -641,7 +640,7 @@ function onmessage(response){
             //获取最小seq的用户
             function getMinSeqUser(UserList,startSeq) {
                 console.log(UserList);
-                console.log(startSeq);
+                // console.log(startSeq);
                 let minSeq = 100000000;
                 let minSeqUser = null;
                 UserList.map(function (item) {
@@ -661,7 +660,7 @@ function onmessage(response){
                 return minSeqUser;
             }
             // 遍历人发offer
-            console.log(dataJson.data);
+            // console.log(dataJson.data); //服务器返回最新的用户连接情况
             // let intval=null;
             let userInfoTmp = state.homeState.userInfo;
             if(dataJson.data && Object.keys(dataJson.data).length > 1){
@@ -677,8 +676,12 @@ function onmessage(response){
                 }
                 objUser = getMinSeqUser(UserList,dataJson.startSeq);
 
-                console.log(objUser);
-                console.log(userInfoTmp);
+                // console.log(objUser); //显示目标用户
+                if(!objUser){
+                    console.error('为获取到目标用户信息');
+                    return;
+                }
+                // console.log(userInfoTmp); //显示增加seq值后的用户
 
                 // getMinSeqUser(dataJson.data);
                 console.log('timer');
@@ -691,7 +694,7 @@ function onmessage(response){
                     fromUser:userInfoTmp,
                     toUser:objUser
                 };
-                console.log(preOfferMsg);
+                // console.log(preOfferMsg);
                 send(JSON.stringify(preOfferMsg),function () {
                     console.log('send preOffer ');
                 });

@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import ChannelList from '../components/ChannelList';
 import store,{ CONSTANT } from '../reducer/reducer';
-import WS,{ getSendData, send } from  '../static/wsInstace.js';
+import WS,{ getSendData, send } from '../static/webSocket.js';
 
 
 let state = store.getState();

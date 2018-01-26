@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import { Modal, Input, Select  } from 'antd';
 const Option = Select.Option;
-import WS,{ getSendData, send } from  '../static/wsInstace.js';
+import WS,{ getSendData, send } from '../static/webSocket.js';
 import store from "../reducer/reducer";
 let state = store.getState();
 store.subscribe(function () {

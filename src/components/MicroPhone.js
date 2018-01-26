@@ -1,7 +1,7 @@
 import React,{ Component }  from 'react'
 import { Select, List, Icon,Modal } from 'antd';
 import store, {CONSTANT} from "../reducer/reducer";
-import WS, {getDateString, getSendData, send} from "../static/wsInstace";
+import WS, {getDateString, getSendData, send} from "../static/webSocket";
 import { prepareConnection, onAnswer,  onCandidate, onOffer, startPeerConnection } from  '../webrtc/webRtcCom';
 const Option = Select.Option;
 
@@ -53,7 +53,7 @@ class MicroPhone extends React.Component {
                         roomName: state.homeState.currentRoomInfo.roomName,
                         user:state.homeState.userInfo
                     };
-                    startPeerConnection(state.homeState.userInfo.id,Msg);
+                    // startPeerConnection(state.homeState.userInfo.id,Msg);
                 }
                 if(item === '禁麦'){
                     //管理员才可禁麦
@@ -100,9 +100,9 @@ class MicroPhone extends React.Component {
             <div className='online-total'>上麦总人数：{state.homeState.roomMicrophoneUser.length}</div>
             <div className='microphone' onClick={e=>this.onClickHandle(e)}>
                 <Select size={'small'} disabled={(state.homeState.userInfo.level < 4) ? false : true} defaultValue='主席模式' onChange={e => {this.handleChange(e)}}>
+                    <Option value="自由模式">自由模式</Option>
                     <Option value="主席模式">主席模式</Option>
                     <Option value="麦序模式">麦序模式</Option>
-                    <Option value="自由模式">自由模式</Option>
                 </Select>
                 <span> <span>放麦</span> |</span>
                 <span> <span>禁麦</span> |</span>

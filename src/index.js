@@ -3,7 +3,7 @@ import ReactDom from 'react-dom';
 import {BrowserRouter, HashRouter, Route, withRouter, Switch, Redirect} from 'react-router-dom';
 import { connect,Provider } from 'react-redux';
 import store,{collapsed,CONSTANT} from './reducer/reducer';
-import WS, {getDateString, getSendData, send} from "./static/wsInstace";
+import WS, {getDateString, getSendData, send} from "./static/webSocket";
 import LoginBox from './containers/LoginBox';
 import RegisterBox from './containers/RegisterBox';
 import HomeLayout from './containers/HomeLayout';

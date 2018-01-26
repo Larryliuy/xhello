@@ -2,7 +2,7 @@ import React,{ Component } from 'react';
 import { Icon, Modal } from 'antd';
 import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
-import WS,{ getSendData, send } from  '../static/wsInstace.js';
+import WS,{ getSendData, send } from '../static/webSocket.js';
 import '../static/login.scss';
 import {offerPeerConnection, startPeerConnection} from "../webrtc/webRtcCom";
 
@@ -30,7 +30,7 @@ class ChannelList extends React.Component{
         intval = setInterval(function () {
             if(state.homeState.allRoomList.length !== 0){
                 const datas = state.homeState.allRoomList;
-                console.log(datas);
+                // console.log(datas);
                 if(datas.length === 0)return;
                 //更新当前房间信息
                 /*console.log(state.homeState.userInfo);

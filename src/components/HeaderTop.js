@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom'
 import { Icon ,message } from 'antd';
 import cookieUtil from "../libs/cookieUtil";
 import HeaderLeft from "../components/HeaderLeft";
-
+import { onLeave } from '../webrtc/webRtcCom';
 
 
 import Skin from './Skin';
@@ -15,6 +15,7 @@ class HeaderTop extends React.Component{
         cookieUtil.unset('userName');
         cookieUtil.unset('password');
         cookieUtil.unset('userData');
+        onLeave();
     };
     render(){
         return (<div>

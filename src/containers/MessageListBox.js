@@ -1,6 +1,6 @@
 import React,{ Component } from 'react'
 import MessageList from '../components/MessageList'
-import WS, {getDateString, getSendData, send} from "../static/wsInstace";
+import WS, {getDateString, getSendData, send} from "../static/webSocket";
 
 
 import store,{ CONSTANT } from '../reducer/reducer';

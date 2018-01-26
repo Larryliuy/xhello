@@ -2,7 +2,7 @@ import React,{ Component } from 'react';
 import { Modal,Row, Col, Select, Table, Button, List } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import { generalApi } from "../static/apiInfo";
-import {send} from "../static/wsInstace";
+import {send} from "../static/webSocket";
 import {message} from "antd/lib/index";
 import store, {CONSTANT} from "../reducer/reducer";
 

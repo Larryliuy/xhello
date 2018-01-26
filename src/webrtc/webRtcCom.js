@@ -1,6 +1,6 @@
-import WS, {getDateString, getSendData, send} from "../static/wsInstace";
+import WS, {getDateString, getSendData, send} from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
-let state = store.getState(),wbMsg;
+let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
 });
@@ -9,11 +9,12 @@ let  micphoneStream, prepareState = false, rtcSessionList=[], pcMeshChain=[], re
 //创建web audio实例,声明web Audio生成的stream
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)(),myWASource, remoteStream, myVideo;
 
+//stun服务器
 let stun_server = {
     urls: 'stun:turn.xtell.cn:3479'
 };
 
-// or TURN
+// or TURN服务器
 let turn_server = {
     urls: 'turn:turn.xtell.cn:3478',
     credential: 'webrtc',
@@ -34,7 +35,7 @@ let rtcPeerConfig = {
 function getPrepareConnectionState(){
     return prepareState;
 }
-
+//获取本地音频流
 function startMyCam(videoBox){
     if (hasUserMedia()) {
         navigator.getUserMedia({ video: false, audio: true }, function(myStream) {
@@ -67,7 +68,7 @@ function startMyCam(videoBox){
 
 
 function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type) {
-    console.log("PreparePeerConnection!");
+    console.log("PreparePeerConnection and create a peerConnection!");
     let newConnection;
     if (hasRTCPeerConnection()) {
         // console.log('prepareState:'+prepareState);
@@ -106,7 +107,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 }
             });
         };
-        console.log("newConnection.onicecandidate");
+        // console.log("newConnection.onicecandidate");
         // Setup ice handling
         newConnection.onicecandidate = function (event) {
             //	console.log("yourConnection.onicecandidate!");
@@ -125,27 +126,34 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
         newConnection.oniceconnectionstatechange = function(event) {
             console.log(type);
             let userInfo = state.homeState.userInfo, updateUserMsg;
-            console.log(userInfo);
-            console.log(wbMsg.fromUser);
+            // console.log(userInfo);
+            // console.log(wbMsg.fromUser);
             if (newConnection.iceConnectionState === "failed" ||
                 newConnection.iceConnectionState === "disconnected" ||
                 newConnection.iceConnectionState === "closed"){
                 //处理失败情况,根据失败的原因去重新连接,getRoomUser,主动断开的情况，连接失败的情况
-                console.log(wbMsg);
-                console.log(state.homeState.userInfo);
+                //首先更新rtcSessionList
+                rtcSessionList = rtcSessionList.filter(function (item) {
+                    return item.toUserId != wbMsg.toUser.id;
+                });
+                console.log(rtcSessionList);
+                console.log('与 '+ wbMsg.toUser.id + '连接失败或断开连接');
+                // console.log(state.homeState.userInfo);
                 if(type === 'offer'){
                     userInfo.parentNode = '';
                     //重新去找新的节点连接
+                    console.log('parent '+ wbMsg.toUser.id +' close');
                 }else{
                     userInfo.Children = userInfo.Children.filter(function (item) {
                         return wbMsg.toUser.id != item;
                     });
-                    //给儿子们发消息去重新找节点连接
+                    //给儿子们发消息去重新找节点连接,这里有一种可能是，peerConnection断掉了，websocket没有断掉,这种可能性是否需要处理待商榷
+                    console.log('children '+ wbMsg.toUser.id +' close');
                 }
             }else{
                 // 处理成功的情况
-                console.log(wbMsg);
-                console.log(state.homeState.userInfo);
+                console.log('connect to '+ wbMsg.toUser.id + '  success');
+                // console.log(state.homeState.userInfo);
                 if(type === 'offer'){
                     userInfo.parentNode = wbMsg.toUser.id;
                 }else{
@@ -339,13 +347,12 @@ function hasRTCPeerConnection() {
     return !!window.RTCPeerConnection;
 }
 
-function onLeave(userInfo) {
+function onLeave() {
+    let userInfo = state.homeState.userInfo.name;
     console.log(userInfo.name+" onLeave!");
     rtcSessionList.map(function (item) {
         if(item.fromUser.id == userInfo.id){
             item.pc.close();
-            // item.pc.onicecandidate = null;
-            // item.pc.onaddstream = null;
         }
     })
 };

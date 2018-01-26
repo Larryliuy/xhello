@@ -144,7 +144,7 @@ class Login extends React.Component {
                   try {
                       datatmp = JSON.parse(data);
                       //JSON.parse没问题的情况
-                      console.log(datatmp);
+                      // console.log(datatmp);
                       if(datatmp.status === 'ok'){
                           message.success('登录成功');
                           _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});

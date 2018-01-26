@@ -3,7 +3,7 @@ import store,{ CONSTANT } from '../reducer/reducer';
 import UEditor from '../components/UEditor';
 import { Button, message } from 'antd';
 import '../static/login.scss'
-import WS,{ getSendData } from  '../static/wsInstace';
+import WS,{ getSendData } from '../static/webSocket';
 
 let state = store.getState();
 store.subscribe(function () {

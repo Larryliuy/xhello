@@ -3,7 +3,7 @@ import { Card, Popover, List, Modal, message } from 'antd';
 const confirm = Modal.confirm;
 import CreateRoom from './CreateRoom';
 import SetRoom from './SetRoom';
-import WS,{ getSendData, send } from  '../static/wsInstace.js';
+import WS,{ getSendData, send } from '../static/webSocket.js';
 import store, {CONSTANT} from "../reducer/reducer";
 import {generalApi} from "../static/apiInfo";
 let state = store.getState();

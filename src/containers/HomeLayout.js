@@ -15,8 +15,8 @@ import FooterBottomBox from './FooterBottomBox';
 import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
 
-import WS, {getDateString, getSendData, send, heartCheck} from "../static/wsInstace";
-import {onAnswer, onCandidate, startMyCam, offerPeerConnection, answerPeerConnection, onLeave, getPrepareConnectionState} from '../webrtc/webRtcCom';
+import WS, { getSendData, send } from "../static/webSocket";
+import { startMyCam,  onLeave } from '../webrtc/webRtcCom';
 
 const layoutStyle = {
     width:'100%',
@@ -93,9 +93,9 @@ class HomeLayout extends React.Component {
                     data);
             // WS.send(JSON.stringify(enterMsg));
             send(JSON.stringify(leaveMsg),function(){
-                alert('关闭websocket');
+                console.log('关闭websocket');
                 WS.close();
-                onLeave(state.homeState.userInfo);
+                onLeave();
             });
             event.returnValue = "离开页面将丢失信息";
             // return "离开页面将丢失信息！";

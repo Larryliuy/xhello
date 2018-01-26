@@ -15,7 +15,7 @@ function bfunload()
     s = "no";
 }*/
 
-import WS,{ instanceWS } from './wsInstace';
+import WS,{ instanceWS } from './webSocket';
 
 window.onunload = function(){
     let a_n = window.event.screenX - window.screenLeft;

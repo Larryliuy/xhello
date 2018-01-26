@@ -1,6 +1,6 @@
 import React,{ Component } from 'react';
 import { List, Avatar, message } from 'antd';
-import WS, {send, timeStamp} from "../static/wsInstace";
+import WS, {send, timeStamp} from "../static/webSocket";
 import store from "../reducer/reducer";
 let state = store.getState();
 store.subscribe(function () {
