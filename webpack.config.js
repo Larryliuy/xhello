@@ -17,16 +17,16 @@ module.exports = {
         }),
         new ExtractTextPlugin({filename:"style.css",disable: false,allChunks: true}),
         new webpack.optimize.CommonsChunkPlugin({name:'vendors',fileName:'vendors.js'} ),
-        new webpack.optimize.UglifyJsPlugin({
-            output: {
-                comments: false,  // remove all comments
-            },
-            compress: {
-                warnings: false,
-                drop_debugger: true,
-                drop_console: true //去掉console
-            }
-        })
+        // new webpack.optimize.UglifyJsPlugin({
+        //     output: {
+        //         comments: false,  // remove all comments
+        //     },
+        //     compress: {
+        //         warnings: false,
+        //         drop_debugger: true,
+        //         drop_console: true //去掉console
+        //     }
+        // })
     ],
     module: {
         rules: [
@@ -34,9 +34,9 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 loader: 'babel-loader',
-                options: {
+                query: {
                     presets: [ 'react','es2015','stage-0'],
-                    plugins: ["transform-class-properties",["import", { libraryName: "antd", style: true}]]
+                    plugins: ["transform-runtime",["import", { "libraryName": "antd", "style": true}]]
                 }
             },
             {
@@ -56,7 +56,7 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                // exclude: /node_modules/,
+                exclude: /node_modules/,
                 loader: ExtractTextPlugin.extract({
                     fallback: "style-loader",
                     use:['css-loader','sass-loader']

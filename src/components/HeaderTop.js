@@ -15,7 +15,7 @@ class HeaderTop extends React.Component{
         cookieUtil.unset('userName');
         cookieUtil.unset('password');
         cookieUtil.unset('userData');
-        onLeave();
+        location.reload();
     };
     render(){
         return (<div>

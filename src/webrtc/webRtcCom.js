@@ -8,7 +8,7 @@ store.subscribe(function () {
 let  micphoneStream, prepareState = false, rtcSessionList=[], pcMeshChain=[], remoteVidoeDom,Msg;
 //创建web audio实例,声明web Audio生成的stream
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)(),myWASource, remoteStream, myVideo;
-
+let secondExist = false;//用户标记预备老大是否存在
 //stun服务器
 let stun_server = {
     urls: 'stun:turn.xtell.cn:3479'
@@ -124,58 +124,164 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             }
         };
         newConnection.oniceconnectionstatechange = function(event) {
-            console.log(type);
-            let userInfo = state.homeState.userInfo, updateUserMsg;
+            // console.log(type);
+            let userInfo = state.homeState.userInfo, updateUserMsg,numberOne = state.homeState.numberOne;
             // console.log(userInfo);
             // console.log(wbMsg.fromUser);
-            if (newConnection.iceConnectionState === "failed" ||
-                newConnection.iceConnectionState === "disconnected" ||
-                newConnection.iceConnectionState === "closed"){
-                //处理失败情况,根据失败的原因去重新连接,getRoomUser,主动断开的情况，连接失败的情况
-                //首先更新rtcSessionList
-                rtcSessionList = rtcSessionList.filter(function (item) {
-                    return item.toUserId != wbMsg.toUser.id;
-                });
-                console.log(rtcSessionList);
-                console.log('与 '+ wbMsg.toUser.id + '连接失败或断开连接');
-                // console.log(state.homeState.userInfo);
-                if(type === 'offer'){
-                    userInfo.parentNode = '';
-                    //重新去找新的节点连接
-                    console.log('parent '+ wbMsg.toUser.id +' close');
-                }else{
-                    userInfo.Children = userInfo.Children.filter(function (item) {
-                        return wbMsg.toUser.id != item;
-                    });
-                    //给儿子们发消息去重新找节点连接,这里有一种可能是，peerConnection断掉了，websocket没有断掉,这种可能性是否需要处理待商榷
-                    console.log('children '+ wbMsg.toUser.id +' close');
-                }
-            }else{
-                // 处理成功的情况
-                console.log('connect to '+ wbMsg.toUser.id + '  success');
-                // console.log(state.homeState.userInfo);
-                if(type === 'offer'){
-                    userInfo.parentNode = wbMsg.toUser.id;
-                }else{
-                    for(let i = 0; i < userInfo.Children.length; i++){
-                        if(userInfo.Children[i] == 0){
-                            userInfo.Children[i] = wbMsg.toUser.id;
+            // console.log(newConnection.iceConnectionState);
+            switch(newConnection.iceConnectionState ) {
+                case "connected":
+                    // The connection has become fully connected
+                    // 处理成功的情况
+                    console.log('connected : connect to '+ wbMsg.toUser.id + '  success');
+                    // console.log(state.homeState.userInfo);
+                    if(type === 'offer'){
+                        userInfo.parentNode = wbMsg.toUser.id;
+                    }else{
+                        for(let i = 0; i < userInfo.Children.length; i++){
+                            if(userInfo.Children[i] == 0){
+                                userInfo.Children[i] = wbMsg.toUser.id;
+                            }
                         }
+                        // userInfo.Children.push(wbMsg.toUser.id);
                     }
-                    // userInfo.Children.push(wbMsg.toUser.id);
-                }
+                    store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
+                    updateUserMsg = {
+                        type:'update_user',
+                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                        roomName: state.homeState.currentRoomInfo.roomName,
+                        user:userInfo
+                    };
+                    if(!userInfo.seq)return;
+                    send(JSON.stringify(updateUserMsg),function () {
+                        console.log('send updateUserList to server');
+                        secondExist = false;//每次连接成功后，重置标记位
+                    });
+                    break;
+                case "disconnected":
+                    console.log("disconnected");
+                    console.log('Disconnect with '+ wbMsg.toUser.id );
+                    console.log(userInfo);
+                    if(type === 'offer'){
+                        userInfo.parentNode = '';
+                        //父连接断时，重新去找新的节点连接
+                        console.log('parent '+ wbMsg.toUser.id +' close');
+                        if(wbMsg.toUser.id == userInfo.id)return;
+                        if(userInfo.numberOne === 2){
+                            //如果我是老大第一个儿子，将自己设置为老大，并直接返回
+                            store.dispatch({type:CONSTANT.NUMBERONE,val:1});
+                            userInfo.numberOne = 1;
+                            updateUserMsg = {
+                                type:'update_user',
+                                roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                                roomName: state.homeState.currentRoomInfo.roomName,
+                                user:userInfo
+                            };
+                            if(!userInfo.seq)return;
+                            send(JSON.stringify(updateUserMsg),function () {
+                                if(userInfo.numberOne === 1){
+                                    console.log('---I am the new header,send the new head to server');
+                                }else{
+                                    console.log('send updateUserList to server');
+                                }
+                                //这里应该做一个完成的标志，
+                            });
+                            // store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
+                            return;
+                        }else if(userInfo.numberOne === 3){
+                            //如果是老大的其他儿子，选第一个作为预备老大，并发送连新老大的消息
+                            if(!secondExist){
+                                console.log('---set new pre-head');
+                                userInfo.numberOne = 2;
+                                secondExist = true;
+                            }else{
+                                console.log('---set new other child');
+                                userInfo.numberOne = 3;
+                            }
+                            updateUserMsg = {
+                                type:'update_user',
+                                roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                                roomName: state.homeState.currentRoomInfo.roomName,
+                                user:userInfo
+                            };
+                            if(!userInfo.seq)return;
+                            send(JSON.stringify(updateUserMsg),function () {
+                                if(userInfo.numberOne === 2){
+                                    console.log('---I am the new pre-head,send the new head to server');
+                                }else{
+                                    console.log('---I am the new other child,send the new head to serve');
+                                }
+                            });
+
+                            let getUsersInfo = {
+                                type:'get_room_users',
+                                roomId:state.homeState.currentRoomInfo.roomId,
+                                roomName:state.homeState.currentRoomInfo.roomName,
+                                user:userInfo
+                            };
+                            console.log(getUsersInfo);
+                            setTimeout(function () {
+                                send(JSON.stringify(getUsersInfo),function(){
+                                    console.log('---delay 1 seconds to get-room-users');
+                                });
+                            },500);
+                            return;
+                        }else{
+                            let getUsersInfo = {
+                                type:'get_room_users',
+                                roomId:state.homeState.currentRoomInfo.roomId,
+                                roomName:state.homeState.currentRoomInfo.roomName,
+                                user:userInfo
+                            };
+                            console.log(getUsersInfo);
+                            send(JSON.stringify(getUsersInfo),function(){
+
+                            });
+                        }
+
+                    }else{
+                        userInfo.Children = userInfo.Children.filter(function (item) {
+                            return wbMsg.toUser.id != item;
+                        });
+                        updateUserMsg = {
+                            type:'update_user',
+                            roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                            roomName: state.homeState.currentRoomInfo.roomName,
+                            user:userInfo
+                        };
+                        if(!userInfo.seq)return;
+                        send(JSON.stringify(updateUserMsg),function () {
+                            console.log('send updateUserList to server');
+                        });
+                        //给儿子们发消息去重新找节点连接,这里有一种可能是，peerConnection断掉了，websocket没有断掉,这种可能性是否需要处理待商榷
+                        console.log('children '+ wbMsg.toUser.id +' close');
+                    }
+                    store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
+                case "failed":
+                    // One or more transports has terminated unexpectedly or in an error
+                    console.log('failed');
+                    console.log(Msg);
+                    // console.log(event);
+                    break;
+                case "closed":
+                    // The connection has been closed,本人关闭或被动通知后关闭会触发（即调用peerConnection.close()）,通知后台我已关闭连接
+                    console.log('closed');
+                    let getUsersInfo = {
+                        type:'get_room_users',
+                        roomId:state.homeState.currentRoomInfo.roomId,
+                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // user:userInfo //被关闭重新连接时不带userInfo
+                    };
+                    console.log(getUsersInfo);
+                    send(JSON.stringify(getUsersInfo),function(){
+
+                    });
+                    break;
+                default:
+                    console.log('default:'+newConnection.iceConnectionState);
+                    break;
             }
-            store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-            updateUserMsg = {
-                type:'update_user',
-                roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                roomName: state.homeState.currentRoomInfo.roomName,
-                user:userInfo
-            };
-            if(!userInfo.seq)return;
-            send(JSON.stringify(updateUserMsg),function () {
-                console.log('send updateUserList to server');
-            })
+
         };
         return {pc:newConnection,wa:webAudio,mixer:mixedOutput,pcOutStream:null};
     }else{
@@ -217,12 +323,7 @@ function offerPeerConnection(wbMsg,videoBox) {
     });
     if(!isExiat){
         rtcSessionList.push(rtcsession);
-        // let obj = {};
-        // obj[state.homeState.userInfo.id]=[];
-        // pcMeshChain.push(obj);
-        // console.log('push Mesh offer');
     }
-    // console.log(pcMeshChain);
     xpc.pc.createOffer(function (offer) {
         Msg = wbMsg;
         Msg.offer = offer;
@@ -348,11 +449,14 @@ function hasRTCPeerConnection() {
 }
 
 function onLeave() {
-    let userInfo = state.homeState.userInfo.name;
+    let userInfo = state.homeState.userInfo;
     console.log(userInfo.name+" onLeave!");
+    console.log(rtcSessionList);
     rtcSessionList.map(function (item) {
-        if(item.fromUser.id == userInfo.id){
+        // console.log(item);
+        if(item.fromUserId == userInfo.id){
             item.pc.close();
+            console.log('peerConnection closed');
         }
     })
 };
