@@ -3,7 +3,7 @@ import store,{ CONSTANT } from '../reducer/reducer';
 import UEditor from '../components/UEditor';
 import { Button, message } from 'antd';
 import '../static/login.scss'
-import WS,{ getSendData } from '../static/webSocket';
+import { getSendData, send } from '../static/webSocket';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -134,7 +134,9 @@ class UEditorBox extends React.Component {
             state.homeState.userInfo,
             this.state.value);
         msg.timeStamp = new Date().getTime();
-        WS.send(JSON.stringify(msg));
+        send(JSON.stringify(msg),function () {
+
+        });
         this.setState({value:''});
         this.state.textareaDom.innerHTML = '';
     }
@@ -157,7 +159,9 @@ class UEditorBox extends React.Component {
                 state.homeState.userInfo,
                 this.state.value);
             msg.timeStamp = new Date().getTime();
-            WS.send(JSON.stringify(msg));
+            send(JSON.stringify(msg),function () {
+
+            });
             this.setState({value:''});
         }else if(e.keyCode === 13 && e.ctrlKey){
             e.target.innerHTML = this.state.value;

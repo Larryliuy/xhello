@@ -42,7 +42,7 @@ class HomeLayout extends React.Component {
     }
     componentDidMount(){
         // 防止websock会空闲时断, 每5秒发送一个数据包,保持心跳
-        intval1 = setInterval(function () {
+        setInterval(function () {
             let Msg = {
                 roomId:state.homeState.currentRoomInfo.id,
                 typeString:'heartBeat',
@@ -91,11 +91,9 @@ class HomeLayout extends React.Component {
                     state.homeState.currentRoomInfo.roomName,
                     state.homeState.userInfo,
                     data);
-            // WS.send(JSON.stringify(enterMsg));
             send(JSON.stringify(leaveMsg),function(){
-                console.log('关闭websocket');
                 WS.close();
-                onLeave();
+                onLeave(state.homeState.userInfo);
             });
             event.returnValue = "离开页面将丢失信息";
             // return "离开页面将丢失信息！";

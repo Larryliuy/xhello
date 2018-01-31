@@ -12,12 +12,33 @@ store.subscribe(function () {
 });
 class MicroPhone extends React.Component {
     handleChange(e){
-        console.log(e)
+        let mode = 1;
+        let Msg = {
+            type:'msg',
+            typeString:'microphoneMode',
+            roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+            roomName: state.homeState.currentRoomInfo.roomName,
+            user:state.homeState.userInfo
+        };
+        console.log(e);
+        if(e === '自由模式'){
+            Msg.mode = 1;
+        }
+        if(e === '主席模式'){
+            Msg.mode = 2;
+        }
+        if(e === '麦序模式'){
+            Msg.mode = 3;
+        }
+        send(JSON.stringify(Msg),function () {
+            console.log('microphoneMode changed and send to others');
+        });
+        store.dispatch({type:CONSTANT.MICROPHONEMODE,val:mode});
     }
     onClickHandle(e){
+        if(state.homeState.microphoneMode != 3)return;//如果不是麦序模式，则直接返回
         let text = e.target.innerHTML;
         const powerArr = ['放麦','离麦','禁麦'];
-        const noPowerArr = ['主席模式','麦序模式','自由模式'];
         const tips = (text) =>{
             Modal.info({
                 title:'系统提示',
@@ -29,12 +50,6 @@ class MicroPhone extends React.Component {
                 onOk() {},
             });
         };
-        /*noPowerArr.map(function(item){
-            if(text.indexOf(item) !== -1){
-                tips('您没有权限');
-                return;
-            }
-        });*/
         powerArr.map(function(item){
             if(text.indexOf(item) !== -1){
                 //如果自己已经在排序，则给出提示并返回
@@ -53,7 +68,6 @@ class MicroPhone extends React.Component {
                         roomName: state.homeState.currentRoomInfo.roomName,
                         user:state.homeState.userInfo
                     };
-                    // startPeerConnection(state.homeState.userInfo.id,Msg);
                 }
                 if(item === '禁麦'){
                     //管理员才可禁麦
@@ -99,14 +113,14 @@ class MicroPhone extends React.Component {
             </div>
             <div className='online-total'>上麦总人数：{state.homeState.roomMicrophoneUser.length}</div>
             <div className='microphone' onClick={e=>this.onClickHandle(e)}>
-                <Select size={'small'} disabled={(state.homeState.userInfo.level < 4) ? false : true} defaultValue='主席模式' onChange={e => {this.handleChange(e)}}>
+                <Select size={'small'} disabled={(state.homeState.userInfo.level < 4) ? false : true} defaultValue='自由模式' onChange={e => {this.handleChange(e)}}>
                     <Option value="自由模式">自由模式</Option>
                     <Option value="主席模式">主席模式</Option>
                     <Option value="麦序模式">麦序模式</Option>
                 </Select>
-                <span> <span>放麦</span> |</span>
-                <span> <span>禁麦</span> |</span>
-                <span> <span>离麦</span></span>
+                <span> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>放麦</span> |</span>
+                <span> <span  className={state.homeState.microphoneMode != 3 ? 'disabled':''}>禁麦</span> |</span>
+                <span> <span  className={state.homeState.microphoneMode != 3 ? 'disabled':''}>离麦</span></span>
             </div>
             <div className='microphone-list'>
                 <List

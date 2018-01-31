@@ -19,7 +19,10 @@ export const CONSTANT = {
     ROOMSTATUS:'ROOMSTATUS',
     MESSAGEDATA:'MESSAGEDATA',
     SENDDATA:'SENDDATA',
-    NUMBERONE:'NUMBERONE'
+    PREOFFERCOUNT:'PREOFFERCOUNT',
+    MICROPHONEMODE:'MICROPHONEMODE',
+    MYAUDIOTRACK:'MYAUDIOTRACK',
+    USERIDLIST:'USERIDLIST',
 };
 function toggleLogin() {
     return {
@@ -58,7 +61,10 @@ const homeInitState = {viewModel:false,skinColor:'#108ee9',
     roomStatus:{},//用于存储各房间打开/关闭状态
     messageData:[],//所有消息数据
     sendData:'',//自己发送的消息数据
-    numberOne:''//表示老大,1表示老大，2表示老大的第1个儿子，3表示老大的其他儿子
+    preOfferCount:0,//表示老大,1表示老大，2表示老大的第1个儿子，3表示老大的其他儿子
+    microphoneMode:1,//表示自由模式
+    myAudioTrack:'',//自己的音轨
+    userIdList:''//循环给用户发送preOffer的列表
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
@@ -81,14 +87,20 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{userInfo:action.val});
         case CONSTANT.ROOMMICROPHONEUSER:
             return Object.assign({},tmpState,{roomMicrophoneUser:action.val});
+        case CONSTANT.MICROPHONEMODE:
+            return Object.assign({},tmpState,{microphoneMode:action.val});
         case CONSTANT.ROOMSTATUS:
             return Object.assign({},tmpState,{roomStatus:action.val});
         case CONSTANT.MESSAGEDATA:
             return Object.assign({},tmpState,{messageData:action.val});
         case CONSTANT.SENDDATA:
             return Object.assign({},tmpState,{sendData:action.val});
-        case CONSTANT.NUMBERONE:
-            return Object.assign({},tmpState,{numberOne:action.val});
+        case CONSTANT.PREOFFERCOUNT:
+            return Object.assign({},tmpState,{preOfferCount:action.val});
+        case CONSTANT.MYAUDIOTRACK:
+            return Object.assign({},tmpState,{myAudioTrack:action.val});
+        case CONSTANT.USERIDLIST:
+            return Object.assign({},tmpState,{userIdList:action.val});
         default:
             // console.log('default');
             return homeInitState;

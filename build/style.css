@@ -7804,6 +7804,8 @@ ul {
       cursor: pointer; }
       .microphone_area .microphone > span > span {
         color: #428cff; }
+    .microphone_area .microphone .disabled {
+      color: #aaa; }
   .microphone_area .ant-list-split .ant-list-item {
     border-bottom: none !important; }
 
