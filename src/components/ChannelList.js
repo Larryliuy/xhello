@@ -4,7 +4,7 @@ import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from '../static/webSocket.js';
 import '../static/login.scss';
-import {offerPeerConnection, startPeerConnection} from "../webrtc/webRtcCom";
+import {getRoomUserList, startOnline} from "../webrtc/webRtcCom";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -27,7 +27,7 @@ class ChannelList extends React.Component{
         //数据从父组件来
         let _this = this;
         //暂时使用定时器解决，后续方案需使用redux-saga解决
-        intval = setInterval(function () {
+        /*intval =*/ setTimeout(function () {
             if(state.homeState.allRoomList.length !== 0){
                 const datas = state.homeState.allRoomList;
                 // console.log(datas);
@@ -53,16 +53,17 @@ class ChannelList extends React.Component{
                     send(JSON.stringify(enterMsg),function(){
                     });
                     //获取房间里用户列表信息
-                    let getUsersInfo = getSendData(
+                    /*let getUsersInfo = getSendData(
                         'get_room_users',
                         state.homeState.currentRoomInfo.roomId,
-                            state.homeState.currentRoomInfo.roomName,
+                        state.homeState.currentRoomInfo.roomName,
                         state.homeState.userInfo,
-                        data);
+                        data);*/
                     // WS.send(JSON.stringify(enterMsg));
-                    send(JSON.stringify(getUsersInfo),function(){
-                        clearInterval(intval);
-                    });
+                    // send(JSON.stringify(getUsersInfo),function(){
+                    //     clearInterval(intval);
+                    // });
+                    getRoomUserList(startOnline);
                     //需要默认将默认房间信息更新到当前房间
 
                 }else{

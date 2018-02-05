@@ -2,7 +2,8 @@ import './pageClose.js';
 import './media.js';
 import {
     answerPeerConnection, getPrepareConnectionState, micphoneStream, offerPeerConnection, onAnswer,
-    onCandidate, onLeave
+    onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
+    getRoomInfo, getRoomUserList
 } from "../webrtc/webRtcCom";
 import store,{CONSTANT} from "../reducer/reducer";
 
@@ -180,6 +181,7 @@ function scrollToBottom(){
 }
 
 let intval=null; //发offer定时器
+let sempher = 0;
 function onmessage(response){
     // console.log(response);
     if(!response) return ;
@@ -211,27 +213,40 @@ function onmessage(response){
                 log('从'+dataJson.fromUser.id+'收到准备连接申请');
                 // console.log(state.homeState.userInfo);
                 // console.log(dataJson.fromUser);
-                let preAnswerMsg;
+                let preAnswerMsg,userInfoTmp = state.homeState.userInfo;
                 // console.log(dataJson.toUser.yes+','+state.homeState.userInfo.Children.length +','+ state.homeState.userInfo.maxChildren);
-                if((dataJson.toUser && dataJson.toUser.yes) || state.homeState.userInfo.Children.length < state.homeState.userInfo.maxChildren){
+                if(sempher < 0) {
+                    sendFailed();
+                    return;
+                }
+                sempher = sempher - 1;
+                if(userInfoTmp.Children.length < userInfoTmp.maxChildren){
                     //先占位
-                    if(dataJson.toUser && dataJson.toUser.yes){
-                        log('儿子'+ dataJson.toUser.id +'发过来的连接申请不能拒绝,通过yes进来的');
-                    }
-                    let userInfoTmp = state.homeState.userInfo;
-                    /*if(state.homeState.userInfo.numberOne && state.homeState.numberOne === dataJson.toUser.numberOne){
-                        console.log('老大：'+state.homeState.numberOne);
-                        if(userInfoTmp.Children.length === 0){
-                            userInfoTmp.numberOne = 2;
-                        }else{
-                            userInfoTmp.numberOne = 3;
-                        }
-                    }*/
-                    if(!(dataJson.toUser && dataJson.toUser.yes)){//带yes标签的用户不用占位
-                        userInfoTmp.Children.push(0);//0表示占位符
-                    }
+                    userInfoTmp.Children.push(dataJson.fromUser.id);//占位符这里的时间差
+                    sempher = sempher + 1;
                     // userInfoTmp.seq = dataJson.toUser.seq;//将我的seq设置给本地state
-                    // store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                    store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                    sendOK();
+                }else{
+                    sempher = sempher + 1;
+                    sendFailed();
+                }
+                function sendFailed() {
+                    preAnswerMsg = {
+                        type:'msg',
+                        typeString:'preAnswer',
+                        ToUserOnly:dataJson.fromUser.id,
+                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                        roomName: state.homeState.currentRoomInfo.roomName,
+                        fromUser:state.homeState.userInfo,
+                        status:'failed'
+                    };
+                    send(JSON.stringify(preAnswerMsg),function () {
+                        // console.log('send preAnswer for failed status ');
+                        log('发送连接申请的回复结果给 '+dataJson.fromUser.id+',结果：申请失败');
+                    });
+                }
+                function sendOK() {
                     preAnswerMsg = {
                         type:'msg',
                         typeString:'preAnswer',
@@ -241,11 +256,12 @@ function onmessage(response){
                         fromUser:userInfoTmp,
                         status:'ok'
                     };
+                    console.log(userInfoTmp);
                     send(JSON.stringify(preAnswerMsg),function () {
                         log('发送连接申请的回复结果给 '+dataJson.fromUser.id+',结果：申请成功');
                         // console.log(dataJson.toUser);
-                        if(userInfoTmp.Children[0] === userInfoTmp.Children[userInfoTmp.Children.length-1])return;//如果第一个孩子等于最后一个孩子，则不需要发送断开
-                        if(dataJson.toUser.yes && userInfoTmp.Children[userInfoTmp.Children.length-1] != 0){
+                        /*if(userInfoTmp.Children[0] === userInfoTmp.Children[userInfoTmp.Children.length-1])return;//如果第一个孩子等于最后一个孩子，则不需要发送断开
+                        if(userInfoTmp.Children[userInfoTmp.Children.length-1] != 0){
                             //如果节点满了，这里发消息给最后一个儿子，让其断开连接
                             if(userInfoTmp.Children.length >= userInfoTmp.maxChildren){
                                 let sendChildMsg = {
@@ -261,28 +277,14 @@ function onmessage(response){
                                     log('通知最后一个儿子，断开连接');
                                 })
                             }
-                        }
-                    })
-                }else{
-                    preAnswerMsg = {
-                        type:'msg',
-                        typeString:'preAnswer',
-                        ToUserOnly:dataJson.fromUser.id,
-                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                        roomName: state.homeState.currentRoomInfo.roomName,
-                        fromUser:state.homeState.userInfo,
-                        status:'failed'
-                    };
-                    send(JSON.stringify(preAnswerMsg),function () {
-                        // console.log('send preAnswer for failed status ');
-                        log('发送连接申请的回复结果给 '+dataJson.fromUser.id+',结果：申请失败');
+                        }*/
                     })
                 }
                 return;
             }
             if(dataJson.typeString === 'preAnswer'){
-                console.log('收到 '+dataJson.fromUser.id + '的申请答复， 结果：'+ dataJson.status);
-                // console.log(dataJson);
+                log('收到 '+dataJson.fromUser.id + '的申请答复， 结果：'+ dataJson.status);
+                console.log(dataJson);
                 if(dataJson.status === 'ok'){
                     //这里发offer
                     let Msg = {
@@ -295,18 +297,26 @@ function onmessage(response){
                         toUser:dataJson.fromUser,
                         sessionId:state.homeState.userInfo.id+'-'+dataJson.fromUser.id
                     };
-                    // console.log(Msg);
-                    /*intval = */setTimeout(function () {
+                    console.log(Msg);
+                    setTimeout(function () {/*intval = */
                         if(getPrepareConnectionState()){
-                            console.log('intval');
+                            // console.log('intval');
                             // console.log("offerPeerConnection ......");
                             offerPeerConnection(Msg,document.getElementById('audioBox'));
-                            clearInterval(intval);
+                            // clearInterval(intval);
                             // break;
                         }
                     },500);
                 }else if(dataJson.status === 'failed'){
-                    let objUserId,userIdList = state.homeState.userIdList,preOfferCount = state.homeState.preOfferCount;
+                    getRoomInfo();
+                    // if(state.homeState.numberOne !== 0){
+                    //     //如果老大存在则直接入网
+                    //     startOnline();
+                    // }else {
+                    //     //老大不存在，申请成为老大
+                    //     applyToBeFirst();
+                    // }
+                    /*let objUserId,userIdList = state.homeState.userIdList,preOfferCount = state.homeState.preOfferCount;
                     if(userIdList[preOfferCount]){
                         if(userIdList[preOfferCount] != dataJson.fromUser.id){
                             objUserId = userIdList[preOfferCount];
@@ -349,10 +359,9 @@ function onmessage(response){
                             console.log('结果失败时，重新发送getRoomUSers消息');
                         })
                         // },500);
-                    }
-
+                    }*/
                 }else{
-                    console.log('未知的状态：'+dataJson.status);
+                    log('未知的状态：'+dataJson.status);
                 }
                 return;
             }
@@ -367,7 +376,7 @@ function onmessage(response){
                     return;
                 }
             }
-            if(dataJson.typeString === 'setNewPreHead'){//当老二掉线时，老大通知我，并将我设置成新的老二
+            /*if(dataJson.typeString === 'setNewPreHead'){//当老二掉线时，老大通知我，并将我设置成新的老二
                 log('收到重新设置预备老大的消息');
                 //在这里将我的信息发送给服务器
                 let userInfot = state.homeState.userInfo;
@@ -399,7 +408,7 @@ function onmessage(response){
                     });
                 }
                 return;
-            }
+            }*/
             // console.log(dataJson);
             if(dataJson.typeString === '放麦'){
                 let userData = state.homeState.roomMicrophoneUser;
@@ -425,7 +434,7 @@ function onmessage(response){
                     }
                 }
                 return;
-            };
+            }
             if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
                 // console.log(dataJson);
                 if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
@@ -471,7 +480,6 @@ function onmessage(response){
                 return;
             }
             //移动到我所在房间
-            // console.log(dataJson);
             if(dataJson.typeString === 'moveToRoom'){
                 let roomStatueTmp = state.homeState.roomStatus,rId;
                 allRoomListTmp = state.homeState.allRoomList;
@@ -583,6 +591,32 @@ function onmessage(response){
                     // console.log(allRoomList);
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
                 }
+                return;
+            }
+            if(dataJson.typeString === 'vodSrc'){
+                log('收到vodSrc');
+                //将收到的vodSrc设置给vodVideo标签,设置成静音(防止开语音的时候，声音传回去),并设置成自动播放
+                let vodVideo = document.getElementById('vodVideo');
+                if(!vodVideo){
+                    console.log('vodVideo不存在');
+                    return;
+                }
+                vodVideo.addEventListener('canplay', function(){
+                    vodVideo.muted = true;		//mute local video to avoid echo by myself.
+                });
+                vodVideo.addEventListener('play', function(){
+                    vodVideo.muted = true;		//mute local video to avoid echo by myself.
+                });
+                vodVideo.src = dataJson.vodSrc;
+                vodVideo.autoplay=true;
+                vodVideo.controls=true;
+                return;
+            }
+            if(dataJson.typeString === 'changeRoomMode'){
+                log('收到改变房间模式消息：'+dataJson.roomMode);
+                let currentRoomInfo = state.homeState.currentRoomInfo;
+                currentRoomInfo.mode = dataJson.roomMode;
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
                 return;
             }
             //消息撤回
@@ -728,9 +762,54 @@ function onmessage(response){
                 time:getDateString(),
                 data:'<p>'+ dataJson.user.name + '已离开房间'+ dataJson.roomName +'</p>'});
             break;
+
         case 'get_room_users':
-            console.log('get_room_users');
-            // console.log(dataJson);
+            log('收到get_room_users消息');
+            let UserInfoList = [], userIdList = [], userInfo = state.homeState.userInfo;
+            console.log(dataJson.data);
+            if(dataJson.data && dataJson.data[userInfo.id]){
+                userInfo = dataJson.data[userInfo.id];
+                store.dispatch({type:CONSTANT.USERINFO,val:userInfo});//将从服务器获取的最新userInfo更新到本地
+            }
+            if(dataJson.data && Object.keys(dataJson.data).length > 1) {
+                // console.log(dataJson.user);
+                for (let item in dataJson.data) {
+                    if(item != userInfo.id ){
+                        UserInfoList.push(dataJson.data[item]);
+                        userIdList.push(item);
+                    }else{
+                        userInfo = dataJson.data[item];
+                        // console.log(userInfo);
+                    }
+                }
+                // console.log(UserInfoList);
+                store.dispatch({type:CONSTANT.USERINFOLIST,val:UserInfoList});//将userInfoList存入redux
+                store.dispatch({type:CONSTANT.USERIDLIST,val:userIdList});//将连接备选人存入redux
+
+                // console.log(UserInfoList);
+                if(getRoomUserListCallback !== null){
+                    let callbackTmp = getRoomUserListCallback;
+                    setGetRoomUserListCallback(null);
+                    callbackTmp();
+                }
+            }else{
+                //申请成为老
+                applyToBeFirst();
+                /*store.dispatch({type:CONSTANT.NUMBERONE,val:userInfo.id});//test:这里用于测试使用
+                let numberOneMsg = {
+                    type:'msg',
+                    typeString:'numberOne',
+                    roomId:state.homeState.currentRoomInfo.roomId,
+                    user:userInfo
+                };
+                send(JSON.stringify(numberOneMsg),function () {
+                    console.log('将我是老大的消息发给其他人')
+                });*/
+                return;
+            }
+
+
+           /* // console.log(dataJson);
             let userInfoTmp ;
             if(dataJson.user && dataJson.user.numberOne){//如果dataJson中user有numberOne则使用dataJson.user，没有则使用state
                 userInfoTmp = dataJson.user;
@@ -755,7 +834,8 @@ function onmessage(response){
                 send(JSON.stringify(updateUserMsg),function () {
                     log('将老大信息更新到服务器');
                 })
-            }
+            }*/
+           //更新左侧列表
             allRoomListTmp = state.homeState.allRoomList;
             // console.log(allRoomListTmp);
             let by = function(name,minor){
@@ -797,11 +877,10 @@ function onmessage(response){
             });
             // console.log(allRoomListTmp)
             store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
-            // console.log(allRoomListTmp);
-            //给不是自己的所有人发offer
-            //建立webRtc连接
 
-            //获取最小seq的用户
+            return;
+
+            /*//获取最小seq的用户
             function getMinSeqUser(UserList) {
                 console.log(UserList);
                 // console.log(startSeq);
@@ -925,8 +1004,32 @@ function onmessage(response){
                         log('发送准备连接（pre-offer）消息给 ' + objUser.id);
                     });
                 }
-            }
+            }*/
 
+            break;
+        case 'get_room_info':
+            log('收到get_room_info消息');
+            console.log(dataJson);
+            if(dataJson.data.king){
+                store.dispatch({type:CONSTANT.NUMBERONE,val:dataJson.data.king});
+                log('王已存在，我要入网');
+                getRoomUserList(startOnline);
+            }else{
+                //申请成为老大
+                log('没有王，我要申请成为新的王');
+                applyToBeFirst();
+            }
+            break;
+        case 'declare_king':
+            // console.log(dataJson);
+            if(dataJson.result === 'ok'){
+                log('我成为了新的王：');
+                store.dispatch({type:CONSTANT.NUMBERONE,val:dataJson.user.id});
+            }else{
+                //申请成为老大
+                log('我没有成为王，我要getRoomInfo');
+                getRoomInfo();
+            }
             break;
         case 'get_rooms':
             // console.log(dataJson.data);
@@ -962,16 +1065,12 @@ function onmessage(response){
                 val:dataTmp[0].childNode[0]});
 
             break;
+        case 'get_first':
+            if(dataJson.first){
+                store.dispatch({type:CONSTANT.NUMBERONE,val:dataJson.first});
+            }
+            break;
         case 'create_room':
-            // console.log(dataJson);
-            // console.log(dataJson.data);
-            //更新allRoomList
-            /* let allRoomListTmp = state.homeState.allRoomList;
-             allRoomListTmp.map(function (item) {
-                 if(item.parentId === 0){
-                     item.push()
-                 }
-             });*/
             break;
         case 'delete_room':
             // console.log(dataJson);
@@ -983,10 +1082,7 @@ function onmessage(response){
     }
     store.dispatch({type:CONSTANT.MESSAGEDATA,val:messagedata});
     scrollToBottom();
-};
-//2断的情况，根本没考虑。预备老大掉线了没有找出新的预备老大
-//1,2,3,4,5 断2，上2，再断1，再上1，断5，上5，（1,2,3）（4,5）
-//死循环可能的原因之一：就是每次连老大的时候老大都会去通知最后一个掉线，结果最后一个掉线的又重连，然后又找到老大，一直这样循环
+}
 
 function log(message) {
     console.log(state.homeState.userInfo.id+'==='+message);

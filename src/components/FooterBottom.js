@@ -3,7 +3,7 @@ import { message ,Input, Button, Slider } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import {generalApi} from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
-import { micphoneStream } from '../webrtc/webRtcCom';
+import { closeMicrophone, openMicrophone } from '../webrtc/webRtcCom';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -44,26 +44,17 @@ class FooterBottom extends React.Component{
             case 'open-microphone-btn':
                 // alert('开启麦克风');
                 // myLocalStream
+                let audioTrack = state.homeState.myAudioTrack;
                 if(this.state.microphoneOpen){
-                    let audioTrack = micphoneStream.getAudioTracks();
-                    console.log(audioTrack.length +','+ audioTrack);
-                    if(audioTrack.length > 0){
-                        if(audioTrack[0]){
-                            this.setState({microphoneOpen:false,audioTrack:audioTrack[0]});
-                            micphoneStream.removeTrack(audioTrack[0]);
-                        }
-                    }
+                    closeMicrophone();
+                    this.setState({microphoneOpen:false});
                 }else{
-                    if(this.state.audioTrack){
-                        micphoneStream.addTrack(this.state.audioTrack);
-                        this.setState({microphoneOpen:true,audioTrack:''});
-                    }
+                    openMicrophone();
+                    this.setState({microphoneOpen:true});
                 }
                 break;
             case 'user-name':
                 this.setState({inputVisible:true});
-                // console.log(this.refs.changeNameInput);
-                // document.getElementById('changeNameInput').querySelector('input')[0].focus();
                 break;
         }
     }
