@@ -4,11 +4,11 @@ module.exports = {
     devtool:'eval-source-map',
     entry:{
         app:__dirname + '/src/index.js',
-        vendors:['react','react-dom','react-redux','react-router-dom',"redux"]
+        vendor:['react','react-dom','react-redux','react-router-dom',"redux"]
     },
     output: {
         path: __dirname + "/build",
-        filename: "[name].js"
+        filename: "[name].js",
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
@@ -16,7 +16,15 @@ module.exports = {
             'process.env.NODE.ENV': "production"
         }),
         new ExtractTextPlugin({filename:"style.css",disable: false,allChunks: true}),
-        new webpack.optimize.CommonsChunkPlugin({name:'vendors',fileName:'vendors.js'} ),
+        new webpack.optimize.CommonsChunkPlugin({
+            name:'vendor',
+            // minChunks: ({ resource }) => (
+            //     resource &&
+            //     resource.indexOf('node_modules') >= 0 &&
+            //     resource.match(/\.js$/)
+            // ),
+            fileName:'vendors.js'
+        }),
         // new webpack.optimize.UglifyJsPlugin({
         //     output: {
         //         comments: false,  // remove all comments
@@ -48,7 +56,7 @@ module.exports = {
                         {
                             loader: 'css-loader',
                             options:{
-                                minimize: false //css压缩
+                                minimize: false //css压缩,dev环境不用压缩
                             }
                         }
                     ]
