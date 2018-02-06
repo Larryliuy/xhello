@@ -62,6 +62,24 @@ class VideoOnDemand extends React.Component{
         console.log(e.target.value);
         this.setState({vodSrc:e.target.value});
     }
+    closeVod(){
+        //关闭点播
+        let roomInfoTmp = state.homeState.currentRoomInfo;
+        roomInfoTmp.mode = 0;
+        store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfoTmp});
+        //发消息给其他用户调整房间模式
+        let sendMsg = {
+            type:'msg',
+            typeString:'changeRoomMode',
+            roomId:state.homeState.currentRoomInfo.roomId,
+            roomName:state.homeState.currentRoomInfo.roomName,
+            user:state.homeState.userInfo,
+            roomMode:0
+        };
+        send(JSON.stringify(sendMsg),function () {
+            console.log('发送关闭点播消息成功');
+        })
+    }
     render(){
         const content = (<div style={{width:'300px'}}>
             <Input onChange={(e)=>this.userNameChange(e)} placeholder={'请输入视频网址'}/>
@@ -82,6 +100,7 @@ class VideoOnDemand extends React.Component{
                              trigger="click">
                         <Button onClick={()=>this.addVideoSrc()}>添加视频网址</Button>
                     </Popover>
+                    <Button onClick={()=>this.closeVod()}></Button>
                 </div>
                 <video id={'vodVideo'}
                        src={this.state.vodSrc}

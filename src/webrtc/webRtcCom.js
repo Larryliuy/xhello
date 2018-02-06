@@ -98,7 +98,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             remoteVidoeDom = document.querySelector('#'+remoteVidoeId);
             remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
             log('触发onaddstream');
-            mixerAudio(e.stream,newConnection);
+            mixerAudio(e.stream,newConnection,true);
         };
         // Setup ice handling
         newConnection.onicecandidate = function (event) {
@@ -196,6 +196,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             pc:newConnection,
             pcState:'connecting',
             pcStateTime:new Date().getTime()/1000,
+            myMicSource:myMicSource,
             wa:webAudio,
             mixer:mixedOutput,
             noMicMixer:moMicOutputStream,
@@ -257,25 +258,29 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             },
             onclosemicrophone:function () {
                 log('进入onclosemicrophone');
-                console.log(this.mixer.stream);
+                this.myMicSource.disconnect(this.mixer);
+                // console.log(this.mixer.stream);
+                // console.log(this.noMicMixer.stream);
                 //在这里关闭麦克风音源
-                this.pc.removeStream(this.mixer.stream);
-                this.pc.addStream(this.noMicMixer.stream);
+                // this.pc.removeStream(this.mixer.stream);
+                // this.pc.addStream(this.noMicMixer.stream);
                 // let newMixer = this.wa.createMediaStreamDestination(),
                 //     newLocalStream = newMixer.stream,
                 //     remoteVidoeDom;
                 // this.mixer = newMixer;
                 // this.pc.addStream(newLocalStream);
                 // console.log(this.pcOutStream);
-                mixerAudio(this.pcOutStream,this.pc);
+                // mixerAudio(this.pcOutStream,this.pc,false);
                 // remoteVidoeDom = document.querySelector('#'+this.remoteVideoId);
                 // remoteVidoeDom.src = window.URL.createObjectURL(this.pcOutStream);
             },
             onopenmicrophone:function () {
                 log('进入onopenmicrophone');
-                console.log(this.mixer.stream);
-                this.pc.removeStream(this.noMicMixer.stream);
-                this.pc.addStream(this.mixer.stream);
+                this.myMicSource.connect(this.mixer);
+                // console.log(this.mixer.stream);
+                // console.log(this.noMicMixer.stream);
+                // this.pc.removeStream(this.noMicMixer.stream);
+                // this.pc.addStream(this.mixer.stream);
                 //这里开启麦克风音源
                 // this.pc.removeStream(this.mixer.stream);
                 // let newMixer = this.wa.createMediaStreamDestination(),
@@ -285,7 +290,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 // newLocalStream = newMixer.stream;
                 // this.mixer = newMixer;
                 // this.pc.addStream(newLocalStream);
-                mixerAudio(this.pcOutStream,this.pc);
+                // mixerAudio(this.pcOutStream,this.pc,false);
                 // remoteVidoeDom = document.querySelector('#'+this.remoteVideoId);
                 // remoteVidoeDom.src = window.URL.createObjectURL(this.pcOutStream);
             }};
@@ -317,6 +322,7 @@ function offerPeerConnection(wbMsg,videoBox) {
         remoteVideoId:videoId,
         pc:xpc.pc,
         wa:xpc.wa,
+        myMicSource:xpc.myMicSource,
         mixer:xpc.mixer,
         noMicMixer:xpc.noMicMixer,
         pcState:xpc.pcState,
@@ -373,6 +379,7 @@ function answerPeerConnection(wbMsg,offer,videoBox) {
         remoteVideoId:videoId,
         pc:xpc.pc,
         wa:xpc.wa,
+        myMicSource:xpc.myMicSource,
         mixer:xpc.mixer,
         noMicMixer:xpc.noMicMixer,
         pcState:xpc.pcState,
@@ -443,7 +450,7 @@ function onCandidate(candidate,sessionId) {
 }
 
 //混音函数，收到远程音频流时用于混音
-function mixerAudio(stream,pc) {
+function mixerAudio(stream,pc,type) {
     rtcSessionList.map(function (item) {
         if(item.pc != pc){
             if(item.wa){
@@ -454,7 +461,9 @@ function mixerAudio(stream,pc) {
                 log('item.wa不存在')
             }
         }else{
-            item.pcOutStream = stream;
+            if(type){//type是false表示不是接受到addstream时的调用
+                item.pcOutStream = stream;
+            }
             rtcSessionList.map(function (item1) {
                 if(item1 != item){
                     // console.log(item1);
@@ -464,7 +473,7 @@ function mixerAudio(stream,pc) {
                             awTmpStream.connect(item.mixer);
                             awTmpStream.connect(item.noMicMixer);
                         }else{
-                            log('item.wa不存在')
+                            log('item.wa不存在');
                         }
                     }else{
                         // console.log(item1.pcOutStream);//这里的pcOutStream偶尔会没有，这是因为item1这个连接还在建立过程中，当他建立成功的时候还会到这个onaddStream来添加

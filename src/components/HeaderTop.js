@@ -29,6 +29,10 @@ class HeaderTop extends React.Component{
     };
     vodPlay(){
         let currentRoomInfo = state.homeState.currentRoomInfo;
+        if(currentRoomInfo.mode === 1){
+            message('已开启直播模式，不能点播');
+            return;
+        }
         currentRoomInfo.mode = 2;
         store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
         //切换房间模式，mode
@@ -66,7 +70,7 @@ class HeaderTop extends React.Component{
                     <Popover placement="bottomLeft"
                                content={content}
                                trigger="click">
-                        <span><Icon style={{color:'#fff'}} type="appstore-o" /></span>
+                        <span><Icon style={{color:'#fff',display:'block',marginTop:'3px'}} type="appstore-o" /></span>
                     </Popover>
                 </span>
                 <span><Skin></Skin></span>
