@@ -59,7 +59,7 @@ class Register extends React.Component {
                 }else {
                     message.error('注册失败');
                 }
-            }).catch(err=>console.log(err))
+            }).catch(err=>console.log(err));
     };
     render(){
         return (<Form className="login-form">

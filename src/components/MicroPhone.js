@@ -1,8 +1,8 @@
 import React,{ Component }  from 'react'
-import { Select, List, Icon,Modal } from 'antd';
+import { Select, List, Icon, Modal, message } from 'antd';
 import store, {CONSTANT} from "../reducer/reducer";
-import WS, {getDateString, getSendData, send} from "../static/webSocket";
-import { prepareConnection, onAnswer,  onCandidate, onOffer, startPeerConnection } from  '../webrtc/webRtcCom';
+import { send } from "../static/webSocket";
+import { ajustUserOrder } from  '../static/comFunctions';
 const Option = Select.Option;
 
 let state = store.getState();
@@ -234,6 +234,58 @@ class MicroPhone extends React.Component {
         // console.log(result);
         return result;
     }
+    upMicrophoneOrder(e){
+        if(state.homeState.userInfo.level > 3){
+            message.info('您没有权限');
+            return;
+        }
+        let onMicUsers = state.homeState.roomMicrophoneUser;
+        console.log(onMicUsers);
+        console.log(onMicUsers[0]);
+        if(onMicUsers.length <= 1 || onMicUsers[0].id == e.target.dataset.uid ){
+            message.info('已经是第一了，无需上移');
+            return;
+        }
+        // let newOnMicUsers = upUserOrder(onMicUsers,e.target.dataset.uid);
+        //发消息给其他人
+        let orderInfo = {type:'up',userId:e.target.dataset.uid};
+        let msg = {
+            type:'msg',
+            typeString:'changeMicOrder',
+            roomId:state.homeState.currentRoomInfo.roomId,
+            roomName:state.homeState.currentRoomInfo.roomName,
+            user:state.homeState.userInfo,
+            orderInfo:orderInfo
+        };
+        send(JSON.stringify(msg),function () {
+            console.log('发送调整麦序消息');
+        })
+    }
+    downMicrophoneOrder(e){
+        if(state.homeState.userInfo.level > 3){
+            message.info('您没有权限');
+            return;
+        }
+        let onMicUsers = state.homeState.roomMicrophoneUser;
+        console.log(onMicUsers);
+        if(onMicUsers[onMicUsers.length-1].id == e.target.dataset.uid){
+            message.info('已经是最后一个，无需上移');
+            return;
+        }
+        //发消息给其他人
+        let orderInfo = {type:'down',userId:e.target.dataset.uid};
+        let msg = {
+            type:'msg',
+            typeString:'changeMicOrder',
+            roomId:state.homeState.currentRoomInfo.roomId,
+            roomName:state.homeState.currentRoomInfo.roomName,
+            user:state.homeState.userInfo,
+            orderInfo:orderInfo
+        };
+        send(JSON.stringify(msg),function () {
+            console.log('发送调整麦序消息');
+        })
+    }
     render(){
         return (<div className='microphone-a'>
             {/*头像区域*/}
@@ -262,7 +314,15 @@ class MicroPhone extends React.Component {
                 <List
                     size='small'
                     dataSource={state.homeState.roomMicrophoneUser}
-                    renderItem={item => (<List.Item><Icon className='list-icon' type="user" />{item.name}</List.Item>)}
+                    renderItem={item => (<List.Item>
+                        <span className={'microphone-user-span'}>
+                            <span><Icon className='list-icon' type="user" />{item.name}</span>
+                            <span>
+                                <span onClick={e=>this.upMicrophoneOrder(e)} title={'向上移'} className={'arrow-up-span'}><Icon data-uid={item.id}  type="arrow-up" /></span>
+                                <span onClick={e=>this.downMicrophoneOrder(e)} title={'向下移'} className={'arrow-down-span'}><Icon data-uid={item.id} type="arrow-down" /></span>
+                            </span>
+                        </span>
+                    </List.Item>)}
                 />
             </div>
         </div>)

@@ -1,7 +1,7 @@
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
-    devtool:'eval-source-map',
+    devtool:'eval-source-map',//成产环境不需要加这个，不然会导致文件巨大
     entry:{
         app:__dirname + '/src/index.js',
         vendor:['react','react-dom','react-redux','react-router-dom',"redux"]
@@ -23,7 +23,7 @@ module.exports = {
             //     resource.indexOf('node_modules') >= 0 &&
             //     resource.match(/\.js$/)
             // ),
-            fileName:'vendors.js'
+            // fileName:'vendors.js'
         }),
         // new webpack.optimize.UglifyJsPlugin({
         //     output: {

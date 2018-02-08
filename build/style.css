@@ -7961,6 +7961,21 @@ ul {
   cursor: pointer; }
   .vodMenu .ant-list-item .ant-list-item-content {
     height: 22px; }
+
+.cheer-applause-audioBox {
+  position: absolute;
+  width: 1px;
+  height: 1px; }
+  .cheer-applause-audioBox #cheer-audio, .cheer-applause-audioBox #applause-audio {
+    width: 1px;
+    height: 1px; }
+
+.microphone-user-span {
+  width: 95%;
+  display: flex;
+  justify-content: space-between; }
+  .microphone-user-span .arrow-up-span, .microphone-user-span .arrow-down-span {
+    cursor: pointer; }
 /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
 /* stylelint-disable no-duplicate-selectors */
 /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors */

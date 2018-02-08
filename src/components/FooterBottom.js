@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import { message ,Input, Button, Slider } from 'antd';
 import UploadAvatar from './UploadAvatar';
-import {generalApi} from "../static/apiInfo";
+import { generalApi } from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcCom';
 
@@ -10,6 +10,7 @@ store.subscribe(function () {
     state = store.getState();
     // console.log(store.getState())
 });
+let isAudioPlay = false,startTime = 0,endTime;
 class FooterBottom extends React.Component{
     constructor(props){
         super(props);
@@ -18,13 +19,14 @@ class FooterBottom extends React.Component{
             inputVisible:false,
             inputValue:'',
             audioTrack:'',
-            microphoneOpen:true
+            microphoneOpen:false
         }
     }
     clickHandle(e){
         // alert(e.target)
         if(!e.target.id) return;
         console.log(e.target.id);
+        let audioDom = '';
         switch (e.target.id){
             case 'avatar-img':
                 this.setState({visible: true});
@@ -36,15 +38,33 @@ class FooterBottom extends React.Component{
                 // alert('控制麦克风');
                 break;
             case 'cheer-span':
-                alert('欢呼');
+                if(!isAudioPlay && (new Date().getTime()/1000 - startTime) > 5){
+                    audioDom = document.getElementById('cheer-audio');
+                    audioDom.src = '../static/sounds/cheer.mp3';
+                    audioDom.autoplay = true;
+                    isAudioPlay = true;
+                    startTime = new Date().getTime()/1000;
+                    setTimeout(function () {
+                        isAudioPlay = false;
+                    },5000);
+                }
                 break;
             case 'applause-span':
-                alert('鼓掌');
+                if(!isAudioPlay && (new Date().getTime()/1000 - startTime) > 5) {
+                    audioDom = document.getElementById('applause-audio');
+                    audioDom.src = '../static/sounds/applause.mp3';
+                    audioDom.autoplay = true;
+                    isAudioPlay = true;
+                    startTime = new Date().getTime()/1000;
+                    setTimeout(function () {
+                        isAudioPlay = false;
+                    },5000);
+                }
                 break;
             case 'open-microphone-btn':
                 // alert('开启麦克风');
                 // myLocalStream
-                let audioTrack = state.homeState.myAudioTrack;
+                // let audioTrack = state.homeState.myAudioTrack;
                 if(this.state.microphoneOpen){
                     closeMicrophone();
                     this.setState({microphoneOpen:false});
@@ -177,6 +197,10 @@ class FooterBottom extends React.Component{
             </div>
             <div className='play-sound'>
                 <span><img id='play-img' src='./images/icons/music.png' />播放</span>
+            </div>
+            <div className={'cheer-applause-audioBox'}>
+                <audio id={'cheer-audio'}></audio>
+                <audio id={'applause-audio'}></audio>
             </div>
         </div>)
     }

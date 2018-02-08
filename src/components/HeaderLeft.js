@@ -1,7 +1,10 @@
 import React,{ Component } from 'react';
 import { Icon, Popover, Input, Button, Modal } from 'antd';
 import RoomManager from './RoomManager';
+import { redirect_uri, registerApi } from '../static/apiInfo';
+import { randomWord } from '../static/comFunctions';
 import store from "../reducer/reducer";
+import { message } from "antd/lib/index";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -61,7 +64,26 @@ class HeaderLeft extends Component{
             this.setState({
                 planeVisible: false,
             });
-            Modal.info({title:'链接地址',content:(<a>http://localhost:3006/#/?invited&userName={this.state.userName}</a>)})
+            console.log(this.state.userName,this.state.password);
+            let inviteCode = randomWord(false,32);
+            //请求注册接口，sex默认为1,
+            let args = 'LoginName='+state.homeState.userInfo.name + '-' + this.state.userName+'&Password='+this.state.password+'&sex=1'+'&inviteCode='+inviteCode;
+            fetch(registerApi,{
+                method:'POST',
+                // credentials: "include",
+                headers:{
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body:args//JSON.stringify(args)
+            }).then((response) => {console.log(response);return response.json()})
+                .then(data=>{
+                    console.log(data);
+                    if(data.status === 'ok'){
+                        Modal.info({title:'链接地址',content:(<a><p style={{width:'100%',wordBreak:'break-word'}}>{redirect_uri+'#/?inviteCode='+inviteCode+'&userName='+this.state.userName}</p></a>)})
+                    }else {
+                        message.error('生成失败,可能名字重复了');
+                    }
+                }).catch(err=>console.log(err));
         }
     }
     render(){

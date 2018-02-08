@@ -592,3 +592,23 @@ ul{
   }
 }
 
+//欢呼鼓掌audio标签
+.cheer-applause-audioBox{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  #cheer-audio,#applause-audio{
+    width: 1px;
+    height: 1px;
+  }
+}
+
+//麦序列表用户
+.microphone-user-span{
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  .arrow-up-span,.arrow-down-span{
+    cursor: pointer;
+  }
+}

@@ -12,12 +12,12 @@ store.subscribe(function(){
 const clcikUserData = [
     {title:'人员管理',operate:['封IP','封ID']},
     {title:'权限管理',operate:['副房主','一级管理员','二级管理员','VIP','会员','撤销级别']},
-    {title:'禁止操作',operate:['禁止此人文字','禁止此人语音','禁止此人图片']},
+    {title:'禁止操作',operate:['禁止此人文字','禁止此人语音','禁止此人图片','取消此人禁止']},
     {title:'移动到我所在房间'}
     ];
 //点击子房间时数据
 const clickChildRoomData = [
-    {title:'禁止权限',operate:['禁止文字','禁止语音','禁止图片']},
+    {title:'禁止权限',operate:['禁止文字','禁止语音','禁止图片','取消禁止']},
     {title:'删除房间'},
     {title:'房间设置'},
     {title:'排序'}

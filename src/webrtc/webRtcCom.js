@@ -125,8 +125,8 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
         myMicSource = webAudio.createMediaStreamSource(micphoneStream);
         mixedOutput  = webAudio.createMediaStreamDestination();
         moMicOutputStream = webAudio.createMediaStreamDestination();
-        myMicSource.connect(mixedOutput);
-
+        // myMicSource.connect(mixedOutput);
+        // myMicSource.disconnect(mixedOutput);
         newConnection.addStream(mixedOutput.stream);
         newConnection.onaddstream = function (e) {
             remoteVidoeDom = document.querySelector('#'+remoteVidoeId);
@@ -735,6 +735,8 @@ function startOnline() {
     firstCandidate = objUser.nextCandidate;
 }
 
+
+//播放音乐,混入自己的mixOutputStream
 
 export {
     startMyCam,

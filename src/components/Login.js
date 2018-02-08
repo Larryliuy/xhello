@@ -1,13 +1,12 @@
 import React,{Component} from 'react';
-import {BrowserRouter, Route, Link} from 'react-router-dom';
-import { Form, Icon, Input, Button, Checkbox, message, Popover } from 'antd';
+import { Link } from 'react-router-dom';
+import { Form, Icon, Input, Button, Checkbox, message } from 'antd';
 const FormItem = Form.Item;
 import cookieUtil from '../libs/cookieUtil';
 import '../static/login.scss'
 import { loginApi, redirect_uri } from "../static/apiInfo";
-import {CONSTANT} from "../reducer/reducer";
-import store from "../reducer/reducer";
-
+import store,{CONSTANT} from "../reducer/reducer";
+import { GetQueryString } from '../static/comFunctions';
 const iconStyle = {
     width: '20px',
     height: '20px'
@@ -32,21 +31,15 @@ class Login extends React.Component {
         // }
     }
     componentWillMount(){
-        //QQ快捷登录
+
         let locationUrl = window.location.href,
-            code,accessToken,_this=this;
-        // window.addEventListener('hashchange',function (ev) {
-            if(locationUrl.indexOf('code=')){
+            code,accessToken,_this=this,
+            allQueryString = locationUrl.substring(locationUrl.indexOf('?')).substr(1);
+        //QQ快捷登录
+        if(locationUrl.indexOf('code=') !== -1){
                 // console.log(ev.oldURL);
                 // locationUrl = ev.oldURL;
-                code = GetQueryString(locationUrl.substring(locationUrl.indexOf('?')).substr(1),'code');//截取URL中的code值
-                //uri参数截取函数
-                function GetQueryString(str,name) {
-                    let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-                    let r = str.match(reg);
-                    if (r != null) return decodeURI(r[2]);
-                    return null;
-                }
+                code = GetQueryString(allQueryString,'code');//截取URL中的code值
                 // console.log(code);
                 if(code){
                     _this.setState({loginComponent:false});
@@ -104,8 +97,57 @@ class Login extends React.Component {
                         });
                 }
             }
-        // });
+        //邀请登录
+        if(locationUrl.indexOf('inviteCode=') !== -1){
+            //这里做邀请登录的功能
+            let inviteCode = GetQueryString(allQueryString,'inviteCode'),//截取URL中的invitedCode值
+                userName = GetQueryString(allQueryString,'userName'),//截取URL中的userName值
+                arg = 'LoginName='+userName+'&inviteCode='+inviteCode;
+            console.log(inviteCode);
+            if(!inviteCode)return;
+            fetch(loginApi,{
+                method:'POST',
+                // credentials: "include",
+                headers:{
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body:arg//JSON.stringify(args)
+            }).then((response) => {/*console.log(response);*/return response.text()})
+                .then(data=>{
+                    // console.log(data);
+                    let datatmp = JSON.parse(data);
+                    // try {
+                    //     datatmp = JSON.parse(data);
+                        //JSON.parse没问题的情况
+                        // console.log(datatmp);
+                        if(datatmp.status === 'ok'){
+                            message.success('登录成功');
+                            _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
+                        }else {
+                            message.error('用户名与密码不匹配');
+                        }
+                    // }catch (e){
+                    //     //JSON.parse有问题的情况,手动截取返回信息中JSON字符串,此处不严格，如果严格需要使用正则
+                    //     console.log(data.substring(data.indexOf('>{'),data.indexOf('}<br')+1));
+                    //     try{
+                    //         datatmp = JSON.parse(data.substring(data.indexOf('{')));
+                    //     }catch (e){
+                    //         datatmp = JSON.parse(data.substring(data.indexOf('{'),data.indexOf('}<br')+1));
+                    //     }
+                    //     console.log(datatmp);
+                    //     if(datatmp.status === 'ok'){
+                    //         message.success('登录成功');
+                    //         _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
+                    //     }else {
+                    //         message.error('用户名与密码不匹配');
+                    //     }
+                    // }
 
+                }).catch(err=>{
+                console.log(err);
+                // props.login(true,{name:'haha',level:1,id:7,sex:2,limit:0});
+            });
+        }
     }
     handleSubmit(e){
         e.preventDefault();
@@ -126,8 +168,8 @@ class Login extends React.Component {
         // let url = 'http://192.168.6.3:82/softwares/xtell_projects_dev/24_YUN_VIDEO/server/app/api/user/login.php';
         let args = {};//'LoginName='+userName+'&Password='+password;
         let arg = 'LoginName='+userName+'&Password='+password;
-        args.LoginName = userName;
-        args.Password = password;
+        // args.LoginName = userName;
+        // args.Password = password;
         // console.log(args);
         // if('fetch' in window){
             fetch(loginApi,{

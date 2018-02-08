@@ -5,6 +5,7 @@ import {
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
     getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone
 } from "../webrtc/webRtcCom";
+import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 
 let state = store.getState();
@@ -399,6 +400,26 @@ function onmessage(response){
                 }
                 return;
             }
+            if(dataJson.typeString === 'changeMicOrder'){
+                let micUsers = state.homeState.roomMicrophoneUser,newMicUsers;
+                newMicUsers = ajustUserOrder(micUsers,dataJson.orderInfo);
+                store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:newMicUsers});
+                if(state.homeState.userInfo.id == dataJson.user.id){
+                    let roomInfo = state.homeState.currentRoomInfo;
+                    roomInfo.onMicrophoneUsers = newMicUsers;
+                    let setRoomMsg = {
+                        type:'set_room_info',
+                        roomId: roomInfo.roomId,		//房间唯一标识符
+                        roomName: roomInfo.roomName,
+                        user:state.homeState.userInfo,
+                        data:roomInfo
+                    };
+                    send(JSON.stringify(setRoomMsg),function(){
+                        console.log('更新服务器onMicrophoneUsers信息');
+                    });
+                }
+                return;
+            }
             if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
                 // console.log(dataJson);
                 if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
@@ -658,8 +679,6 @@ function onmessage(response){
                 if(item.childNode.length !== 0){
                     item.childNode.map(function (item) {
                         if(item.roomId == dataJson.roomId.toString()){
-                            //更新当前房间信息
-                            // store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:item});
                             let flag = true;//flag表示是否可以插入用户
                             if(item.childNode){
                                 item.childNode.map(function (uItem) {
@@ -692,6 +711,10 @@ function onmessage(response){
             });
             // console.log(allRoomListTmp);
             store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
+            //更新（增加）当前房间人数
+            let roomInfoEnter = state.homeState.currentRoomInfo;
+            roomInfoEnter.totalClients+=1;
+            store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfoEnter});
             // console.log(dataJson);
             messagedata.push({userName:dataJson.user.name,
                 time:getDateString(),
@@ -743,7 +766,12 @@ function onmessage(response){
                 }
             });
             store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
-            // console.log(allRoomListTmp);
+            // 更新（减少）在线人数;
+            let roomInfoTmp = state.homeState.currentRoomInfo;
+            if(roomInfoTmp.totalClients>0){
+                roomInfoTmp.totalClients-=1;
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfoTmp});
+            }
             messagedata.push({userName:dataJson.user.name,
                 time:getDateString(),
                 data:'<p>'+ dataJson.user.name + '已离开房间'+'</p>'});
@@ -867,9 +895,6 @@ function onmessage(response){
             // console.log(dataJson.data);
             let dataTmp = [],
                 i=0;
-            // let ids = [];
-            /*console.log(typeof dataTmp);
-            console.log(dataTmp instanceof Array);*/
             dataJson.data.map(function (item) {
                 // ids.push(item.roomId);
                 if(item.parentId.toString() === '0'){
@@ -897,11 +922,6 @@ function onmessage(response){
                 val:dataTmp[0].childNode[0]});
 
             break;
-        // case 'get_first':
-        //     if(dataJson.first){
-        //         store.dispatch({type:CONSTANT.NUMBERONE,val:dataJson.first});
-        //     }
-        //     break;
         case 'create_room':
             break;
         case 'delete_room':

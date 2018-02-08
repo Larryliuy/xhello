@@ -215,6 +215,22 @@ class RightClickPanel extends React.Component{
                     });
 
                     break;
+                case '取消此人禁止':
+                    Msg = {
+                        type:'msg',
+                        typeString:'uLimit',
+                        roomId:state.homeState.currentRoomInfo.roomId,
+                        roomName:state.homeState.currentRoomInfo.roomName,
+                        objUserId:objId.substring(1),
+                        limit:0
+                    };
+                    send(JSON.stringify(Msg),function(){
+                        //http请求修改数据
+                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=0';
+                        limitFetch(args);
+                    });
+
+                    break;
                 case '一级管理员':
                     Msg = {
                         type:'msg',
@@ -359,6 +375,23 @@ class RightClickPanel extends React.Component{
                     send(JSON.stringify(Msg),function(){
                         //http请求修改数据
                         let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=1';
+                        limitFetch(args);
+                        console.log(args)
+                    });
+                    break;
+                case '取消禁止':
+                    // console.log(objId);
+                    Msg = {
+                        type:'msg',
+                        typeString:'rLimit',
+                        roomId:state.homeState.currentRoomInfo.roomId,
+                        roomName:state.homeState.currentRoomInfo.roomName,
+                        objRoomId:parseInt(objId) || objId.substring(2),
+                        limit:0
+                    };
+                    send(JSON.stringify(Msg),function(){
+                        //http请求修改数据
+                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=0';
                         limitFetch(args);
                         console.log(args)
                     });
