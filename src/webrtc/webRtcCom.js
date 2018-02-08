@@ -1,39 +1,50 @@
-import WS, {getDateString, getSendData, send} from "../static/webSocket";
+/**
+ * webRTC与web audio函数库
+ */
+
+import WS, { send } from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
 });
 
-let  micphoneStream, prepareState = false, rtcSessionList=[], pcMeshChain=[], remoteVidoeDom,Msg;
-//创建web audio实例,声明web Audio生成的stream
-let myMicSource, myVideo,firstCandidate = 0;
-//stun服务器
-let stun_server = {
-    urls: 'stun:turn.xtell.cn:3479'
-};
-// or TURN服务器
-let turn_server = {
-    urls: 'turn:turn.xtell.cn:3478',
-    credential: 'webrtc',
-    username: 'webrtc'
-};
+let micphoneStream, /** 麦克风音频流*/
+    prepareState = false, /** 麦克风获取是否准备好（本地音频流是否获取到）*/
+    rtcSessionList=[], /** 本地peerConnection连接对象组*/
+    remoteVidoeDom, /** 远程video标签Dom*/
+    Msg, /** 发送消息*/
+    myMicSource, /** 我的麦克风音源*/
+    myVideo, /** 我的video标签Dom*/
+    firstCandidate = 0, /** 第一候选人的seq*/
+    microphoneStatus = true, /** 麦克风是否开启，true表示开着，false表示关着*/
+    getRoomUserListCallback = null,/** 获取房间列表的回调函数*/
+    stun_server = {
+        urls: 'stun:turn.xtell.cn:3479'
+    },/** stun服务器*/
+    turn_server = {
+        urls: 'turn:turn.xtell.cn:3478',
+        credential: 'webrtc',
+        username: 'webrtc'
+    },/** TURN服务器*/
+    iceServers = [stun_server, turn_server],/** ice服务器*/
+    rtcPeerConfig = {
+        iceTransports: 'all',
+        iceServers: iceServers
+    };/** 创建peerConnection对象时的服务器配置*/
 
-let iceServers = [stun_server, turn_server];
-let rtcPeerConfig = {
-    iceTransports: 'all',
-    iceServers: iceServers
-};
-// let configuration = rtcPeerConfig;
-// if (hasRTCPeerConnection()) {
-//     yourConnection = new RTCPeerConnection(rtcPeerConfig);
-// } else {
-//     alert("Sorry, your browser does not support WebRTC.");
-// }
+/**
+ * 获取准备连接状态
+ * @returns {boolean}
+ */
 function getPrepareConnectionState(){
     return prepareState;
 }
-//获取本地音频流
+
+/**
+ * 获取本地音频流
+ * @param videoBox 用于将video或audio标签包裹的容易Dom对象
+ */
 function startMyCam(videoBox){
     if (hasUserMedia()) {
         navigator.getUserMedia({ video: false, audio: true }, function(myStream) {
@@ -66,8 +77,28 @@ function startMyCam(videoBox){
     }
 }
 
-
-
+/**
+ * 准备连接函数，连接之前的准备工作
+ * @param wbMsg 用于发送消息给websocket服务器的消息信息（主要使用里面的user信息）
+ * @param sessionId  与每个用户连接的唯一id，一个连接一个SessionId
+ * @param micphoneStream 麦克风的音频流
+ * @param remoteVidoeId 用于播放远程音频的Dom对象id
+ * @param type offer表示我是发起连接的人（孩子），answer表示我被申请连接的人（父亲）
+ * @returns {{toUser: *, type: *, pc: RTCPeerConnection, pcState: string, pcStateTime: number, myMicSource: MediaStreamAudioSourceNode | *, wa: *, mixer: *, noMicMixer: *, pcOutStream: null, ondisconnected: ondisconnected, onclosemicrophone: onclosemicrophone, onopenmicrophone: onopenmicrophone}}
+ * toUser：连接的用户信息；
+ * type：身份（offer，answer）；
+ * pc：peerConnection对象；
+ * pcState: peerConnection连接状态，connecting表示正在连接，connected表示已连接，disconnected表示已断开连接
+ * pcStateTime: peerConnection连接状态改变时的时间戳
+ * myMicSource：我的麦克风音源
+ * wa：web audio对象
+ * mixer：带麦克风混音后的输出
+ * noMicMixer：不带麦克风混音后的输出
+ * pcOutStream：用于存储peerConnection远程接受到的音频流，作为自己的输出流
+ * ondisconnected：掉线后触发的事件函数
+ * onclosemicrophone：关闭麦克风事件函数
+ * onopenmicrophone：开启麦克风事件函数
+ */
 function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type) {
     log("进入preparePeerConnection函数!");
     let newConnection;
@@ -77,7 +108,6 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
 
         newConnection = new RTCPeerConnection(rtcPeerConfig);
 
-        // console.log(localstream);
         if(!micphoneStream)return;
         //准备连接时先设置自己的stream到video
         // console.log(localStream);
@@ -87,7 +117,11 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
         }catch (e){
             console.error(e);
         }
-        if(!webAudio){log('webAudio创建失败');console.log(webAudio);return;}
+        if(!webAudio){
+            log('webAudio创建失败');
+            console.log(webAudio);
+            return;
+        }
         myMicSource = webAudio.createMediaStreamSource(micphoneStream);
         mixedOutput  = webAudio.createMediaStreamDestination();
         moMicOutputStream = webAudio.createMediaStreamDestination();
@@ -123,7 +157,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     objItem = item;
                 }
             });
-            console.log(wbMsg);
+            // console.log(wbMsg);
             // console.log(rtcSessionList);
             // console.log(objItem);
             switch(newConnection.iceConnectionState) {
@@ -158,7 +192,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                         roomName: state.homeState.currentRoomInfo.roomName,
                         user:userInfo
                     };
-                    console.log(updateUserMsg);
+                    // console.log(updateUserMsg);
                     if(!userInfo.seq)return;
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     send(JSON.stringify(updateUserMsg),function () {
@@ -249,7 +283,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     roomName: state.homeState.currentRoomInfo.roomName,
                     user:userInfo
                 };
-                console.log(updateUserMsg);
+                // console.log(updateUserMsg);
                 if(!userInfo.seq)return;
                 send(JSON.stringify(updateUserMsg),function () {
                     log('把 '+ wbMsg.toUser.id +' 的断线消息发送到服务器');
@@ -258,41 +292,19 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             },
             onclosemicrophone:function () {
                 log('进入onclosemicrophone');
-                this.myMicSource.disconnect(this.mixer);
-                // console.log(this.mixer.stream);
-                // console.log(this.noMicMixer.stream);
-                //在这里关闭麦克风音源
-                // this.pc.removeStream(this.mixer.stream);
-                // this.pc.addStream(this.noMicMixer.stream);
-                // let newMixer = this.wa.createMediaStreamDestination(),
-                //     newLocalStream = newMixer.stream,
-                //     remoteVidoeDom;
-                // this.mixer = newMixer;
-                // this.pc.addStream(newLocalStream);
-                // console.log(this.pcOutStream);
-                // mixerAudio(this.pcOutStream,this.pc,false);
-                // remoteVidoeDom = document.querySelector('#'+this.remoteVideoId);
-                // remoteVidoeDom.src = window.URL.createObjectURL(this.pcOutStream);
+                try{
+                    this.myMicSource.disconnect(this.mixer);
+                }catch (e){
+                    console.log(e);
+                }
             },
             onopenmicrophone:function () {
                 log('进入onopenmicrophone');
-                this.myMicSource.connect(this.mixer);
-                // console.log(this.mixer.stream);
-                // console.log(this.noMicMixer.stream);
-                // this.pc.removeStream(this.noMicMixer.stream);
-                // this.pc.addStream(this.mixer.stream);
-                //这里开启麦克风音源
-                // this.pc.removeStream(this.mixer.stream);
-                // let newMixer = this.wa.createMediaStreamDestination(),
-                //     myMicSource = this.wa.createMediaStreamSource(micphoneStream),
-                //     newLocalStream ,remoteVidoeDom;
-                // myMicSource.connect(newMixer);
-                // newLocalStream = newMixer.stream;
-                // this.mixer = newMixer;
-                // this.pc.addStream(newLocalStream);
-                // mixerAudio(this.pcOutStream,this.pc,false);
-                // remoteVidoeDom = document.querySelector('#'+this.remoteVideoId);
-                // remoteVidoeDom.src = window.URL.createObjectURL(this.pcOutStream);
+                try{
+                    this.myMicSource.connect(this.mixer);
+                }catch (e){
+                    console.log(e);
+                }
             }};
     }else{
         alert("NO WEBRTC"); return;
@@ -300,6 +312,11 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
 
 }
 
+/**
+ * 此函数用于发起offer时调用
+ * @param wbMsg 用于发送消息给websocket服务器的消息信息（主要使用里面的user信息）
+ * @param videoBox 用于将video或audio标签包裹的容易Dom对象
+ */
 function offerPeerConnection(wbMsg,videoBox) {
     let videoId = "video_" + wbMsg.toUser.id;
     let theirVideo = document.createElement('video');
@@ -449,7 +466,12 @@ function onCandidate(candidate,sessionId) {
     });
 }
 
-//混音函数，收到远程音频流时用于混音
+/**
+ * 用于混音
+ * @param stream 远程音频流
+ * @param pc peerConnection对象
+ * @param type offer表示调用者不是混音节点，answer表示调用者是混音节点
+ */
 function mixerAudio(stream,pc,type) {
     rtcSessionList.map(function (item) {
         if(item.pc != pc){
@@ -483,25 +505,35 @@ function mixerAudio(stream,pc,type) {
             })
         }
     });
-    console.log(rtcSessionList);
+    // console.log(rtcSessionList);
 }
 
-//关闭麦克风
+/**
+ * 关闭麦克风函数
+ */
 function closeMicrophone() {
     log('进入closeMicrophone');
     rtcSessionList.map(function (item) {
         item.onclosemicrophone();
     });
+    microphoneStatus = false;
 }
-//开启麦克风
+
+/**
+ * 开启麦克风函数
+ */
 function openMicrophone() {
     log('进入openMicrophone');
     rtcSessionList.map(function (item) {
         item.onopenmicrophone();
-    })
+    });
+    microphoneStatus = true;
 }
 
-
+/**
+ * 判断是否支持getUserMedia，即是否支持获取摄像头，麦克风
+ * @returns {boolean} 返回值为true表示支持，false表示不支持
+ */
 function hasUserMedia() {
     navigator.getUserMedia = navigator.getUserMedia ||
         navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
@@ -509,6 +541,10 @@ function hasUserMedia() {
     return !!navigator.getUserMedia;
 }
 
+/**
+ * 判断是否支持RTCPeerConnection
+ * @returns {boolean} 返回值为true表示支持，false表示不支持
+ */
 function hasRTCPeerConnection() {
     window.RTCPeerConnection = window.RTCPeerConnection ||
         window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
@@ -519,7 +555,10 @@ function hasRTCPeerConnection() {
         window.webkitRTCIceCandidate || window.mozRTCIceCandidate;
     return !!window.RTCPeerConnection;
 }
-
+/**
+ * peerConnection断开时调用的函数，用于清楚断开连接的rtcSession对象
+ * @param userInfo 表示断开连接的用户信息对象
+ */
 function onLeave(userInfo) {
     log('进入onLeave!'+userInfo.id);
     // if(userInfo.id == state.homeState.userInfo.id){
@@ -535,7 +574,7 @@ function onLeave(userInfo) {
     // }else{
     rtcSessionList = rtcSessionList.filter(function (item) {
         // console.log(item);
-        if(item.toUserId == userInfo.id){
+        if(item.toUserId == userInfo.id || item.fromUserId == userInfo.id){
             removeInstance(item);
             // log('child peerConnection closed');
             log('与'+userInfo.id+"断开连接");
@@ -546,7 +585,10 @@ function onLeave(userInfo) {
     // console.log(rtcSessionList);
 }
 
-//此函数用于清除rtcSessionList里面符合条件的item对象（包括pc，wa，mixer，pcOutStream）;
+/**
+ * 此函数用于清除rtcSessionList里面符合条件的item对象（包括pc，wa，mixer，pcOutStream）;
+ * @param item 表示rtcSession对象
+ */
 function removeInstance(item){
     if(item.pc){
         item.pc.close();//这里是直接close还是setRemoteDescription为空，需要确认
@@ -564,6 +606,136 @@ function removeInstance(item){
     }
 }
 
+/**
+ * 打印函数，本地打印并发送到服务器
+ * @param message 表示打印的消息
+ */
+function log(message) {
+    console.log(state.homeState.userInfo.id+'==='+message);
+    //送到服务器后台
+    let msg = {
+        type:'log',
+        log:message,
+        user:state.homeState.userInfo
+    };
+    send(JSON.stringify(msg),function () {
+
+    })
+}
+
+/**
+ * 设置获取房间用户列表回调函数的函数
+ * @param callback 回调函数
+ */
+function setGetRoomUserListCallback(callback) {
+    getRoomUserListCallback = callback;
+}
+
+/**
+ * 获取最小seq的用户（候选人）
+ * @param UserList 用户列表
+ * @param min 指定开始搜索的最小seq
+ * @returns {{minSeqUser: *, nextCandidate: number}}
+ * minSeqUser 最小的seq用户
+ * nextCandidate下次开始搜索的seq
+ */
+function getCandidate(UserList,min) {
+    let minSeq = 100000000;
+    let minSeqUser = null;
+    UserList.map(function (item) {
+        if(item.Children.length < item.maxChildren){
+            // console.log(item.seq+','+minSeq);
+            if(item.seq > min && item.seq < minSeq && state.homeState.userInfo.id != item.id){
+                minSeq = item.seq;
+                minSeqUser = item;
+                // console.log(minSeqUser);
+            }
+        }
+    });
+    return {minSeqUser:minSeqUser,nextCandidate:minSeq};
+}
+
+/**
+ * 获取房间用户列表信息函数
+ * @param callback 获取用户列表信息后需要立即执行的回调函数
+ */
+function getRoomUserList(callback) {
+    setTimeout(function () {
+        let getUsersInfo = {
+            type:'get_room_users',
+            roomId:state.homeState.currentRoomInfo.roomId,
+            roomName:state.homeState.currentRoomInfo.roomName,
+            user:state.homeState.userInfo,
+        };
+        send(JSON.stringify(getUsersInfo),function(){
+            getRoomUserListCallback = callback;
+        });
+    },500);
+
+}
+
+/**
+ * 申请成为王的函数
+ */
+function applyToBeFirst(){
+    let beFirstMsg = {
+        type:'declare_king',
+        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomName: state.homeState.currentRoomInfo.roomName,
+        user:state.homeState.userInfo
+    };
+    send(JSON.stringify(beFirstMsg),function () {
+        log('发送称王的消息到服务器');
+    });
+}
+
+/**
+ * 获取房间信息函数
+ */
+function getRoomInfo(){
+    let beFirstMsg = {
+        type:'get_room_info',
+        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomName: state.homeState.currentRoomInfo.roomName,
+        user:state.homeState.userInfo
+    };
+    // console.log(beFirstMsg);//这个消息发过去就挂了
+    send(JSON.stringify(beFirstMsg),function () {
+        log('发送getRoomInfo消息到服务器');
+    });
+}
+
+/**
+ * 入网函数（开始入网）
+ */
+function startOnline() {
+    if(state.homeState.numberOne == state.homeState.userInfo.id){
+        console.log('我已经是王了，不需要连别人');
+        return;
+    }
+    // console.log('firstCandidate:'+firstCandidate);
+    let objUser = getCandidate(state.homeState.userInfoList,firstCandidate);
+    // console.log(state.homeState.userInfoList);
+    // console.log(objUser);
+    if(!objUser.minSeqUser){console.error('目标用户不存在');return;}//目标用户不存在直接返回
+    let preOfferMsg = {
+        type:'msg',
+        typeString:'preOffer',
+        ToUserOnly:objUser.minSeqUser.id,
+        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomName: state.homeState.currentRoomInfo.roomName,
+        fromUser: state.homeState.userInfo,
+        toUser:objUser.minSeqUser
+    };
+    // console.log(preOfferMsg);
+    send(JSON.stringify(preOfferMsg),function () {
+        log('发送准备连接（pre-offer）消息给 ' + objUser.minSeqUser.id);
+    });
+    console.log('nextCandidate:'+objUser.nextCandidate);
+    firstCandidate = objUser.nextCandidate;
+}
+
+
 export {
     startMyCam,
     onAnswer,
@@ -580,175 +752,6 @@ export {
     getRoomUserListCallback,
     getRoomInfo,
     closeMicrophone,
-    openMicrophone
+    openMicrophone,
+    microphoneStatus
 };
-
-
-function log(message) {
-    console.log(state.homeState.userInfo.id+'==='+message);
-    //送到服务器后台
-    let msg = {
-        type:'log',
-        log:message,
-        user:state.homeState.userInfo
-    };
-    send(JSON.stringify(msg),function () {
-
-    })
-}
-let getRoomUserListCallback = null;
-
-function setGetRoomUserListCallback(callback) {
-    getRoomUserListCallback = callback;
-}
-
-//获取最小seq的用户（候选人）
-function getCandidate(UserList,min) {
-    let minSeq = 100000000;
-    let minSeqUser = null;
-    UserList.map(function (item) {
-        if(item.Children.length < item.maxChildren){
-            // console.log(item.seq+','+minSeq);
-            if(item.seq > min && item.seq < minSeq && state.homeState.userInfo.id != item.id){
-                minSeq = item.seq;
-                minSeqUser = item;
-                console.log(minSeqUser);
-            }
-        }
-    });
-    return {minSeqUser:minSeqUser,nextCandidate:minSeq};
-}
-
-function getRoomUserList(callback) {
-// WS.send(JSON.stringify(enterMsg));
-    setTimeout(function () {
-        let getUsersInfo = {
-            type:'get_room_users',
-            roomId:state.homeState.currentRoomInfo.roomId,
-            roomName:state.homeState.currentRoomInfo.roomName,
-            user:state.homeState.userInfo,
-        };
-        send(JSON.stringify(getUsersInfo),function(){
-            getRoomUserListCallback = callback;
-        });
-    },500);
-
-}
-function applyToBeFirst(){
-    let beFirstMsg = {
-        type:'declare_king',
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
-        user:state.homeState.userInfo
-    };
-    send(JSON.stringify(beFirstMsg),function () {
-        log('发送称王的消息到服务器');
-    });
-}
-function getRoomInfo(){
-    let beFirstMsg = {
-        type:'get_room_info',
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
-        user:state.homeState.userInfo
-    };
-    send(JSON.stringify(beFirstMsg),function () {
-        log('发送getRoomInfo消息到服务器');
-    });
-}
-
-function startOnline() {
-    if(state.homeState.numberOne == state.homeState.userInfo.id){
-        console.log('我已经是王了，不需要连别人');
-        return;
-    }
-    console.log('firstCandidate:'+firstCandidate);
-    let objUser = getCandidate(state.homeState.userInfoList,firstCandidate);
-    // console.log(state.homeState.userInfoList);
-    console.log(objUser);
-    if(!objUser.minSeqUser){console.error('目标用户不存在');return;}//目标用户不存在直接返回
-    let preOfferMsg = {
-        type:'msg',
-        typeString:'preOffer',
-        ToUserOnly:objUser.minSeqUser.id,
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
-        fromUser: state.homeState.userInfo,
-        toUser:objUser.minSeqUser
-    };
-    console.log(preOfferMsg);
-    send(JSON.stringify(preOfferMsg),function () {
-        log('发送准备连接（pre-offer）消息给 ' + objUser.minSeqUser.id);
-    });
-    console.log('nextCandidate:'+objUser.nextCandidate);
-    firstCandidate = objUser.nextCandidate;
-
-        /*if(userInfoTmp.numberOne === 2){//user是消息传过来的用户信息，也就是最新的本人消息
-            log('我是新的预备老大 .');
-            userInfoTmp.numberOne = 2;
-            store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
-            UserList.map(function (item) {
-                console.log(item);
-                if(item.numberOne && item.numberOne == 1){//这里为2的情况就是服务器获取的新老大的数据没有来得及更新
-                    objUser = item;
-                    objUser.yes = true; //yes表示新老大必须接受连接
-                }
-            });
-        }else if(userInfoTmp.numberOne === 3){//user是消息传过来的用户信息，也就是最新的本人消息
-            log('我是新的其他孩子');
-            userInfoTmp.numberOne = 3;
-            store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
-            UserList.map(function (item) {
-                console.log(item);
-                if(item.numberOne && item.numberOne == 1){//这里为2的情况就是服务器获取的新老大的数据没有来得及更新
-                    objUser = item;
-                    objUser.yes = true; //yes表示新老大必须接受连接
-                }
-            });
-        }else{
-            objUser = getMinSeqUser(UserList);
-
-        }
-
-        console.log(objUser); //显示目标用户
-        console.log(userIdList[0]); //显示目标用户
-        if(!objUser){
-            console.error('未获取到目标用户信息');
-            // return;
-        }else{
-            //如果目标用户是老大，则设置预备老大和老大其他孩子标识
-            if(objUser.numberOne && objUser.numberOne == 1){
-                // console.log(userInfoTmp);
-                if(objUser.Children.length === 0){//初始化时判断孩子的的长度来决定谁是预备老大.
-                    log('我是初始化预备老大');
-                    if(!userInfoTmp.numberOne){
-                        userInfoTmp.numberOne = 2;
-                    }
-                }else{
-                    log('我是其他孩子');
-                    if(userInfoTmp.numberOne == 2){//如果是老大断线重连的情况，已经确定预备老大
-                        userInfoTmp.numberOne = 2;
-                    }else if(userInfoTmp.numberOne == 3){
-                        userInfoTmp.numberOne = 3;
-                    }else{}
-                }
-                store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
-                let updateUserMsg = {
-                    type:'update_user',
-                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                    roomName: state.homeState.currentRoomInfo.roomName,
-                    user:userInfoTmp
-                };
-                send(JSON.stringify(updateUserMsg),function () {
-                    if( userInfoTmp.numberOne === 2 ){
-                        log('我是新的预备老大');
-                    }else if(userInfoTmp.numberOne === 3){
-                        log('我是新的其他孩子');
-                    }
-
-                })
-            }
-
-         }
-     }*/
-}

@@ -12,7 +12,7 @@ store.subscribe(function () {
 });
 class MicroPhone extends React.Component {
     handleChange(e){
-        let mode = 1;
+        // let microphoneMode = 1;
         let Msg = {
             type:'msg',
             typeString:'microphoneMode',
@@ -22,22 +22,37 @@ class MicroPhone extends React.Component {
         };
         console.log(e);
         if(e === '自由模式'){
-            Msg.mode = 1;
+            Msg.microphoneMode = 1;
         }
         if(e === '主席模式'){
-            Msg.mode = 2;
+            Msg.microphoneMode = 2;
         }
         if(e === '麦序模式'){
-            Msg.mode = 3;
+            Msg.microphoneMode = 3;
         }
         send(JSON.stringify(Msg),function () {
-            console.log('microphoneMode changed and send to others');
+            // console.log('microphoneMode changed and send to others');
+            let roomInfo = state.homeState.currentRoomInfo;
+            if(roomInfo.microphoneMode !==  Msg.microphoneMode){
+                roomInfo.microphoneMode =  Msg.microphoneMode;
+                let setRoomMsg = {
+                    type:'set_room_info',
+                    roomId: roomInfo.roomId,		//房间唯一标识符
+                    roomName: roomInfo.roomName,
+                    user:state.homeState.userInfo,
+                    data:roomInfo
+                };
+                send(JSON.stringify(setRoomMsg),function(){
+                    console.log('更新服务器microphoneMode信息');
+                });
+            }
         });
-        store.dispatch({type:CONSTANT.MICROPHONEMODE,val:mode});
+        store.dispatch({type:CONSTANT.MICROPHONEMODE,val:Msg.microphoneMode});
     }
     onClickHandle(e){
+        console.log('onClick');
         if(state.homeState.microphoneMode != 3)return;//如果不是麦序模式，则直接返回
-        let text = e.target.innerHTML;
+        let text = e.target.innerText;
         const powerArr = ['放麦','离麦','禁麦'];
         const tips = (text) =>{
             Modal.info({
@@ -50,39 +65,131 @@ class MicroPhone extends React.Component {
                 onOk() {},
             });
         };
-        powerArr.map(function(item){
+        //如果自己已经在排序，则给出提示并返回
+        let filter = false;
+        let roomInfo = state.homeState.currentRoomInfo,
+            roomMicrophoneUser = state.homeState.roomMicrophoneUser;
+        console.log(text);
+        switch (text){
+            case '放麦':
+                if(text === '放麦') {
+                    // console.log(roomMicrophoneUser);
+                    // console.log(roomInfo);
+                    roomMicrophoneUser.map(function (item) {
+                        if (item.id === state.homeState.userInfo.id) {
+                            filter = true;
+                            tips('您已经在排序了，请耐性等待');
+                        }
+                    });
+                    if (!filter) {
+                        console.log('MIC:');
+                        roomMicrophoneUser.push(state.homeState.userInfo);
+                    }
+                }
+                break;
+            case '禁麦':
+                //管理员才可禁麦
+                if(state.homeState.userInfo.level > 3){
+                    tips('只有管理才可以禁麦！');
+                    return;
+                }
+                if(roomMicrophoneUser.length === 0){
+                    tips('麦序上没有人');
+                    return;
+                }
+                if(roomInfo.onMicrophoneUsers[0]){
+                    roomMicrophoneUser = roomMicrophoneUser.slice(1);//将第一个上麦的人kill掉
+                }
+                break;
+            case '离麦':
+                filter = true;
+                if(roomMicrophoneUser.length === 0){
+                    tips('您不在麦序');
+                    return;
+                }
+                // console.log(state.homeState.roomMicrophoneUser);
+                roomMicrophoneUser.map(function(item){
+                    // console.log(typeof item.id+','+typeof state.homeState.userInfo.id);
+                    if(item.id === state.homeState.userInfo.id){
+                        filter = false;
+                    }
+                    return item;
+                });
+                roomMicrophoneUser = roomMicrophoneUser.filter(function(item){
+                    return item.id !== state.homeState.userInfo.id;
+                });
+                if(filter){
+                    tips('您不在麦序');
+                }
+                break;
+        }
+        if(filter) return;
+        roomInfo.onMicrophoneUsers = roomMicrophoneUser;
+        let setRoomMsg = {
+            type:'set_room_info',
+            roomId: roomInfo.roomId,		//房间唯一标识符
+            roomName: roomInfo.roomName,
+            user:state.homeState.userInfo,
+            data:roomInfo
+        };
+        send(JSON.stringify(setRoomMsg),function(){
+            console.log('更新服务器onMicrophoneUsers信息');
+        });
+        let micrpMsg = {
+            type:'msg',
+            typeString:text,
+            roomId: roomInfo.roomId,		//房间唯一标识符
+            roomName: roomInfo.roomName,
+            user:state.homeState.userInfo
+        };
+        // console.log(micrpMsg);
+        send(JSON.stringify(micrpMsg),function(){console.log('发送 '+text+' 消息')});
+        /*powerArr.map(function(item){
             if(text.indexOf(item) !== -1){
                 //如果自己已经在排序，则给出提示并返回
                 let filter = false;
+                let roomInfo = state.homeState.currentRoomInfo,
+                    roomMicrophoneUser = state.homeState.roomMicrophoneUser;
                 if(item === '放麦'){
-                    state.homeState.roomMicrophoneUser.map(function(item){
+                    // console.log(roomMicrophoneUser);
+                    // console.log(roomInfo);
+                    roomMicrophoneUser.map(function(item){
                         if(item.id === state.homeState.userInfo.id){
                             filter = true;
                             tips('您已经在排序了，请耐性等待');
                         }
                     });
-                    let Msg = {
-                        type:'msg',
-                        typeString:'webrtc',
-                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                        roomName: state.homeState.currentRoomInfo.roomName,
-                        user:state.homeState.userInfo
-                    };
+                    if(!filter){
+                        console.log('MIC:');
+                        roomInfo.onMicrophoneUsers.push(state.homeState.userInfo);
+                    }
                 }
                 if(item === '禁麦'){
                     //管理员才可禁麦
+                    if(state.homeState.userInfo.level > 3){
+                        tips('只有管理才可以禁麦！');
+                        return;
+                    }
+                    if(roomMicrophoneUser.length === 0){
+                        tips('麦序上没有人');
+                        return;
+                    }
+                    if(roomInfo.onMicrophoneUsers[0]){
+                        roomInfo.onMicrophoneUsers = roomInfo.onMicrophoneUsers.slice(1);//将第一个上麦的人kill掉
+                    }
                 }
                 if(item === '离麦'){
                     filter = true;
-                    if(state.homeState.roomMicrophoneUser.length === 0){
+                    if(roomMicrophoneUser.length === 0){
                         tips('您不在麦序');
                         return;
                     }
                     // console.log(state.homeState.roomMicrophoneUser);
-                    state.homeState.roomMicrophoneUser.map(function(item){
+                    roomMicrophoneUser.map(function(item){
                         // console.log(typeof item.id+','+typeof state.homeState.userInfo.id);
                         if(item.id === state.homeState.userInfo.id){
                             filter = false;
+                            roomInfo.onMicrophoneUsers.splice(state.homeState.userInfo);
                         }
                     });
                     if(filter){
@@ -90,17 +197,42 @@ class MicroPhone extends React.Component {
                     }
                 }
                 if(filter) return;
+                let setRoomMsg = {
+                    type:'set_room_info',
+                    roomId: roomInfo.roomId,		//房间唯一标识符
+                    roomName: roomInfo.roomName,
+                    user:state.homeState.userInfo,
+                    data:roomInfo
+                };
+                send(JSON.stringify(setRoomMsg),function(){
+                    console.log('更新服务器onMicrophoneUsers信息');
+                });
                 let micrpMsg = {
                     type:'msg',
                     typeString:item,
-                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                    roomName: state.homeState.currentRoomInfo.roomName,
+                    roomId: roomInfo.roomId,		//房间唯一标识符
+                    roomName: roomInfo.roomName,
                     user:state.homeState.userInfo
                 };
                 // console.log(micrpMsg);
-                send(JSON.stringify(micrpMsg),function(){});
+                send(JSON.stringify(micrpMsg),function(){console.log('发送 '+item+' 消息')});
             }
-        })
+        });*/
+    }
+    getMicModeText() {
+        // console.log('进入getMicModeText');
+        let micMode = state.homeState.microphoneMode,result;
+        if(micMode == 1){
+            result = '自由模式';
+        }else if(micMode == 2){
+            result = '主席模式';
+        }else if(micMode == 3){
+            result = '麦序模式';
+        }else{
+            result = '自由模式';//错误情况
+        }
+        // console.log(result);
+        return result;
     }
     render(){
         return (<div className='microphone-a'>
@@ -112,15 +244,19 @@ class MicroPhone extends React.Component {
                     </p>
             </div>
             <div className='online-total'>上麦总人数：{state.homeState.roomMicrophoneUser.length}</div>
-            <div className='microphone' onClick={e=>this.onClickHandle(e)}>
-                <Select size={'small'} disabled={(state.homeState.userInfo.level < 4) ? false : true} defaultValue='自由模式' onChange={e => {this.handleChange(e)}}>
+            <div className='microphone'>
+                <Select size={'small'}
+                        disabled={(state.homeState.userInfo.level < 4) ? false : true}
+                        defaultValue={'自由模式'}
+                        value={this.getMicModeText()}
+                        onChange={e => {this.handleChange(e)}}>
                     <Option value="自由模式">自由模式</Option>
                     <Option value="主席模式">主席模式</Option>
                     <Option value="麦序模式">麦序模式</Option>
                 </Select>
-                <span> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>放麦</span> |</span>
-                <span> <span  className={state.homeState.microphoneMode != 3 ? 'disabled':''}>禁麦</span> |</span>
-                <span> <span  className={state.homeState.microphoneMode != 3 ? 'disabled':''}>离麦</span></span>
+                <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>放麦</span> |</span>
+                <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>禁麦</span> |</span>
+                <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>离麦</span></span>
             </div>
             <div className='microphone-list'>
                 <List

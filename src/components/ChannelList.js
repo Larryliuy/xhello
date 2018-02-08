@@ -4,7 +4,7 @@ import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from '../static/webSocket.js';
 import '../static/login.scss';
-import {getRoomUserList, startOnline} from "../webrtc/webRtcCom";
+import {getRoomUserList, onLeave, getRoomInfo} from "../webrtc/webRtcCom";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -42,30 +42,19 @@ class ChannelList extends React.Component{
                 // console.log('crid：'+state.homeState.currentRoomInfo.id);
                 //判断用户是否在房间里 && WS.send(JSON.stringify({type:'in_room'}))
                 if(state.homeState.currentRoomInfo.roomId){
-                    let data = state.homeState.userInfo.name + "<p>进入了房间</p>" + state.homeState.currentRoomInfo.title,
+                    let data = state.homeState.userInfo.name + "<p>进入了房间</p>",
                         enterMsg = getSendData(
                             'enter_room',
                             state.homeState.currentRoomInfo.roomId,
                             state.homeState.currentRoomInfo.roomName,
                             state.homeState.userInfo,
                             data);
-                    // WS.send(JSON.stringify(enterMsg));
+                    // console.log(enterMsg);
                     send(JSON.stringify(enterMsg),function(){
+                        // getRoomUserList(startOnline);
+                        getRoomInfo();
                     });
-                    //获取房间里用户列表信息
-                    /*let getUsersInfo = getSendData(
-                        'get_room_users',
-                        state.homeState.currentRoomInfo.roomId,
-                        state.homeState.currentRoomInfo.roomName,
-                        state.homeState.userInfo,
-                        data);*/
-                    // WS.send(JSON.stringify(enterMsg));
-                    // send(JSON.stringify(getUsersInfo),function(){
-                    //     clearInterval(intval);
-                    // });
-                    getRoomUserList(startOnline);
                     //需要默认将默认房间信息更新到当前房间
-
                 }else{
                     console.log('房间id不存在');
                     clearInterval(intval);
@@ -100,15 +89,17 @@ class ChannelList extends React.Component{
                 state.homeState.currentRoomInfo.roomName,
                 state.homeState.userInfo,
                 data);
-        // WS.send(JSON.stringify(enterMsg));
+        console.log(leaveMsg);
         send(JSON.stringify(leaveMsg),function(){
+            store.dispatch({type:CONSTANT.NUMBERONE,val:0});
+            onLeave(state.homeState.userInfo);
         });
         //离开后标记离开的房间为最后一次房间
         store.dispatch({type:CONSTANT.LASTROOMINFO,val:state.homeState.currentRoomInfo});
         // 进入该房间聊天室
         // console.log(state.homeState.lastRoomInfo);
         // console.log(roomIdInt+','+roomName);
-        data ="<p>"+ state.homeState.userInfo.name + "进入了房间" + roomName +"</p>";
+        data ="<p>"+ state.homeState.userInfo.name + "进入了房间" +"</p>";
         let enterMsg = getSendData(
             'enter_room',
             roomIdInt,
@@ -138,17 +129,19 @@ class ChannelList extends React.Component{
         }
         // this.setState({roomStatus:tRoomState});
         store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
-        //获取房间里用户列表信息
-        let getUsersInfo = getSendData(
-            'get_room_users',
-            roomIdInt,
-            roomName,
-            state.homeState.userInfo,
-            data);
-        // WS.send(JSON.stringify(enterMsg));
-        send(JSON.stringify(getUsersInfo),function(){
-
-        });
+        getRoomInfo();
+        // getRoomUserList(startOnline);
+        // //获取房间里用户列表信息
+        // let getUsersInfo = getSendData(
+        //     'get_room_users',
+        //     roomIdInt,
+        //     roomName,
+        //     state.homeState.userInfo,
+        //     data);
+        // // WS.send(JSON.stringify(enterMsg));
+        // send(JSON.stringify(getUsersInfo),function(){
+        //
+        // });
     }
     dblClickHandle = (event) =>{
         // if(event.target.id.indexOf('rc') === -1)return;

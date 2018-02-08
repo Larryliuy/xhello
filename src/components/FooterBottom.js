@@ -122,13 +122,10 @@ class FooterBottom extends React.Component{
         // console.log(value);
         if(!value) return;
         //这里设置音频声量
-        let videoBox = document.getElementById('audioBox').getElementsByTagName('video'),newArr=[];
+        let videoBox = document.getElementById('audioBox').getElementsByTagName('video');
         for(let i=0; i<videoBox.length; i++ ){
-            newArr.push(videoBox[i]);
+            videoBox[i].volume = value/100;
         }
-        newArr.map(function (item) {
-            item.volume = value/100;
-        })
     }
     handleSliderMicrophone(value){
         // console.log(value);
@@ -176,7 +173,11 @@ class FooterBottom extends React.Component{
                 </span>
             </div>
             <div>
-                <span style={{marginLeft:80}}><Button id='open-microphone-btn' type='primary'>{this.state.microphoneOpen?'点击关麦':'点击开麦'}</Button></span>
+                <span style={{marginLeft:80}}>
+                    <Button id='open-microphone-btn'
+                            disabled={(state.homeState.microphoneMode == 2 || state.homeState.microphoneMode == 3 && state.homeState.userInfo.level > 3) ? true : false}
+                            type='primary'>{this.state.microphoneOpen?'点击关麦':'点击开麦'}</Button>
+                </span>
             </div>
             <div>
                 <span id='cheer-span' style={{marginLeft:80}}>欢呼</span>

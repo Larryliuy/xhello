@@ -21,6 +21,10 @@ class HeaderLeft extends Component{
     }
     state = { visible: false, planeVisible: false, userName:'',password:'' };
     showModal = () => {
+        if(state.homeState.userInfo.level > 3){//二级管理员以下没有权限,直接返回
+            message('您没有权限');
+            return;
+        }
         this.setState({
             visible: true,
         });

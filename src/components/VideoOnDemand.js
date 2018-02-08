@@ -40,17 +40,25 @@ class VideoOnDemand extends React.Component{
             return;
         }
         console.log(videoSrc);
-        // vodVideo.addEventListener('canplay', function(){
-        //     vodVideo.muted = true;		//mute local video to avoid echo by myself.
-        // });
-        // vodVideo.addEventListener('play', function(){
-        //     vodVideo.muted = true;		//mute local video to avoid echo by myself.
-        // });
         vodVideo.src = videoSrc;
         vodVideo.autoplay=true;
         vodVideo.controls=true;
         send(JSON.stringify(sendSrcMsg),function () {
             console.log('视频连接已广播');
+            //set_room_info
+            let roomInfo = state.homeState.currentRoomInfo;
+            roomInfo.videoSrc = videoSrc;
+            let setRoomMsg = {
+                type:'set_room_info',
+                roomId:state.homeState.currentRoomInfo.roomId,
+                roomName:state.homeState.currentRoomInfo.roomName,
+                user:state.homeState.userInfo,
+                data:roomInfo
+            };
+            console.log(setRoomMsg);
+            send(JSON.stringify(setRoomMsg),function () {
+                console.log('发送set videoSrc消息发服务器');
+            });
             if(!vodVideo){
                 console.log('vodVideo不存在');
                 return;
@@ -66,18 +74,33 @@ class VideoOnDemand extends React.Component{
         //关闭点播
         let roomInfoTmp = state.homeState.currentRoomInfo;
         roomInfoTmp.mode = 0;
+        roomInfoTmp.microphoneMode = 1;//重置为默认的自由模式(是否需要重置)
+        roomInfoTmp.player = 0;
+        roomInfoTmp.videoSrc = '';
         store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfoTmp});
         //发消息给其他用户调整房间模式
         let sendMsg = {
             type:'msg',
             typeString:'changeRoomMode',
-            roomId:state.homeState.currentRoomInfo.roomId,
-            roomName:state.homeState.currentRoomInfo.roomName,
+            roomId:roomInfoTmp.roomId,
+            roomName:roomInfoTmp.roomName,
             user:state.homeState.userInfo,
-            roomMode:0
+            mode:0
         };
         send(JSON.stringify(sendMsg),function () {
             console.log('发送关闭点播消息成功');
+            //http请求改变数据库mode = 0
+            //ws 发送set_room_info
+            let setRoomMsg = {
+                type:'set_room_info',
+                roomId: roomInfoTmp.roomId,		//房间唯一标识符
+                roomName: roomInfoTmp.roomName,
+                user:state.homeState.userInfo,
+                data:roomInfoTmp
+            };
+            send(JSON.stringify(setRoomMsg),function () {
+                console.log('发送改变房间模式消息给服务器')
+            })
         })
     }
     render(){
@@ -90,9 +113,10 @@ class VideoOnDemand extends React.Component{
                 <Button type={'primary'} onClick={()=>this.planeOkHandle()}>确定</Button>
             </span>
         </div>);
+
         return (
             <div style={{height:'100%',textAlign:'center !important'}}>
-                <div style={{textAlign:'center'}}>
+                <div style={{textAlign:'center',display:(state.homeState.currentRoomInfo.mode !== 0 && state.homeState.currentRoomInfo.player == state.homeState.userInfo.id)?'block':'none'}}>
                     <Popover placement="bottom"
                              title={'添加网络视频连接'}
                              content={content}
@@ -100,8 +124,9 @@ class VideoOnDemand extends React.Component{
                              trigger="click">
                         <Button onClick={()=>this.addVideoSrc()}>添加视频网址</Button>
                     </Popover>
-                    <Button onClick={()=>this.closeVod()}></Button>
+                    <Button onClick={()=>this.closeVod()}>关闭点播</Button>
                 </div>
+                <div style={{color:'#666',textAlign:'center',display:(state.homeState.currentRoomInfo.mode !== 0 && state.homeState.currentRoomInfo.player == state.homeState.userInfo.id)?'none':'block'}}><p>管理正在添加视频中...</p></div>
                 <video id={'vodVideo'}
                        src={this.state.vodSrc}
                        style={{position:'relative',width:'640px',height:'320px'}}>不支持video</video>

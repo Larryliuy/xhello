@@ -245,10 +245,10 @@ class Login extends React.Component {
                     <div className='fast_login'>
                         <span className='icon_wechat' onMouseOver={()=>this.onMouseHoverHandle()}><Icon type="wechat" style={iconStyle}/></span>
                         <div id={'we-chat'} onMouseOut={()=>this.onMouseOutHandle()} style={{visibility:this.state.wechatVisible}}></div>
-                        <span id={'qqSpan'} className='icon_qq'><a href="https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101454868&redirect_uri=http%3a%2f%2fa701.xtell.cn%3a82%2fsoftwares%2fxtell_projects_dev%2f24_YUN_VIDEO%2fsrc%2fweb%2findex.html%23%2f&state=test"><Icon type="qq" style={iconStyle}/></a></span>
+                        <span id={'qqSpan'} className='icon_qq'><a href={"https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101454868&redirect_uri="+redirect_uri+"&state=test"}><Icon type="qq" style={iconStyle}/></a></span>
                     </div>
             </Form>
         );
     }
-};
+}
 export default Login;

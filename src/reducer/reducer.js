@@ -26,12 +26,6 @@ export const CONSTANT = {
     USERINFOLIST:'USERINFOLIST',
     NUMBERONE:'NUMBERONE',
 };
-function toggleLogin() {
-    return {
-        type:CONSTANT.ISLOGINED,
-        val:false
-    }
-}
 export function collapsed(bool) {
     return {
         type:CONSTANT.VIEWMODEL,

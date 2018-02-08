@@ -39,8 +39,8 @@ class MessageList extends React.Component{
                 if(parseInt(msgDiv.id) !== parseInt(state.homeState.userInfo.id))return;
                 //如果发送消息时间超过一分钟则返回
                 if(new Date().getTime() - parseInt(timestampMsg) > 60000){
-                    console.log('over');
-                    console.log(new Date().getTime());
+                    console.log('over time');
+                    // console.log(new Date().getTime());
                     return;
                 }
                 this.setState({display:'block',top:e.clientY+10,left:e.clientX,timeStamp:timestampMsg});
@@ -52,7 +52,7 @@ class MessageList extends React.Component{
         let micrpMsg = {
             type:'msg',
             typeString:'withdraw',
-            roomId: state.homeState.currentRoomInfo.roomId,		//房 间唯一标识符
+            roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
             roomName: state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
             timeStamp:this.state.timeStamp

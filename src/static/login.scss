@@ -582,3 +582,13 @@ ul{
   left: -500px;
   overflow: hidden;
 }
+
+//点播
+.vodMenu{
+  width: 200px;
+  cursor: pointer;
+  .ant-list-item .ant-list-item-content{
+    height: 22px;
+  }
+}
+
