@@ -31,7 +31,6 @@ class HeaderTop extends React.Component{
         }else{
             location.reload();
         }
-        // location.reload();
     };
     vodPlay(e){
         console.log(e.target.innerText);

@@ -130,14 +130,6 @@ class FooterBottom extends React.Component{
     handleSliderMicrophone(value){
         // console.log(value);
         if(!value) return;
-        //这里设置麦克风声量
-        // let videoBox = document.getElementById('audioBox').getElementsByTagName('video'),newArr=[];
-        // for(let i=0; i<videoBox.length; i++ ){
-        //     newArr.push(videoBox[i]);
-        // }
-        // newArr.map(function (item) {
-        //     item.volume = value/100;
-        // })
     }
     render(){
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
