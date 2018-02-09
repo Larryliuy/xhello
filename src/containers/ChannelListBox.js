@@ -17,7 +17,7 @@ const rightClickHandle = (e) => {
         // console.log('no-right');
         store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
     }else{
-        const id = e.target.getAttribute('id') || '';
+        const id = e.target.getAttribute('id') || e.target.parentNode.getAttribute('id') || '';
         // console.log(id);
         if(id.indexOf('rc') !== -1) {
             store.dispatch({

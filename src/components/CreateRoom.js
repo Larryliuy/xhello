@@ -17,11 +17,28 @@ class CreateRoom extends React.Component{
     handleOk(){
         let roomType = this.props.roomType,
             createMsg,
-            parentId=0;
-        if(roomType === 2){
-            parentId = state.homeState.location.obj.substring(1);
+            parentId=0,
+            roomList = state.homeState.allRoomList,
+            order;//房间的排序值
+        if(roomList.length === 1){
+            order = 1;
+        }else{
+            order = Number(roomList[roomList.length-1].order)+1;
         }
-        console.log(roomType+';'+parentId);
+        if(roomType === 2){ //创建子房间
+            parentId = state.homeState.location.obj.substring(1);
+            //获取order值
+            roomList.map(function (item) {
+                if(item.roomId == parentId){
+                    if(item.childNode.length === 1){
+                        order = 1;
+                    }else{
+                        order = Number(item.childNode[item.childNode.length-1].order)+1;
+                    }
+                }
+            })
+        }
+        console.log(roomType+';'+parentId+';'+order);
         createMsg = {
             type:'create_room',
             parentId:parentId,
@@ -30,6 +47,7 @@ class CreateRoom extends React.Component{
             userName:state.homeState.userInfo.name,
             color:this.state.color,
             password:this.state.password,
+            order:order
         };
         // console.log(roomType);
         console.log(createMsg);
@@ -42,7 +60,8 @@ class CreateRoom extends React.Component{
                 data:''
             };
             send(JSON.stringify(getRoomsMsg),function () {
-                let enterMsg = getSendData(
+                //创建房间后是否需要立即进入房间未知
+                /*let enterMsg = getSendData(
                     'enter_room',
                     state.homeState.currentRoomInfo.roomId,
                     state.homeState.currentRoomInfo.roomName,
@@ -50,7 +69,7 @@ class CreateRoom extends React.Component{
                 // WS.send(JSON.stringify(enterMsg));
                 send(JSON.stringify(enterMsg),function(){
 
-                });
+                });*/
             });
         });
         // console.log(this.state);

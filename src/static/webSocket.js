@@ -5,7 +5,7 @@ import {
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
     getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone
 } from "../webrtc/webRtcCom";
-import { ajustUserOrder } from '../static/comFunctions';
+import { ajustUserOrder, ajustRoomOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 
 let state = store.getState();
@@ -17,7 +17,7 @@ store.subscribe(function () {
 if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
 }
-// let WS = null,lockReconnect = false ,wsUrl = 'wss://192.168.6.3:443/wss' ;
+// let WS = null,lockReconnect = false ,wsUrl = 'wss://113.110.252.171:443/wss' ;
 let WS = null,lockReconnect = false ,wsUrl = 'wss://a701.xtell.cn:443/wss' ;
 
 if (window.WebSocket) {
@@ -417,6 +417,57 @@ function onmessage(response){
                     send(JSON.stringify(setRoomMsg),function(){
                         console.log('更新服务器onMicrophoneUsers信息');
                     });
+                }
+                return;
+            }
+            if(dataJson.typeString === 'changeRoomOrder'){
+                console.log('收到changeRoomOrder消息');
+                let allRoomList = state.homeState.allRoomList,
+                    roomInfo = state.homeState.userInfo,
+                    newRoomList = dataJson.newRoomList;
+                console.log(dataJson);
+                allRoomList = allRoomList.map(function (item) {
+                    if(item.childNode.length !== 0){
+                        item.childNode.map(function (cItem) {
+                            if(cItem.roomId == dataJson.orderInfo.roomId){
+                                item.childNode = newRoomList;
+                            }
+                        });
+                    }
+                    return item;
+                });
+                console.log(allRoomList);
+                store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
+                if(state.homeState.userInfo.id == dataJson.user.id){
+                    let setRoomMsg = {
+                        type:'update_room_info',
+                        roomId: roomInfo.roomId,		//房间唯一标识符
+                        roomName: roomInfo.roomName,
+                        user:state.homeState.userInfo,
+                        data:newRoomList
+                    };
+                    send(JSON.stringify(setRoomMsg),function(){
+                        console.log('update_room_info更新服务器changeRoomOrder信息');
+                    });
+                }
+                return;
+            }
+            if(dataJson.typeString === 'audioSourceInput'){
+                console.log('收到audioSourceInput消息');
+                // console.log(dataJson);
+                let audioInputUsers = state.homeState.microphoneInputUsers;
+                if(dataJson.inputSource){
+                    if(!audioInputUsers[dataJson.user.id]){
+                        audioInputUsers[dataJson.user.id] = true;
+                        store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:audioInputUsers});
+                        // console.log(audioInputUsers);
+                    }
+                }else {
+                    if(audioInputUsers[dataJson.user.id]){
+                        delete audioInputUsers[dataJson.user.id];
+                        store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:audioInputUsers});
+                        // console.log(audioInputUsers);
+                    }
                 }
                 return;
             }

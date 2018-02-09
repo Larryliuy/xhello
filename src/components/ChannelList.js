@@ -293,9 +293,12 @@ class ChannelList extends React.Component{
                                     <ul style={{paddingLeft:'15px'}}>
                                         {item.childNode.map(function (item) {
                                             // console.log(item)
-                                            return <li id={'u'+item.id} key={'u'+item.id}>
-                                                <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span>
-                                                {item.name}
+                                            return <li className={'user-list-li'} id={'u'+item.id} key={'u'+item.id}>
+                                                <span>
+                                                    <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span>
+                                                    {item.name}
+                                                </span>
+                                                <span><Icon style={{color:state.homeState.microphoneInputUsers[item.id]?'green':'#fff'}} type="sound" /></span>
                                             </li>
                                         })}
                                     </ul>}

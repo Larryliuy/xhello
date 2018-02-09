@@ -3,7 +3,8 @@ import { Card, Popover, List, Modal, message } from 'antd';
 const confirm = Modal.confirm;
 import CreateRoom from './CreateRoom';
 import SetRoom from './SetRoom';
-import WS,{ getSendData, send } from '../static/webSocket.js';
+import SortRoom from './SortRoom';
+import { getSendData, send } from '../static/webSocket.js';
 import store, {CONSTANT} from "../reducer/reducer";
 import {generalApi} from "../static/apiInfo";
 let state = store.getState();
@@ -14,13 +15,16 @@ store.subscribe(function () {
 class RightClickPanel extends React.Component{
     constructor(props){
         super(props);
-        this.state = {display:'none',operate:[],createRoom:false,setRoom:false,roomType:1,roomInfo:{}}
+        this.state = {display:'none',operate:[],createRoom:false,setRoom:false,sortRoom:false,roomType:1,roomInfo:{}}
     }
     setCreateRoomVisible(){
         this.setState({createRoom:false})
     }
     setSetRoomVisible(){
         this.setState({setRoom:false})
+    }
+    setSortRoomVisible(){
+        this.setState({sortRoom:false})
     }
     componentWillMount(){
         // this.setState({operate:operateData});
@@ -483,10 +487,28 @@ class RightClickPanel extends React.Component{
                     console.log(objId);
                     this.setState({roomInfo:{id:objId}});
                     break;
-                case '排序':
+                case '子房间排序':
                     //选中获取元素id（即房间id），然后建一个临时AllRoomList用于更新排序列表，
                     // 点确定按钮更新到state.homeState.allRoomList.
-                    alert(text);
+                    this.setState({sortRoom:true});
+                    if(objId.indexOf('rc') !== -1){
+                        if(parseInt(objId)){
+                            objId = objId.substring(0,objId.indexOf('rc'));
+                        }else{
+                            objId = objId.substring(2);
+                        }
+
+                    }else if(objId.indexOf('r') !== -1){
+                        if(parseInt(objId)){
+                            objId = objId.substring(0,objId.indexOf('r'));
+                        }else{
+                            objId = objId.substring(1);
+                        }
+                    }else{
+                        return;
+                    }
+                    console.log(objId);
+                    this.setState({roomInfo:{id:objId}});
                     break;
                 default:
                     break;
@@ -519,6 +541,7 @@ class RightClickPanel extends React.Component{
                     /> </Card>
             {this.state.createRoom && <CreateRoom roomType={this.state.roomType} setVisible={this.setCreateRoomVisible.bind(this)}></CreateRoom>}
             {this.state.setRoom && <SetRoom roomInfo={this.state.roomInfo} setVisible={this.setSetRoomVisible.bind(this)}></SetRoom>}
+            {this.state.sortRoom && <SortRoom roomInfo={this.state.roomInfo} setVisible={this.setSortRoomVisible.bind(this)}></SortRoom>}
 
         </div>)
     }

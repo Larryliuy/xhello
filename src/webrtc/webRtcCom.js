@@ -10,6 +10,9 @@ store.subscribe(function () {
 });
 
 let micphoneStream, /** 麦克风音频流*/
+    micphoneSource,
+    myWebAudio = new (window.AudioContext || window.webkitAudioContext)(), /**用于处理本地麦克风对应的webaudio*/
+    myAnalyser = myWebAudio.createAnalyser(), /** 本地麦克风的AnalyserNode*/
     prepareState = false, /** 麦克风获取是否准备好（本地音频流是否获取到）*/
     rtcSessionList=[], /** 本地peerConnection连接对象组*/
     remoteVidoeDom, /** 远程video标签Dom*/
@@ -42,21 +45,72 @@ function getPrepareConnectionState(){
 }
 
 /**
+ * 获取麦克风音源大小
+ * @param analyser  AnalyserNode
+ * @returns {number} 返回值为麦克风的音源大小
+ */
+function getVoiceSize (analyser) {
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+    const data = dataArray.slice(100, 1000);
+    const sum = data.reduce((a, b) => a + b);
+    return sum
+}
+let intval = null;
+/**
+ *超过一定时间没有音源输入，则清除定时器
+ */
+
+let setTimer = setTimeout(function () {//有声音输入的时候重置这个，延时器(属于优化阶段了)
+    clearInterval(intval);
+},1000*60*60);
+function sourceConnectAnalyser(stream) {//观察者模式
+    micphoneSource = myWebAudio.createMediaStreamSource(stream);
+    micphoneSource.connect(myAnalyser);//连接到本地webAudio的AnalyserNode
+    myAnalyser.fftSize = 2048;
+    let msg = {
+        type:'msg',
+        typeString:'audioSourceInput',
+        roomId:state.homeState.currentRoomInfo.roomId,
+        roomName:state.homeState.currentRoomInfo.roomName,
+        user:state.homeState.userInfo,
+    };
+    intval = setInterval(function () {
+        if(getVoiceSize(myAnalyser)>100 && state.homeState.microphoneOpen){
+            if(!state.homeState.microphoneInput){
+                console.log('有音源输入');
+                store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:true});
+                msg.inputSource = true;
+                send(JSON.stringify(msg),function () {
+                    // console.log('发送audioSourceInput消息');
+                })
+            }
+        }else {
+            // console.log('没有音源输入');
+            if(state.homeState.microphoneInput) {
+                store.dispatch({type: CONSTANT.MICROPHONEINPUT, val: false});
+                msg.inputSource = false;
+                send(JSON.stringify(msg),function () {
+                    // console.log('发送audioSourceInput消息');
+                })
+            }
+        }
+    },500);
+}
+
+
+/**
  * 获取本地音频流
  * @param videoBox 用于将video或audio标签包裹的容易Dom对象
  */
 function startMyCam(videoBox){
     if (hasUserMedia()) {
         navigator.getUserMedia({ video: false, audio: true }, function(myStream) {
-            // myWASource = audioCtx.createMediaStreamSource(myStream);
-            // mixedOutput  = audioCtx.createMediaStreamDestination();
-            // myWASource.connect(mixedOutput);
-            // myLocalStream = mixedOutput.stream;
             micphoneStream = myStream;
             //将自己的音轨存入全局state
-            // console.log(micphoneStream.getAudioTracks());
-            store.dispatch({type:CONSTANT.MYAUDIOTRACK,val:micphoneStream.getAudioTracks()});
-            // console.log(myLocalStream);
+            // store.dispatch({type:CONSTANT.MYAUDIOTRACK,val:micphoneStream.getAudioTracks()});
+            sourceConnectAnalyser(micphoneStream);
+            console.log(micphoneStream);
             myVideo = document.createElement('video');
             myVideo.src = window.URL.createObjectURL(micphoneStream);
             myVideo.addEventListener('canplay', function(){
@@ -305,6 +359,9 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 }catch (e){
                     console.log(e);
                 }
+            },
+            onAddMusic:function () {
+                //这里添加播放音乐的流(本地或网络)，然后混入mixer
             }};
     }else{
         alert("NO WEBRTC"); return;
@@ -591,7 +648,7 @@ function onLeave(userInfo) {
  */
 function removeInstance(item){
     if(item.pc){
-        item.pc.close();//这里是直接close还是setRemoteDescription为空，需要确认
+        item.pc.close();
         item.pc = null;
     }
     if(item.wa){
@@ -604,6 +661,7 @@ function removeInstance(item){
     if(item.pcOutStream) {
         item.pcOutStream = null;
     }
+    //这里是否需要清除audio和video标签
 }
 
 /**

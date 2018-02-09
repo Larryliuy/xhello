@@ -7816,6 +7816,11 @@ ul {
     height: 200px; }
 
 /*用户图标样式*/
+.user-list-li {
+  display: flex;
+  justify-content: space-between;
+  width: 90%; }
+
 .user-icon img {
   width: 18px;
   height: 18px; }
@@ -7976,6 +7981,12 @@ ul {
   justify-content: space-between; }
   .microphone-user-span .arrow-up-span, .microphone-user-span .arrow-down-span {
     cursor: pointer; }
+
+.sort-room .ant-table-thead th {
+  padding: 10px 16px !important; }
+
+.sort-room .ant-table-tbody .ant-table-row td {
+  padding: 8px 16px !important; }
 /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
 /* stylelint-disable no-duplicate-selectors */
 /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors */

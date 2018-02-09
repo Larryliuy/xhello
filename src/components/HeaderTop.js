@@ -28,7 +28,7 @@ class HeaderTop extends React.Component{
         let localUri = location.href;
         if(localUri.indexOf('?')){
             location.replace(localUri.split('?')[0]);//针对QQ登录这种场景
-            // location.reload();
+            location.reload();
         }else{
             location.reload();
         }

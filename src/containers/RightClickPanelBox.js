@@ -19,14 +19,14 @@ const clcikUserData = [
 const clickChildRoomData = [
     {title:'禁止权限',operate:['禁止文字','禁止语音','禁止图片','取消禁止']},
     {title:'删除房间'},
-    {title:'房间设置'},
-    {title:'排序'}
+    {title:'房间设置'}
 ];
 //点击房间时数据
 const clickRoomData = [
     {title:'创建同级别房间'},
     {title:'创建子房间'},
-    {title:'删除房间'}
+    {title:'删除房间'},
+    {title:'子房间排序'}
 ];
 class RightClickPanelBox extends React.Component{
     constructor(props){

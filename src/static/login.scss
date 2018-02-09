@@ -401,6 +401,11 @@ ul{
     }
 }
 /*用户图标样式*/
+.user-list-li{
+  display: flex;
+  justify-content: space-between;
+  width:90%;
+}
 .user-icon img{
   width: 18px;
   height: 18px;
@@ -610,5 +615,19 @@ ul{
   justify-content: space-between;
   .arrow-up-span,.arrow-down-span{
     cursor: pointer;
+  }
+}
+.sort-room{
+  .ant-table-thead{
+    th{
+      padding: 10px 16px !important;
+    }
+  }
+  .ant-table-tbody{
+    .ant-table-row{
+      td{
+        padding: 8px 16px !important;
+      }
+    }
   }
 }

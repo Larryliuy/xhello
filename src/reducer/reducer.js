@@ -21,6 +21,9 @@ export const CONSTANT = {
     SENDDATA:'SENDDATA',
     PREOFFERCOUNT:'PREOFFERCOUNT',
     MICROPHONEMODE:'MICROPHONEMODE',
+    MICROPHONEOPEN:'MICROPHONEOPEN',
+    MICROPHONEINPUT:'MICROPHONEINPUT',
+    MICROPHONEINPUTUSERS:'MICROPHONEINPUTUSERS',
     MYAUDIOTRACK:'MYAUDIOTRACK',
     USERIDLIST:'USERIDLIST',
     USERINFOLIST:'USERINFOLIST',
@@ -62,6 +65,9 @@ const homeInitState = {
     preOfferCount:0,
     numberOne:0,//表示老大的id
     microphoneMode:1,//表示自由模式
+    microphoneOpen:false,//表示自己麦克风的开关状态
+    microphoneInput:false,//表示麦克风是否有音源舒服
+    microphoneInputUsers:{},//表示有音源输入的其他人
     myAudioTrack:'',//自己的音轨
     userIdList:'',//循环给用户发送preOffer的列表
     userInfoList:''//循环给用户发送preOffer的列表
@@ -89,6 +95,12 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{roomMicrophoneUser:action.val});
         case CONSTANT.MICROPHONEMODE:
             return Object.assign({},tmpState,{microphoneMode:action.val});
+        case CONSTANT.MICROPHONEOPEN:
+            return Object.assign({},tmpState,{microphoneOpen:action.val});
+        case CONSTANT.MICROPHONEINPUT:
+            return Object.assign({},tmpState,{microphoneInput:action.val});
+        case CONSTANT.MICROPHONEINPUTUSERS:
+            return Object.assign({},tmpState,{microphoneInputUsers:action.val});
         case CONSTANT.ROOMSTATUS:
             return Object.assign({},tmpState,{roomStatus:action.val});
         case CONSTANT.MESSAGEDATA:

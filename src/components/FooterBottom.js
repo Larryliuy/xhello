@@ -40,7 +40,7 @@ class FooterBottom extends React.Component{
             case 'cheer-span':
                 if(!isAudioPlay && (new Date().getTime()/1000 - startTime) > 5){
                     audioDom = document.getElementById('cheer-audio');
-                    audioDom.src = '../static/sounds/cheer.mp3';
+                    audioDom.src = './sounds/cheer.mp3';
                     audioDom.autoplay = true;
                     isAudioPlay = true;
                     startTime = new Date().getTime()/1000;
@@ -52,7 +52,7 @@ class FooterBottom extends React.Component{
             case 'applause-span':
                 if(!isAudioPlay && (new Date().getTime()/1000 - startTime) > 5) {
                     audioDom = document.getElementById('applause-audio');
-                    audioDom.src = '../static/sounds/applause.mp3';
+                    audioDom.src = './sounds/applause.mp3';
                     audioDom.autoplay = true;
                     isAudioPlay = true;
                     startTime = new Date().getTime()/1000;
@@ -67,10 +67,12 @@ class FooterBottom extends React.Component{
                 // let audioTrack = state.homeState.myAudioTrack;
                 if(this.state.microphoneOpen){
                     closeMicrophone();
-                    this.setState({microphoneOpen:false});
+                    // this.setState({microphoneOpen:false});
+                    store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
                 }else{
                     openMicrophone();
-                    this.setState({microphoneOpen:true});
+                    // this.setState({microphoneOpen:true});
+                    store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:true});
                 }
                 break;
             case 'user-name':
@@ -188,7 +190,7 @@ class FooterBottom extends React.Component{
                 <span style={{marginLeft:80}}>
                     <Button id='open-microphone-btn'
                             disabled={(state.homeState.microphoneMode == 2 || state.homeState.microphoneMode == 3 && state.homeState.userInfo.level > 3) ? true : false}
-                            type='primary'>{this.state.microphoneOpen?'点击关麦':'点击开麦'}</Button>
+                            type='primary'>{state.homeState.microphoneOpen?'点击关麦':'点击开麦'}</Button>
                 </span>
             </div>
             <div>

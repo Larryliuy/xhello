@@ -41,7 +41,7 @@ function GetQueryString(str,name) {
 }
 
 /**
- * 用于调整麦序的函数，不属于通用函数
+ * 用于调整麦序的函数，不属于通用型函数
  * @param onMicusers 数组列表
  * @param orderInfo 需要调整的用户信息，type === 'up'表示向上移动，type === 'down'表示向下移动
  * @returns {*} 返回值是调整之后的新数组
@@ -77,4 +77,45 @@ function ajustUserOrder(onMicusers,orderInfo) {
     return onMicusersTpm;
 }
 
-export { randomWord, GetQueryString, ajustUserOrder }
+/**
+ * 用于调整房间顺序的函数，不属于通用型函数
+ * @param onMicusers 数组列表
+ * @param orderInfo 需要调整的用户信息，type === 'up'表示向上移动，type === 'down'表示向下移动
+ * @returns {*} 返回值是调整之后的新数组
+ */
+
+function ajustRoomOrder(roomList,orderInfo) {
+    let roomTpm,newRoomList = roomList;
+    console.log(newRoomList);
+    console.log(newRoomList[0]);
+    if(orderInfo.type === 'up'){
+        for(let i = 0,len = roomList.length; i < len; i++){
+            if(newRoomList[i].roomId == orderInfo.roomId){
+                console.log('index:'+i);
+                roomTpm = newRoomList[i];
+                roomTpm.order = Number(roomTpm.order)-1;//更改order值
+                newRoomList[i] = newRoomList[i-1];
+                newRoomList[i].order = Number(newRoomList[i].order)+1;//更改order值
+                newRoomList[i-1] = roomTpm;
+                break;
+            }
+        }
+    }else if(orderInfo.type === 'down'){
+        for(let i = 0,len = roomList.length; i < len; i++){
+            if(newRoomList[i].roomId == orderInfo.roomId){
+                console.log('index:'+i);
+                roomTpm = newRoomList[i];
+                roomTpm.order = Number(roomTpm.order)+1;//更改order值
+                newRoomList[i] = newRoomList[i+1];
+                newRoomList[i].order = Number(newRoomList[i].order)-1;//更改order值
+                newRoomList[i+1] = roomTpm;
+                break;
+            }
+        }
+    }else{
+        console.error('orderInfo.type错误:'+orderInfo.type);
+    }
+    return newRoomList;
+}
+
+export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder }
