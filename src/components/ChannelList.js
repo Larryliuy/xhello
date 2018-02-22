@@ -4,7 +4,7 @@ import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from '../static/webSocket.js';
 import '../static/login.scss';
-import {getRoomUserList, onLeave, getRoomInfo} from "../webrtc/webRtcCom";
+import {getRoomUserList, onLeave, getRoomInfo} from "../webrtc/webRtcAudio";
 
 let state = store.getState();
 store.subscribe(function () {

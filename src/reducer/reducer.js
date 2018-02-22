@@ -28,6 +28,7 @@ export const CONSTANT = {
     USERIDLIST:'USERIDLIST',
     USERINFOLIST:'USERINFOLIST',
     NUMBERONE:'NUMBERONE',
+    ISYOUKU:'ISYOUKU',
 };
 export function collapsed(bool) {
     return {
@@ -70,7 +71,8 @@ const homeInitState = {
     microphoneInputUsers:{},//表示有音源输入的其他人
     myAudioTrack:'',//自己的音轨
     userIdList:'',//循环给用户发送preOffer的列表
-    userInfoList:''//循环给用户发送preOffer的列表
+    userInfoList:'',//循环给用户发送preOffer的列表
+    isYouku:false//循环给用户发送preOffer的列表
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
@@ -117,6 +119,8 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{userInfoList:action.val});
         case CONSTANT.NUMBERONE:
             return Object.assign({},tmpState,{numberOne:action.val});
+        case CONSTANT.ISYOUKU:
+            return Object.assign({},tmpState,{isYouku:action.val});
         default:
             // console.log('default');
             return homeInitState;

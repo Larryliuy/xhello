@@ -13,7 +13,7 @@ class Register extends React.Component {
             userName:'',
             password:'',
             passwordOnce:'',
-            sex:'',
+            sex:1,
         }
     }
     userNameOnchange(e){
@@ -35,14 +35,14 @@ class Register extends React.Component {
         }
     }
     sexOnchange(e){
-        // console.log(e.target.value);
+        console.log(e.target.value);
         this.setState({sex:e.target.value});
         // console.log(this.state)
     }
     handleSubmit(e){
         e.preventDefault();
         console.log(this.state);
-        let args = 'LoginName='+this.state.userName+'&Password='+this.state.password+'&sex='+this.state.sex;
+        let args = 'LoginName='+this.state.userName+'&Password='+this.state.password+'&Sex='+this.state.sex;
         fetch(registerApi,{
             method:'POST',
             // credentials: "include",

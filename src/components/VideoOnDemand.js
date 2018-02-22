@@ -29,7 +29,7 @@ class VideoOnDemand extends React.Component{
             roomId:state.homeState.currentRoomInfo.roomId,
             roomName:state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
-            vodSrc:this.state.vodSrc
+            // vodSrc:this.state.vodSrc
         };
         let vodVideo = document.getElementById('vodVideo'),
             videoSrc = this.state.vodSrc,
@@ -39,6 +39,14 @@ class VideoOnDemand extends React.Component{
             message.error('视频链接不正确，请重新输入');
             return;
         }
+        //如果是优酷视频，则需要截取出优酷视频id
+        if(videoSrc.indexOf('v.youku.') !== -1){
+            store.dispatch({type:CONSTANT.ISYOUKU,val:true})
+            let videoId = videoSrc.substring(videoSrc.indexOf('id_')+3,videoSrc.indexOf('.html'));
+            videoSrc = 'https://player.youku.com/embed/'+ videoId;//不用加https
+            sendSrcMsg.webSite = 'youku';
+        }
+
         console.log(videoSrc);
         vodVideo.src = videoSrc;
         vodVideo.autoplay=true;
@@ -127,9 +135,19 @@ class VideoOnDemand extends React.Component{
                     <Button onClick={()=>this.closeVod()}>关闭点播</Button>
                 </div>
                 <div style={{color:'#666',textAlign:'center',display:(state.homeState.currentRoomInfo.mode !== 0 && state.homeState.currentRoomInfo.player == state.homeState.userInfo.id)?'none':'block'}}><p>管理正在添加视频中...</p></div>
-                <video id={'vodVideo'}
+                <iframe height={'100%'}
+                        id={'vodVideo'}
+                        width={'100%'}
+                        src={this.state.vodSrc}
+                        frameBorder={'0'}
+                        autoPlay={'true'}
+                        allowFullScreen={true}>
+                </iframe>
+                {/*<video id={'vodVideo'}
                        src={this.state.vodSrc}
-                       style={{position:'relative',width:'640px',height:'320px'}}>不支持video</video>
+                       style={{position:'relative',width:'640px',height:'320px'}}>
+                    不支持video
+                </video>*/}
             </div>
         )
     }

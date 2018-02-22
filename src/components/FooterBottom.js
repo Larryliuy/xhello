@@ -3,7 +3,7 @@ import { message ,Input, Button, Slider } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import { generalApi } from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
-import { closeMicrophone, openMicrophone } from '../webrtc/webRtcCom';
+import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -65,7 +65,7 @@ class FooterBottom extends React.Component{
                 // alert('开启麦克风');
                 // myLocalStream
                 // let audioTrack = state.homeState.myAudioTrack;
-                if(this.state.microphoneOpen){
+                if(state.homeState.microphoneOpen){
                     closeMicrophone();
                     // this.setState({microphoneOpen:false});
                     store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
@@ -77,6 +77,11 @@ class FooterBottom extends React.Component{
                 break;
             case 'user-name':
                 this.setState({inputVisible:true});
+                break;
+            case 'play-span':
+            case 'play-img':
+                //播放本地音乐并将流混入mixer
+                console.log('播放音乐');
                 break;
         }
     }
@@ -198,11 +203,12 @@ class FooterBottom extends React.Component{
                 <span id='applause-span' style={{marginLeft:10}}>鼓掌</span>
             </div>
             <div className='play-sound'>
-                <span><img id='play-img' src='./images/icons/music.png' />播放</span>
+                <span><img id='play-img' src='./images/icons/music.png' /><span id={'play-span'}>播放</span></span>
             </div>
             <div className={'cheer-applause-audioBox'}>
                 <audio id={'cheer-audio'}></audio>
                 <audio id={'applause-audio'}></audio>
+                <audio id={'play-audio'}></audio>
             </div>
         </div>)
     }

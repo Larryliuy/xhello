@@ -16,7 +16,8 @@ import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
 
 import { send } from "../static/webSocket";
-import { startMyCam } from '../webrtc/webRtcCom';
+import { startMyCam } from '../webrtc/webRtcAudio';
+import {startMyCamVideo} from "../webrtc/webRtcVideo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -54,8 +55,22 @@ class HomeLayout extends React.Component {
         },5000);
 
         //获取自己麦克音频流
+        let roomInfo = state.homeState.currentRoomInfo;
         let videoBox = document.getElementById('audioBox');
-        startMyCam(videoBox);
+        if(roomInfo.mode == 1){
+            console.log('直播模式:'+roomInfo.mode);
+            startMyCamVideo(videoBox);
+        }else{
+            console.log('语音模式:'+roomInfo.mode);
+            startMyCam(videoBox);
+        }
+        /*else if(roomInfo.mode == 2) {
+            // startMyCam(videoBox);
+            console.log('双人(连麦)直播模式');
+        }else{
+            console.log(roomInfo);
+            console.error('未知的房间模式:'+roomInfo.mode);
+        }*/
         let isChanging = false,
             _this = this,
             dragBar = document.getElementById('resizable');

@@ -7974,6 +7974,9 @@ ul {
   .cheer-applause-audioBox #cheer-audio, .cheer-applause-audioBox #applause-audio {
     width: 1px;
     height: 1px; }
+  .cheer-applause-audioBox #play-audio {
+    width: 1px;
+    height: 1px; }
 
 .microphone-user-span {
   width: 95%;

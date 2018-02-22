@@ -25,13 +25,15 @@ class HeaderTop extends React.Component{
         cookieUtil.unset('userName');
         cookieUtil.unset('password');
         cookieUtil.unset('userData');
-        let localUri = location.href;
-        if(localUri.indexOf('?')){
-            location.replace(localUri.split('?')[0]);//针对QQ登录这种场景
-            location.reload();
+        let localUri = location.href,
+            localUriNo = localUri.split('?')[0];
+        console.log(localUri.indexOf('?') !== -1);
+        if(localUri.indexOf('?') !== -1){
+            location.replace(localUriNo+'#/');//针对QQ登录这种场景
         }else{
             location.reload();
         }
+        // location.reload();
     };
     vodPlay(e){
         console.log(e.target.innerText);
@@ -56,8 +58,10 @@ class HeaderTop extends React.Component{
                 roomId:roomInfo.roomId,
                 roomName:roomInfo.roomName,
                 user:state.homeState.userInfo,
-                mode:2
+                mode:2,
+                player:state.homeState.userInfo.id
             };
+            // console.log(sendMsg);
             send(JSON.stringify(sendMsg),function () {
                 console.log('发送改变房间模式消息成功');
                 //http请求改变数据库mode=2
