@@ -16,6 +16,7 @@ let localStream, /** 本地音视频流*/
     Msg, /** 发送消息*/
     myMicStream, /** 我的麦克风音源*/
     myVideo, /** 我的video标签Dom*/
+    downStream = null, /** 我收到的远程流（作为offer方）*/
     firstCandidate = 0, /** 第一候选人的seq*/
     microphoneStatus = false, /** 麦克风是否开启，true表示开着，false表示关着*/
     callbackVideo = null,/** 获取房间列表的回调函数*/
@@ -35,7 +36,7 @@ let localStream, /** 本地音视频流*/
 
 /**
  * 获取准备连接状态
- * @returns {boolean}
+ * @returns {boolean} true表示已准备（摄像头麦克风获取正常）
  */
 function getPrepareConnectionStateVideo(){
     return prepareState;
@@ -103,7 +104,17 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type) {
         }
         newConnection = new RTCPeerConnection(rtcPeerConfig);
         if(type === 'answer'){
-            newConnection.addStream(localStream);
+            if(localStream.active){
+                console.log('我是主播，将我的音视频流添加到pc');
+                newConnection.addStream(localStream);
+            }else{
+                if(downStream){
+                    newConnection.addStream(downStream);
+                    console.log('将down流添加进pc');
+                }else{
+                    console.log('上级流为空');
+                }
+            }
         }else {
             let canvas = document.getElementById('myCanvas');
             canvas.width = 1;
@@ -122,6 +133,13 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type) {
                 remoteVidoeDom.controls=true;
                 log('触发onaddstream,我是offer,播放');
                 //并将收到的流作为输出流
+                rtcSessionList.map(function (item) {
+                    if(item.pc === newConnection){
+                        item.reciveStream = e.stream;
+                        downStream = e.stream;
+                        // console.log(item.reciveStream);
+                    }
+                })
             }else{
                 console.log('触发onaddstream,我是anwser，不播放');
             }
@@ -160,7 +178,9 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type) {
                                 console.log(item);
                                 let myTrack = item.myMicStream.getAudioTracks();
                                 console.log(myTrack);
-                                item.myMicStream.removeTrack(myTrack[0]);
+                                if(myTrack[0]){
+                                    item.myMicStream.removeTrack(myTrack[0]);
+                                }
                             }
                         }
                     });
@@ -226,9 +246,40 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type) {
             pcState:'connecting',
             pcStateTime:new Date().getTime()/1000,
             myMicStream:localStream,
+            reciveStream:null,
             pcOutStream:null,
             ondisconnected:function () {
-                console.log('进入ondisconnected');
+                if(this.pcState === 'disconnected')return;
+                this.pcStateTime = new Date().getTime()/1000;
+                this.pcState = 'disconnected';
+
+                onLeaveVideo(this.toUser);
+
+                let userInfo = state.homeState.userInfo;
+                if(type === 'answer'){
+                    console.log('子流ondisconnected');
+                    let _this = this;
+                    console.log('seq:'+userInfo.seq);
+                    userInfo.Children = userInfo.Children.filter(function (item) {
+                        return _this.toUser.id != item;
+                    });
+                }else {
+                    console.log('父流ondisconnected');
+                    downStream = null;
+                    userInfo.parentNode = '';
+                    firstCandidate = 0;
+                    getRoomInfoVideo();
+                }
+                let updateUserMsg = {
+                    type:'update_user',
+                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                    roomName: state.homeState.currentRoomInfo.roomName,
+                    user:userInfo
+                };
+                if(!userInfo.seq)return;
+                send(JSON.stringify(updateUserMsg),function () {
+                    log('把 '+ wbMsg.toUser.id +' 的断线消息发送到服务器');
+                });
             }
             };
     }else{
@@ -260,6 +311,7 @@ function offerPeerConnectionVideo(wbMsg,videoTag) {
         ondisconnected:xpc.ondisconnected,
         type:xpc.type,
         toUser:xpc.toUser,
+        reciveStream:xpc.reciveStream,
         pcOutStream:xpc.pcOutStream
     };
     // let isExiat = false;//标记rtcSession是否存在
@@ -303,6 +355,7 @@ function answerPeerConnectionVideo(wbMsg,offer,videoId) {
         ondisconnected:xpc.ondisconnected,
         type:xpc.type,
         toUser:xpc.toUser,
+        reciveStream:xpc.reciveStream,
         pcOutStream:xpc.pcOutStream
     };
     rtcSessionList = rtcSessionList.filter(function (item) {
