@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import { Icon, Popover, Input, Button, Modal } from 'antd';
 import RoomManager from './RoomManager';
-import { redirect_uri, registerApi } from '../static/apiInfo';
+import { redirect_uri, registerApi, homePage } from '../static/apiInfo';
 import { randomWord } from '../static/comFunctions';
 import store from "../reducer/reducer";
 import { message } from "antd/lib/index";
@@ -79,7 +79,7 @@ class HeaderLeft extends Component{
                 .then(data=>{
                     console.log(data);
                     if(data.status === 'ok'){
-                        Modal.info({title:'链接地址',content:(<a><p style={{width:'100%',wordBreak:'break-word'}}>{redirect_uri+'#/?inviteCode='+inviteCode+'&userName='+state.homeState.userInfo.name + '-' +this.state.userName}</p></a>)})
+                        Modal.info({title:'链接地址',content:(<a><p style={{width:'100%',wordBreak:'break-word'}}>{homePage+'#/?inviteCode='+inviteCode+'&userName='+state.homeState.userInfo.name + '-' +this.state.userName}</p></a>)})
                     }else {
                         message.error('生成失败,可能名字重复了');
                     }

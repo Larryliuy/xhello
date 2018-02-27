@@ -7,12 +7,11 @@ import '../static/login.scss'
 import { loginApi, redirect_uri, domian } from "../static/apiInfo";
 import store,{CONSTANT} from "../reducer/reducer";
 import { GetQueryString } from '../static/comFunctions';
-document.domain = domian;
+// document.domain = domian;
 const iconStyle = {
     width: '20px',
     height: '20px'
 };
-
 
 class Login extends React.Component {
     constructor(props){
@@ -33,10 +32,10 @@ class Login extends React.Component {
         console.log(document.domain);
     }
     componentWillMount(){
-
         let locationUrl = window.location.href,
-            code,accessToken,_this=this,
-            allQueryString = locationUrl.substring(locationUrl.indexOf('?')).substr(1);
+            accessToken,_this=this,
+            allQueryString = window.location.hash.substring(2);
+        // console.log(allQueryString);
         //邀请登录
         if(locationUrl.indexOf('inviteCode=') !== -1){
             //这里做邀请登录的功能
@@ -75,68 +74,56 @@ class Login extends React.Component {
             return ;//如果是要请登录则不需要继续判断登录是否是快捷登录了
         }
         //QQ快捷登录
-        if(locationUrl.indexOf('code=') !== -1 && locationUrl.indexOf('inviteCode=') === -1){
-                // console.log(ev.oldURL);
-                // locationUrl = ev.oldURL;
-                code = GetQueryString(allQueryString,'code');//截取URL中的code值
-                // console.log(code);
-                if(code){
-                    _this.setState({loginComponent:false});
-                    let args = 'grant_type=authorization_code&client_id=101454868&client_secret=4811cade40988ad7094119ef56f9a5bd&code='+code+'&redirect_uri='+redirect_uri;
-                    //获取access token值
-                    fetch('https://graph.qq.com/oauth2.0/token?'+args, {method:"GET",mode: 'cors'})
-                        .then((response) => {console.log(response);return response.text()})
-                        .then(data=>{
-                            console.log(data);
-                            if(GetQueryString(data,'access_token')){
-                                accessToken = GetQueryString(data,'access_token');
-                                console.log(accessToken);
-                                args = 'access_token='+accessToken;
-                                //根据accessToken获取openID
-                                fetch('https://graph.qq.com/oauth2.0/me?'+args)
-                                    .then((response) => {return response.text()})
-                                    .then(data=>{
-                                        console.log(data);
-                                        data = data.substring(10,data.length-4);
-                                        data = JSON.parse(data);
-                                        // console.log(data);
-                                        if(data.openid){
-                                            //openid 需要和用户绑定在一起
-                                            let clientId = data.client_id,
-                                                openId = data.openid,
-                                                args = 'access_token='+accessToken+'&oauth_consumer_key='+clientId+'&openid='+openId;
-                                            // console.log(clientId+','+openId);
-                                            fetch('https://graph.qq.com/user/get_user_info?'+args)
-                                                .then((response) => {return response.json()})
-                                                .then(data=>{
-                                                    //这里获取用户信息
-                                                    console.log(data);
-                                                    if(data.ret === 0){
-                                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:openId,name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2,maxChildren:2,Children:[]}});
-                                                        location.replace("#/home");
-                                                    }
-                                                })
-                                                .catch(err=>{
-                                                    console.log(err);
-                                                })
-
-                                        }else {
-                                            message.error('openid为获取到');
-                                            location.replace("#/home");
-                                        }
-                                    })
-                                    .catch(err=>{
-                                        console.log(err);
-                                    });
-                            }else {
-                                message.error('access_token未获取到');
-                                location.replace("#/home");
-                            }
-                        })
-                        .catch(err=>{
-                            console.log(err);
-                            // location.replace(location.href.split('?')[0]+'#/');//QQ登录失败时跳回登录页
-                        });
+        if(locationUrl.indexOf('access_token=') !== -1){
+            console.log('QQ login');
+            accessToken = GetQueryString(allQueryString,'access_token');//截取URL中的code值
+            // console.log(code);
+            if(accessToken){
+                _this.setState({loginComponent:false});
+                cookieUtil.set('accessToken',accessToken);
+                //使用Access Token来获取用户的OpenID
+                let args = 'access_token='+accessToken+'&callback=callback';
+                let path = "https://graph.qq.com/oauth2.0/me?";
+                let url = path + args;
+                let script = document.createElement('script');
+                script.src = url;
+                document.body.appendChild(script);
+                //根据accessToken获取openID
+                /*let args = 'access_token='+accessToken;
+                fetch("https://graph.qq.com/oauth2.0/me?"+args)
+                    .then((response) => {return response.text()})
+                    .then(data=>{
+                        console.log(data);
+                        data = data.substring(10,data.length-4);
+                        data = JSON.parse(data);
+                        // console.log(data);
+                        if(data.openid){
+                            //openid 需要和用户绑定在一起
+                            let clientId = data.client_id,
+                                openId = data.openid,
+                                args = 'access_token='+accessToken+'&oauth_consumer_key='+clientId+'&openid='+openId;
+                            // console.log(clientId+','+openId);
+                            fetch('https://graph.qq.com/user/get_user_info?'+args)
+                                .then((response) => {return response.json()})
+                                .then(data=>{
+                                    //这里获取用户信息
+                                    console.log(data);
+                                    if(data.ret === 0){
+                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:openId,name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2,maxChildren:2,Children:[]}});
+                                        location.replace("#/home");
+                                    }
+                                })
+                                .catch(err=>{
+                                    console.log(err);
+                                })
+                        }else {
+                            message.error('openid为获取到');
+                            location.replace("#/home");
+                        }
+                    })
+                    .catch(err=>{
+                        console.log(err);
+                    });*/
                 }
             }
     }
@@ -150,7 +137,7 @@ class Login extends React.Component {
     };
     onChangePassword(e){
         // console.log('password:' + e.target.value)
-        this.setState({password:e.target.value});;
+        this.setState({password:e.target.value});
     };
     onClickHandle(){
         let userName = this.state.userName,
@@ -241,6 +228,10 @@ class Login extends React.Component {
     onMouseOutHandle(){
         this.setState({wechatVisible:'hidden'});
     }
+    callback(user)
+    {
+        console.log(user);
+    }
     render(){
         if(!this.state.loginComponent)return (<div style={{textAlign:'center'}}><p>正在验证中...,请稍候</p></div>);
         return (<Form onSubmit={this.handleSubmit} className="login-form">
@@ -275,7 +266,7 @@ class Login extends React.Component {
                     <div className='fast_login'>
                         <span className='icon_wechat' onMouseOver={()=>this.onMouseHoverHandle()}><Icon type="wechat" style={iconStyle}/></span>
                         <div id={'we-chat'} onMouseOut={()=>this.onMouseOutHandle()} style={{visibility:this.state.wechatVisible}}></div>
-                        <span id={'qqSpan'} onClick={()=>this.qqSpanHandle()} className='icon_qq'><a href={"https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101454868&redirect_uri="+redirect_uri+"&state=test"}><Icon type="qq" style={iconStyle}/></a></span>
+                        <span id={'qqSpan'} onClick={()=>this.qqSpanHandle()} className='icon_qq'><a href={"https://graph.qq.com/oauth2.0/authorize?response_type=token&client_id=101454868&redirect_uri="+redirect_uri+'&scope=get_user_info'}><Icon type="qq" style={iconStyle}/></a></span>
                         {/*<span id={'qqSpan'} onClick={()=>this.qqSpanHandle()} className='icon_qq'><a href={"#"}><Icon type="qq" style={iconStyle}/></a></span>*/}
                     </div>
             </Form>

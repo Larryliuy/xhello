@@ -4,7 +4,8 @@ import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from '../static/webSocket.js';
 import '../static/login.scss';
-import {getRoomUserList, onLeave, getRoomInfo} from "../webrtc/webRtcAudio";
+import { onLeave, getRoomInfo, getPrepareConnectionState} from "../webrtc/webRtcAudio";
+import { onLeaveVideo, getRoomInfoVideo, getPrepareConnectionStateVideo} from "../webrtc/webRtcVideo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -52,7 +53,7 @@ class ChannelList extends React.Component{
                     // console.log(enterMsg);
                     send(JSON.stringify(enterMsg),function(){
                         // getRoomUserList(startOnline);
-                        getRoomInfo();
+                        getRoomInfo(state.homeState.currentRoomInfo.roomId);
                     });
                     //需要默认将默认房间信息更新到当前房间
                 }else{
@@ -68,31 +69,29 @@ class ChannelList extends React.Component{
 
     componentWillUnmount(){
         //页面卸载是关闭聊天室连接
-        if(WS){
-            let data =  state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.currentRoomInfo.title ;
-            send(JSON.stringify(getSendData('leave_room',
-                state.homeState.currentRoomInfo.roomId,
-                state.homeState.currentRoomInfo.roomName,
-                state.homeState.userInfo,
-                data)),function(){WS.close();});
-            // alert('close');
-        }
+        WS.close();
     }
     //这里做分离自己进入房间事件，其他人进入房间进去，封装一个getList
     enterRoom(roomIdInt,roomName){
         if(!roomIdInt || !roomName) return;
             //离开上一个聊天室
-        let data = state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
+        let userInfo = state.homeState.userInfo;
+        let data = userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
             leaveMsg = getSendData(
                 'leave_room',
                 state.homeState.currentRoomInfo.roomId,
                 state.homeState.currentRoomInfo.roomName,
-                state.homeState.userInfo,
+                userInfo,
                 data);
-        console.log(leaveMsg);
+        // console.log(leaveMsg);
         send(JSON.stringify(leaveMsg),function(){
             store.dispatch({type:CONSTANT.NUMBERONE,val:0});
-            onLeave(state.homeState.userInfo);
+            if(getPrepareConnectionState()){
+                onLeave(state.homeState.userInfo);
+            }
+            if(getPrepareConnectionStateVideo()){
+                onLeaveVideo(state.homeState.userInfo);
+            }
         });
         //离开后标记离开的房间为最后一次房间
         store.dispatch({type:CONSTANT.LASTROOMINFO,val:state.homeState.currentRoomInfo});
@@ -100,11 +99,12 @@ class ChannelList extends React.Component{
         // console.log(state.homeState.lastRoomInfo);
         // console.log(roomIdInt+','+roomName);
         data ="<p>"+ state.homeState.userInfo.name + "进入了房间" +"</p>";
+        userInfo.Children = [];
         let enterMsg = getSendData(
             'enter_room',
             roomIdInt,
             roomName,
-            state.homeState.userInfo,
+            userInfo,
             data);
         // WS.send(JSON.stringify(enterMsg));
         send(JSON.stringify(enterMsg),function(){
@@ -129,7 +129,7 @@ class ChannelList extends React.Component{
         }
         // this.setState({roomStatus:tRoomState});
         store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
-        getRoomInfo();
+        getRoomInfo(roomIdInt.toString());
         // getRoomUserList(startOnline);
         // //获取房间里用户列表信息
         // let getUsersInfo = getSendData(

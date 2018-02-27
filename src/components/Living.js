@@ -16,12 +16,13 @@ class Living extends React.Component{
             <div style={{height:'100%',textAlign:'center !important'}}>
                 <div>
                         <video id={'myVideo'}
-                               style={{position:'relative',width:'100%',height:'100%'}}>不支持video</video>
+                               style={{position:'relative',width:'640px',height:'480px'}}>不支持video</video>
                         <video id={'theirVideo'}
                                style={{position:'relative',width:'200px',height:'120px'}}>不支持video</video>
                     <canvas id={'myCanvas'}></canvas>
+                    <audio id={'myAudio'}></audio>
                 </div>
-                <div className='host-text'><p><a href={'http://www.xtell.cn'}>打个小广告</a></p></div>
+                <div className='host-text'><p><a target={'_blank'} href={'http://www.xtell.cn'}>打个小广告:极智未来</a></p></div>
             </div>
         )
     }

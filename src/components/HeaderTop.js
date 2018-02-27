@@ -41,11 +41,11 @@ class HeaderTop extends React.Component{
         if(e.target.innerText === '播放网络视频'){
             let roomInfo = state.homeState.currentRoomInfo;
             if(roomInfo.mode === 1){
-                message('已开启直播模式，不能点播');
+                message.warn('已开启直播模式，不能点播');
                 return;
             }
             if(roomInfo.mode === 2){
-                message('已开启点播模式，不用重复点播');
+                message.warn('已开启点播模式，不用重复点播');
                 return;
             }
             roomInfo.mode = 2;

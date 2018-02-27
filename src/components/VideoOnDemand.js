@@ -43,7 +43,7 @@ class VideoOnDemand extends React.Component{
         if(videoSrc.indexOf('v.youku.') !== -1){
             store.dispatch({type:CONSTANT.ISYOUKU,val:true})
             let videoId = videoSrc.substring(videoSrc.indexOf('id_')+3,videoSrc.indexOf('.html'));
-            videoSrc = 'https://player.youku.com/embed/'+ videoId;//不用加https
+            videoSrc = 'https://player.youku.com/embed/'+ videoId+'?isAutoPlay=true';//不用加https
             sendSrcMsg.webSite = 'youku';
         }
 
@@ -135,12 +135,12 @@ class VideoOnDemand extends React.Component{
                     <Button onClick={()=>this.closeVod()}>关闭点播</Button>
                 </div>
                 <div style={{color:'#666',textAlign:'center',display:(state.homeState.currentRoomInfo.mode !== 0 && state.homeState.currentRoomInfo.player == state.homeState.userInfo.id)?'none':'block'}}><p>管理正在添加视频中...</p></div>
-                <iframe height={'100%'}
+                <iframe height={'80%'}
                         id={'vodVideo'}
                         width={'100%'}
                         src={this.state.vodSrc}
                         frameBorder={'0'}
-                        autoPlay={'true'}
+                        allowTransparency={true}
                         allowFullScreen={true}>
                 </iframe>
                 {/*<video id={'vodVideo'}
