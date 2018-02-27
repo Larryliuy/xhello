@@ -9,6 +9,7 @@ import ChannelListBox from './ChannelListBox';
 import MicroPhoneBox from './MicroPhoneBox';
 import AdvertisementBox from './AdvertisementBox';
 import LivingBox from './LivingBox';
+import LivingDoubleBox from './LivingDoubleBox';
 import VideoOnDemand from '../components/VideoOnDemand';
 import HeaderTopBox from './HeaderTopBox';
 import FooterBottomBox from './FooterBottomBox';
@@ -153,25 +154,29 @@ class HomeLayout extends React.Component {
                             {state.homeState.currentRoomInfo.mode == 0 && <MessageListBox></MessageListBox>}
                             {state.homeState.currentRoomInfo.mode == 1 && <LivingBox></LivingBox>}
                             {state.homeState.currentRoomInfo.mode == 2 && <VideoOnDemand></VideoOnDemand>}
+                            {state.homeState.currentRoomInfo.mode == 3 && <LivingDoubleBox></LivingDoubleBox>}
                         </div>
                         <div className= 'text_area'>
                             {state.homeState.currentRoomInfo.mode == 0 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
-                            {state.homeState.currentRoomInfo.mode== 1 && <AdvertisementBox></AdvertisementBox>}
-                            {state.homeState.currentRoomInfo.mode== 2 && <AdvertisementBox></AdvertisementBox>}
+                            {state.homeState.currentRoomInfo.mode == 1 && <AdvertisementBox></AdvertisementBox>}
+                            {state.homeState.currentRoomInfo.mode == 2 && <AdvertisementBox></AdvertisementBox>}
+                            {state.homeState.currentRoomInfo.mode == 3 && <AdvertisementBox></AdvertisementBox>}
                         </div>
                     </Content>
                     <Sider width={240} collapsible = {false} style={Object.assign({},sliderStyle,{borderLeft: '1px solid #eee'})}>
                         {/*麦序区域*/}
                         <div className='content-right-up'>
                             {state.homeState.currentRoomInfo.mode == 0 && <MicroPhoneBox></MicroPhoneBox>}
-                            {state.homeState.currentRoomInfo.mode== 1 && <MessageListBox></MessageListBox>}
-                            {state.homeState.currentRoomInfo.mode== 2 && <MessageListBox></MessageListBox>}
+                            {state.homeState.currentRoomInfo.mode == 1 && <MessageListBox></MessageListBox>}
+                            {state.homeState.currentRoomInfo.mode == 2 && <MessageListBox></MessageListBox>}
+                            {state.homeState.currentRoomInfo.mode == 3 && <MessageListBox></MessageListBox>}
                         </div>
                         {/*广告区域*/}
                         <div className="ad-area" >
                             {state.homeState.currentRoomInfo.mode == 0 && <AdvertisementBox></AdvertisementBox>}
-                            {state.homeState.currentRoomInfo.mode== 1 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
-                            {state.homeState.currentRoomInfo.mode== 2 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
+                            {state.homeState.currentRoomInfo.mode == 1 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
+                            {state.homeState.currentRoomInfo.mode == 2 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
+                            {state.homeState.currentRoomInfo.mode == 3 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
                         </div>
                     </Sider>
                 </Layout>

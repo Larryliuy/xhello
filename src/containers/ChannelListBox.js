@@ -39,8 +39,8 @@ const rightClickHandle = (e) => {
             store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
             return;
         }
-        let classArr = e.target;
-        console.log(classArr);
+        // let classArr = e.target;
+        console.log(e.target);
     }
 };
 

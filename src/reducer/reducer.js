@@ -72,7 +72,7 @@ const homeInitState = {
     myAudioTrack:'',//自己的音轨
     userIdList:'',//循环给用户发送preOffer的列表
     userInfoList:'',//循环给用户发送preOffer的列表
-    isYouku:false//循环给用户发送preOffer的列表
+    isYouku:false//点播的连接是否是youku(优酷)
 };
 export const homeState = (state = homeInitState,action)=>{
     let tmpState = state;
