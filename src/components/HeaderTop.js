@@ -80,7 +80,7 @@ class HeaderTop extends React.Component{
         }
     }
     render(){
-        const data = ['播放网络视频'];
+        const data = ['播放网络视频','开启单人直播','开启双人直播'];
         const content = (<div className={'vodMenu'} style={{width:'200px',cursor:'pointer'}} onClick={(e)=>this.vodPlay(e)}>
             <List dataSource={data}
                   size="small"

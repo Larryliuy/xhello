@@ -10,7 +10,6 @@ let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
 });
-
 //css
 const h4Style = {
     // textAlign:'center',

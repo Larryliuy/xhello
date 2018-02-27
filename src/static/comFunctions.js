@@ -118,4 +118,12 @@ function ajustRoomOrder(roomList,orderInfo) {
     return newRoomList;
 }
 
-export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder }
+/**
+ *用于QQ登录获取openId的回调函数
+ */
+function callback(user)
+{
+    console.log(user);
+}
+
+export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback }

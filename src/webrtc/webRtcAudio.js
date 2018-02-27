@@ -293,10 +293,6 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             let preStateTime = this.pcStateTime;
                 this.pcStateTime = new Date().getTime()/1000;
                 this.pcState = 'disconnected';
-                // this.wa.close();
-                // this.pcOutStream = null;
-                // this.mixer = null;
-                // this.pc.close();
 
                 onLeave(this.toUser);
 
@@ -310,10 +306,10 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     // console.log(userInfo);
                 }else{
                     //父亲掉线
-                    userInfo = state.homeState.userInfo;
+                    // userInfo = state.homeState.userInfo;
                     userInfo.parentNode = '';
                     firstCandidate = 0;
-                    getRoomInfo();
+                    getRoomInfo(state.homeState.currentRoomInfo.roomId);
                 }
                 let updateUserMsg = {
                     type:'update_user',
@@ -325,6 +321,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 if(!userInfo.seq)return;
                 send(JSON.stringify(updateUserMsg),function () {
                     log('把 '+ wbMsg.toUser.id +' 的断线消息发送到服务器');
+                    console.log(state.homeState.roomMicrophoneUser);
                 });
 
             },
@@ -734,11 +731,11 @@ function applyToBeFirst(){
 /**
  * 获取房间信息函数
  */
-function getRoomInfo(){
+function getRoomInfo(roomId){
     let beFirstMsg = {
         type:'get_room_info',
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
+        roomId: roomId,		//房间唯一标识符
+        // roomName: state.homeState.currentRoomInfo.roomName,
         user:state.homeState.userInfo
     };
     // console.log(beFirstMsg);//这个消息发过去就挂了
@@ -759,7 +756,12 @@ function startOnline() {
     let objUser = getCandidate(state.homeState.userInfoList,firstCandidate);
     // console.log(state.homeState.userInfoList);
     // console.log(objUser);
-    if(!objUser.minSeqUser){console.error('目标用户不存在');return;}//目标用户不存在直接返回
+    if(!objUser.minSeqUser){
+        console.error('目标用户不存在');
+        //目标用户不存在,继续用户用户列表并返回
+        getRoomUserList();
+        return;
+    }
     let preOfferMsg = {
         type:'msg',
         typeString:'preOffer',

@@ -338,7 +338,7 @@ function onmessage(response){
                             offerPeerConnectionVideo(Msg,'myVideo',false);
                         }else if(roomMode == 3){
                             if(!roomInfo.secondKing && dataJson.fromUser.Children.length<=1){
-                                offerPeerConnectionVideo(Msg,'firstVideo',true);
+                                offerPeerConnectionVideo(Msg,'firstVideo',false);//按顺序进时这里需要改为true
                             }else{
                                 offerPeerConnectionVideo(Msg,'firstVideo',false);
                             }
@@ -489,8 +489,44 @@ function onmessage(response){
                 }
                 return;
             }
+            if(dataJson.typeString === 'applyToBebarley'){
+                console.log('收到连麦者申请:'+dataJson.user.id);
+                let roomInfo = state.homeState.currentRoomInfo;
+                if(!roomInfo.secondKing){
+                    console.log('连麦者不存在，可同意连麦');
+                    let preBarleyListsBox = document.getElementById('preBarleyLists');
+                    preBarleyListsBox.style.zIndex = Number(dataJson.user.id);
+                    preBarleyListsBox.innerText = '同意 '+dataJson.user.name+' 的连麦申请';
+                }
+            }
+            if(dataJson.typeString === 'agreeToBebarley'){
+                console.log('收到同意连麦的消息');
+                onLeaveVideo(state.homeState.userInfo);
+                let myVideoTag = document.getElementById('secondVideo');
+                startMyCamVideo(myVideoTag,true);
+                let user = dataJson.user;
+                user.Children = user.Children.filter(function (item) {
+                    return item !== user.id;
+                });
+                let Msg = {
+                    type:'msg',
+                    typeString:'webrtc',
+                    ToUserOnly:dataJson.user.id,
+                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                    roomName: state.homeState.currentRoomInfo.roomName,
+                    fromUser:state.homeState.userInfo,
+                    toUser:user,
+                    secondKing:true,
+                    sessionId:state.homeState.userInfo.id+'-'+dataJson.user.id
+                };
+                console.log(Msg);
+                setTimeout(function () {
+                    offerPeerConnectionVideo(Msg,'firstVideo',true);
+                },1000);
+
+            }
             if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
-                // console.log(dataJson);
+                console.log(dataJson);
                 let roomInfo = state.homeState.currentRoomInfo;
                 if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
                     if(dataJson.offer){
@@ -505,6 +541,9 @@ function onmessage(response){
                             toUser:dataJson.fromUser,
                             sessionId:state.homeState.userInfo.id+'-'+dataJson.fromUser.id,
                         };
+                        if(dataJson.secondKing){
+                            Msg.secondKing = true;
+                        }
                         if(getPrepareConnectionState() && roomInfo.mode == 0){
                             answerPeerConnection(Msg,dataJson.offer, document.getElementById('audioBox'));
                         }else if(roomInfo.mode == 1){
@@ -517,7 +556,12 @@ function onmessage(response){
                             if(getPrepareConnectionStateVideo()){
                                 if(state.homeState.userInfo.Children.length <=1){
                                     console.log('孩子节点数小于等于1,连接人是连麦者');
-                                    answerPeerConnectionVideo(Msg,dataJson.offer,'secondVideo',true);
+                                    // console.log(dataJson);
+                                    if(dataJson.secondKing){
+                                        answerPeerConnectionVideo(Msg,dataJson.offer,'secondVideo',true);
+                                    }else{
+                                        answerPeerConnectionVideo(Msg,dataJson.offer,'secondVideo',false);//顺序进入房间需改为true
+                                    }
                                 }else{
                                     console.log('孩子节点数大于1,连接人不是连麦者');
                                     answerPeerConnectionVideo(Msg,dataJson.offer,'liveCanvas',false);
@@ -1029,7 +1073,7 @@ function onmessage(response){
                     }else{
                         log('连麦者不存在，我要申请连麦:'+state.homeState.currentRoomInfo.mode);
                         let myVideoTag = document.getElementById('secondVideo');
-                        startMyCamVideo(myVideoTag,true);
+                        // startMyCamVideo(myVideoTag,true);
                     }
                     getRoomUserListVideo(startOnlineVideo);
                 }else{
