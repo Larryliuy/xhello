@@ -3,7 +3,7 @@
  */
 
 import WS, { send } from "../static/webSocket";
-import store, {CONSTANT} from "../reducer/reducer";
+import store, {CONSTANT, homeState} from "../reducer/reducer";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -798,6 +798,25 @@ function startOnline() {
     firstCandidate = objUser.nextCandidate;
 }
 
+/**
+ * 初始化用户信息函数
+ * */
+function updateServerUserInfo() {
+    let userInfo = state.homeState.userInfo;
+    userInfo.Children = [];
+    let updateUserMsg = {
+        type:'update_user',
+        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomName: state.homeState.currentRoomInfo.roomName,
+        user:userInfo
+    };
+    // console.log(updateUserMsg);
+    if(!userInfo.seq)return;
+    store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
+    send(JSON.stringify(updateUserMsg),function () {
+        log('发送update_user消息到服务器');
+    });
+}
 
 //播放音乐,混入自己的mixOutputStream
 
@@ -819,5 +838,6 @@ export {
     closeMicrophone,
     openMicrophone,
     microphoneStatus,
-    initVariableAudio
+    initVariableAudio,
+    updateServerUserInfo
 };

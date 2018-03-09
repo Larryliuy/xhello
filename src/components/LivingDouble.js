@@ -59,12 +59,11 @@ class LivingDouble extends React.Component{
                 {state.homeState.userInfo.id == state.homeState.currentRoomInfo.king ?
                     <div className={'closeVideoMode'}>
                         <Button onClick={closeVideoMode}>关闭直播</Button>
-                        <div id={'preBarleyLists'} onClick={(e)=>this.onAgreeToBebarley(e)}></div>
+                        <button id={'preBarleyLists'} onClick={(e)=>this.onAgreeToBebarley(e)}></button>
                     </div>
                 :
                     <div className={'refreshVideo'}>
                         <Button onClick={refreshVideo}>刷新</Button>
-                        <div id={'preBarleyLists'} onClick={(e)=>this.onAgreeToBebarley(e)}></div>
                     </div>}
                 <div className='host-text'><p><a target={'_blank'} href={'http://www.xtell.cn'}>打个小广告:极智未来</a></p></div>
             </div>

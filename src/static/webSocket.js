@@ -3,14 +3,14 @@ import './media.js';
 import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
-    getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam
+    getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam, updateServerUserInfo
 } from "../webrtc/webRtcAudio";
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
     setRoomInfo, initVariableVideo, getRoomInfoVideo
 } from "../webrtc/webRtcVideo";
-import { ajustUserOrder, ajustRoomOrder } from '../static/comFunctions';
+import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 
 let state = store.getState();
@@ -497,7 +497,7 @@ function onmessage(response){
                     console.log('连麦者不存在，可同意连麦');
                     let preBarleyListsBox = document.getElementById('preBarleyLists');
                     preBarleyListsBox.style.zIndex = Number(dataJson.user.id);
-                    preBarleyListsBox.innerText = '同意 '+dataJson.user.name+' 的连麦申请';
+                    preBarleyListsBox.innerText = '同意 '+dataJson.user.name;
                     preBarleyListsBox.style.visibility = 'visible';
                 }
             }
@@ -769,6 +769,9 @@ function onmessage(response){
             }
             if(dataJson.typeString === 'changeRoomMode'){
                 log('收到改变房间模式消息：'+dataJson.mode+','+dataJson.player);
+                let currentRoomInfo = state.homeState.currentRoomInfo;
+                //初始化服务器userInfo
+                updateServerUserInfo();
                 //初始化原有模式的变量
                 if(getPrepareConnectionState()){
                     onLeave(state.homeState.userInfo);
@@ -778,28 +781,30 @@ function onmessage(response){
                     onLeaveVideo(state.homeState.userInfo);
                     initVariableVideo();
                 }
-                let currentRoomInfo = state.homeState.currentRoomInfo;
                 console.log(currentRoomInfo);
                 console.log(dataJson);
                 currentRoomInfo.mode = dataJson.mode;
-                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});//保证先切换房间模式，已保证下面能读取到audioBox
                 currentRoomInfo.king = '';
                 if(dataJson.user.id == state.homeState.userInfo.id && dataJson.player){
                     if(dataJson.mode != 0){
                         currentRoomInfo.player = dataJson.player;
                         getRoomInfoVideo(currentRoomInfo.roomId);
                     }
+                }else{
+                    //如果是0，即语音模式,则需要去找别人连接
+                    if(dataJson.mode == 0){
+                        let videoBox = document.getElementById('audioBox');
+                        startMyCam(videoBox);
+                        getRoomInfo(currentRoomInfo.roomId);
+                        //这里不能直接getRoomInfo，不然会各自连成很多小的圈子
+                    }
                 }
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
-                if(dataJson.mode == 0){
-                    let videoBox = document.getElementById('audioBox');
-                    startMyCam(videoBox);
-                    getRoomInfo(currentRoomInfo.roomId);
-                }
                 if(state.homeState.microphoneMode != 1){
                     console.log(state.homeState.microphoneMode);
                     store.dispatch({type:CONSTANT.MICROPHONEMODE,val:1});
                 }
+
                 return;
             }
             //消息撤回

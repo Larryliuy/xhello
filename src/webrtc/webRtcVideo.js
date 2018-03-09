@@ -4,6 +4,7 @@
 
 import { send } from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
+import {getRoomInfo, startMyCam, getPrepareConnectionState} from "./webRtcAudio";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -833,6 +834,13 @@ function drawVideoToCanvas() {
  * */
 function closeVideoMode() {
     //关闭视频模式
+    let videoBox = document.getElementById('audioBox');
+    if(!getPrepareConnectionState()){
+        console.log('重新获取startMyCam');
+        startMyCam(videoBox);
+    }
+    getRoomInfo(state.homeState.currentRoomInfo.roomId);
+
     let roomInfoTmp = state.homeState.currentRoomInfo;
     roomInfoTmp.mode = 0;
     roomInfoTmp.microphoneMode = 1;//重置为默认的自由模式(是否需要重置)

@@ -674,6 +674,12 @@ ul{
     top: 50px;
   }
 }
-.preBarleyLists{
+#preBarleyLists{
   cursor: pointer;
+  display: block;
+  margin-top: 2px;
+  border-radius: 3px;
+  border: 1px solid #aaa;
+  padding: 3px 10px;
+  background-color: #eee;
 }
