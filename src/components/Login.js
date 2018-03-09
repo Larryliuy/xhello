@@ -34,8 +34,8 @@ class Login extends React.Component {
     componentWillMount(){
         let locationUrl = window.location.href,
             accessToken,_this=this,
-            allQueryString = window.location.hash.substring(2);
-        // console.log(allQueryString);
+            allQueryString = window.location.hash.substring(3);
+        console.log(allQueryString);
         //邀请登录
         if(locationUrl.indexOf('inviteCode=') !== -1){
             //这里做邀请登录的功能
