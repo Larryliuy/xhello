@@ -9,14 +9,13 @@ store.subscribe(function () {
     state = store.getState();
 });
 
-let localStream, /** 本地音视频流*/
+let localStream = null, /** 本地音视频流*/
     prepareState = false, /** 麦克风获取是否准备好（本地音频流是否获取到）*/
     rtcSessionList=[], /** 本地peerConnection连接对象组*/
-    remoteVidoeDom, /** 远程video标签Dom*/
-    Msg, /** 发送消息*/
-    myMicStream, /** 我的麦克风音源*/
-    secondKing ='', /** 连麦者*/
-    barleyAudioTrack, /** 我的video标签Dom*/
+    remoteVidoeDom = null, /** 远程video标签Dom*/
+    Msg = {}, /** 发送消息*/
+    secondKing ='', /** 连麦者ID*/
+    barleyAudioTrack, /** 连麦者音轨*/
     downStream = null, /** 我收到的远程流（作为offer方）*/
     firstCandidate = 0, /** 第一候选人的seq*/
     microphoneStatus = false, /** 麦克风是否开启，true表示开着，false表示关着*/
@@ -37,7 +36,7 @@ let localStream, /** 本地音视频流*/
 
 /**
  * 获取准备连接状态
- * @returns {boolean} true表示已准备（摄像头麦克风获取正常）
+ * @returns {boolean} true表示已准备（摄像头麦克风获取正常,webRtc 正在或已经连接）
  */
 function getPrepareConnectionStateVideo(){
     return prepareState;
@@ -66,7 +65,7 @@ function startMyCamVideo(myVideoTag,isKing){
                         myVideoTag.muted = true;		//mute local video to avoid echo by myself.
                     });
                     myVideoTag.autoplay=true;
-                    myVideoTag.controls=true;
+                    // myVideoTag.controls=true;
                 }
                 prepareState = true;
                 drawVideoToCanvas();
@@ -99,7 +98,7 @@ function startMyCamVideo(myVideoTag,isKing){
  */
 function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isKing) {
     log("进入preparePeerConnection函数!");
-    let newConnection;
+    let newConnection,webAudio;
     if (hasRTCPeerConnection()) {
         if(type === 'answer'){//直播模式下，我是发起offer的人不需要获取视频流
             if(!prepareState && isKing){
@@ -113,18 +112,12 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                 console.log('我是主播，将我的音视频流添加到pc');
                 console.log(localStream);
                 console.log(downStream);
-                if(downStream){
-                    //将连麦者与主播的音频混音，然后加入addStream
-                    if(localStream){
-                        console.log(barleyAudioTrack);
-                        let localAudioTrack = localStream.getAudioTracks();
-                        console.log(localAudioTrack);
-                        console.log(downStream.getAudioTracks());
-                        downStream.addTrack(localAudioTrack[0]);
-                        downStream.addTrack(barleyAudioTrack[0]);
-                        console.log(downStream.getAudioTracks());
+                if(downStream){//直播模式第二个人这里已经有了，
+                    if(isKing){
+                        newConnection.addStream(localStream);
+                    }else{
+                        newConnection.addStream(downStream);
                     }
-                    newConnection.addStream(downStream);
                 }else{
                     newConnection.addStream(localStream);
                 }
@@ -144,12 +137,13 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
             }else{
                 console.log('我不是连麦者，添加音，视频tag stream到addStream');
                 let canvas = document.getElementById('liveCanvas') || document.getElementById('myCanvas');
-                let myAudio = document.getElementById('myAudio');
+                // let myAudio = document.getElementById('myAudio');
+                let myAudio = document.createElement('audio');
                 //createMediaElementSource
-                let webAudio = new (window.AudioContext || window.webkitAudioContext)();
-                let sourceNode = webAudio.createMediaElementSource(myAudio);
+                webAudio = new (window.AudioContext || window.webkitAudioContext)();
+                let audioSourceNode = webAudio.createMediaElementSource(myAudio);
                 let webAudioOutput  = webAudio.createMediaStreamDestination();
-                sourceNode.connect(webAudioOutput);
+                audioSourceNode.connect(webAudioOutput);
                 if(canvas){
                     canvas.width = 1;
                     canvas.height = 1;
@@ -157,6 +151,9 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     newConnection.addStream(stream);
                 }
                 newConnection.addStream(webAudioOutput.stream);
+                if(!prepareState){//添加stream后证明已经开始连接了
+                    prepareState = true;
+                }
             }
         }
         // newConnection.addStream(localStream);
@@ -168,16 +165,16 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     remoteVidoeDom = document.querySelector('#'+vidoeId);
                     remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
                     remoteVidoeDom.autoplay=true;
-                    remoteVidoeDom.controls=true;
+                    // remoteVidoeDom.controls=true;
                     if(vidoeId === 'firstVideo'){
                        let firstVideo = document.getElementById('firstVideo');
-                        firstVideo.style.width = '1px';
-                        firstVideo.style.height = '1px';
-                        let liveCanvas = document.querySelector('#liveCanvas');
-                        if(liveCanvas){
-                            liveCanvas.width = 600;
-                            liveCanvas.height = 320;
-                        }
+                        firstVideo.style.width = '45%';
+                        firstVideo.style.height = '85%';
+                        // let liveCanvas = document.querySelector('#liveCanvas');
+                        // if(liveCanvas){
+                        //     liveCanvas.width = 1;
+                        //     liveCanvas.height = 1;
+                        // }
                     }
                 }else {
                     log('触发onaddstream,我是offer,观众,播放');
@@ -185,31 +182,31 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     console.log(e.stream.getAudioTracks());
                     remoteVidoeDom = document.querySelector('#'+vidoeId);
                     remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
-                    remoteVidoeDom.style.width = '600px';
-                    remoteVidoeDom.style.height = '320px';
+                    remoteVidoeDom.style.width = '80%';
+                    remoteVidoeDom.style.height = '80%';
                     remoteVidoeDom.autoplay=true;
-                    remoteVidoeDom.controls=true;
-                    let liveCanvas = document.querySelector('#liveCanvas');
-                    if(liveCanvas){
-                        liveCanvas.width = '1px';
-                        liveCanvas.height = '1px';
-                    }
+                    // remoteVidoeDom.controls=true;
+                    // let liveCanvas = document.querySelector('#liveCanvas');
+                    // if(liveCanvas){
+                    //     liveCanvas.width = '1px';
+                    //     liveCanvas.height = '1px';
+                    // }
+                    downStream = e.stream;
                 }
                 //并将收到的流作为输出流
-                rtcSessionList.map(function (item) {
-                    if(item.pc === newConnection){
-                        item.reciveStream = e.stream;
-                        downStream = e.stream;
-                        // console.log(item.reciveStream);
-                    }
-                })
+                // rtcSessionList.map(function (item) {
+                //     if(item.pc === newConnection){
+                //         item.reciveStream = e.stream;
+                //         // console.log(item.reciveStream);
+                //     }
+                // })
             }else{
                 if(vidoeId === 'secondVideo' && localStream && isKing){
                     console.log('触发onaddstream,接受到连麦者stream，播放');
                     remoteVidoeDom = document.querySelector('#'+vidoeId);
                     remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
                     remoteVidoeDom.autoplay=true;
-                    remoteVidoeDom.controls=true;
+                    // remoteVidoeDom.controls=true;
                     //接受到连麦者的stream后，将整个canvas流赋值给downStream
                     let canvas = document.getElementById('liveCanvas');
                     downStream = canvas.captureStream();
@@ -282,6 +279,10 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         if(!exist){//只要他有占位就不用添加了
                             userInfo.Children.push(wbMsg.toUser.id);
                         }
+                        //如果是连麦主播，则需要将混音加入downStream,mixerAudio
+                        if(vidoeId === 'secondVideo' && localStream && isKing){
+                            mixerAudio();
+                        }
                     }
                     updateUserMsg = {
                         type:'update_user',
@@ -304,6 +305,10 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         //更变自己的最大连接数
                         userInfo.maxChildren = 0;
                         setRoomInfo(roomInfo);
+                        //通知房间中的其他人重新连接
+                        let msg = {
+
+                        }
                     }
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     send(JSON.stringify(updateUserMsg),function () {
@@ -327,6 +332,9 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     if(objItem){
                         objItem.ondisconnected();
                     }
+                    //切换房间时，需要设置回原来的最大连接数
+                    userInfo.maxChildren = 2;
+                    store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     break;
                 default:
                     // console.log('default:'+newConnection.iceConnectionState);
@@ -338,6 +346,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
             toUser:wbMsg.toUser,
             type:type,
             isKing:isKing,
+            webAudio:webAudio,
             pc:newConnection,
             pcState:'connecting',
             pcStateTime:new Date().getTime()/1000,
@@ -430,6 +439,7 @@ function offerPeerConnectionVideo(wbMsg,videoTag,isKing) {
         myMicStream:xpc.myMicStream,
         ondisconnected:xpc.ondisconnected,
         type:xpc.type,
+        webAudio:xpc.webAudio,
         isKing:xpc.isKing,
         toUser:xpc.toUser,
         reciveStream:xpc.reciveStream,
@@ -476,6 +486,7 @@ function answerPeerConnectionVideo(wbMsg,offer,videoId,isKing) {
         ondisconnected:xpc.ondisconnected,
         type:xpc.type,
         isKing:xpc.isKing,
+        webAudio:xpc.webAudio,
         toUser:xpc.toUser,
         reciveStream:xpc.reciveStream,
         pcOutStream:xpc.pcOutStream
@@ -589,6 +600,9 @@ function removeInstance(item){
     if(item.pcOutStream) {
         item.pcOutStream = null;
     }
+    if(item.webAudio){
+        item.webAudio.close();
+    }
     //这里是否需要清除audio和video标签
 }
 
@@ -626,6 +640,7 @@ function setCallbackVideo(callback) {
  * nextCandidate下次开始搜索的seq
  */
 function getCandidate(UserList,min) {
+    console.log(UserList);
     let minSeq = 100000000;
     let minSeqUser = null;
     UserList.map(function (item) {
@@ -755,13 +770,45 @@ function setRoomInfo(roomInfo) {
         data:roomInfo
     };
     send(JSON.stringify(setRoomMsg),function () {
-        console.log('set roomInfo消息发服务器:');
+        console.log('发送set roomInfo消息服务器:');
     });
+}
+
+function mixerAudio() {
+    //将连麦者与主播的音频混音，然后加入addStream
+    if(localStream){
+        let localAudioTrack = localStream.getAudioTracks();
+        if(downStream){
+            downStream.addTrack(localAudioTrack[0]);
+            downStream.addTrack(barleyAudioTrack[0]);
+        }
+    }
 }
 
 function hasSecondking() {
     return !!secondKing;
 }
+
+/**
+ * 初始化webTrcVideo变量
+ * */
+function initVariableVideo() {
+    localStream = null;
+    prepareState = false;
+    rtcSessionList=[];
+    remoteVidoeDom = null;
+    Msg = {};
+    secondKing ='';
+    barleyAudioTrack;
+    downStream = null;
+    firstCandidate = 0;
+    microphoneStatus = false;
+    callbackVideo = null;
+}
+
+/**
+ * 将video视频实时绘到canvas上
+ * */
 let intval1 = null,intval2 = null;
 function drawVideoToCanvas() {
     let firstVideo = document.getElementById("firstVideo");
@@ -771,17 +818,60 @@ function drawVideoToCanvas() {
     let canvasCtx = canvas.getContext('2d');
     firstVideo.addEventListener('play', function() {
         intval1 = window.setInterval(function() {
-            canvasCtx.drawImage(firstVideo, 0, 0, 100, 100);
+            canvasCtx.drawImage(firstVideo, 0, 0, 150, 150);
         }, 20);
     }, false);
     secondVideo.addEventListener('play', function() {
         intval2 = window.setInterval(function() {
-            canvasCtx.drawImage(secondVideo, 105, 0, 100, 100);
+            canvasCtx.drawImage(secondVideo, 150, 0, 150, 150);
         }, 20);
     }, false);
 }
 
+/**
+ * 关闭视频模式函数
+ * */
+function closeVideoMode() {
+    //关闭视频模式
+    let roomInfoTmp = state.homeState.currentRoomInfo;
+    roomInfoTmp.mode = 0;
+    roomInfoTmp.microphoneMode = 1;//重置为默认的自由模式(是否需要重置)
+    roomInfoTmp.player = 0;
+    roomInfoTmp.videoSrc = '';
+    store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfoTmp});
+    //发消息给其他用户调整房间模式
+    let sendMsg = {
+        type:'msg',
+        typeString:'changeRoomMode',
+        roomId:roomInfoTmp.roomId,
+        roomName:roomInfoTmp.roomName,
+        user:state.homeState.userInfo,
+        mode:0
+    };
+    send(JSON.stringify(sendMsg),function () {
+        console.log('发送关闭视频模式消息成功');
+        //ws 发送set_room_info
+        let setRoomMsg = {
+            type:'set_room_info',
+            roomId: roomInfoTmp.roomId,		//房间唯一标识符
+            roomName: roomInfoTmp.roomName,
+            user:state.homeState.userInfo,
+            data:roomInfoTmp
+        };
+        send(JSON.stringify(setRoomMsg),function () {
+            console.log('发送改变房间模式消息给服务器');
+            getRoomInfoVideo(roomInfoTmp.roomId);
+        })
+    })
+}
 
+/**
+ * 刷新直播
+ * */
+function refreshVideo() {
+    onLeaveVideo(state.homeState.userInfo);
+    getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
+}
 //播放音乐,混入自己的mixOutputStream
 
 export {
@@ -800,5 +890,8 @@ export {
     callbackVideo,
     getRoomInfoVideo,
     microphoneStatus,
-    setRoomInfo
+    setRoomInfo,
+    closeVideoMode,
+    refreshVideo,
+    initVariableVideo
 };

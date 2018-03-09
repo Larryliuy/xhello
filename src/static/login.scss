@@ -636,13 +636,44 @@ ul{
   }
 }
 
-.apply-tobe-barley-btn{
-  position: absolute;
-  right: 20px;
-  top: 10px;
+.double-live-div{
+  position:relative;
+  height: 100%;
+  text-align: center !important;
+  #firstVideo,#secondVideo{
+    position: relative;
+    width: 45%;
+    height: 85%;
+  }
+  #liveCanvas{
+    position: relative;
+    width: 1px;
+    height: 1px;
+  }
+  .apply-tobe-barley-btn{
+    position: absolute;
+    right: 20px;
+    top: 10px;
+  }
+  .closeVideoMode,.refreshVideo{
+    position: absolute;
+    right: 20px;
+    top: 50px;
+  }
 }
-#preBarleyLists{
-  position: absolute;
-  right: 20px;
-  top: 50px;
+.single-live-div{
+  position: relative;
+  height: 80%;
+  text-align: center !important;
+  .mediaBox{
+    height: 80%;
+  }
+  .closeVideoMode,.refreshVideo{
+    position: absolute;
+    right: 20px;
+    top: 50px;
+  }
+}
+.preBarleyLists{
+  cursor: pointer;
 }

@@ -9,16 +9,16 @@ store.subscribe(function () {
     state = store.getState();
 });
 
-let micphoneStream, /** 麦克风音频流*/
-    micphoneSource,
+let micphoneStream = null, /** 麦克风音频流*/
+    micphoneSource = null,
     myWebAudio = new (window.AudioContext || window.webkitAudioContext)(), /**用于处理本地麦克风对应的webaudio*/
     myAnalyser = myWebAudio.createAnalyser(), /** 本地麦克风的AnalyserNode*/
     prepareState = false, /** 麦克风获取是否准备好（本地音频流是否获取到）*/
     rtcSessionList=[], /** 本地peerConnection连接对象组*/
-    remoteVidoeDom, /** 远程video标签Dom*/
-    Msg, /** 发送消息*/
-    myMicSource, /** 我的麦克风音源*/
-    myVideo, /** 我的video标签Dom*/
+    remoteVidoeDom = null, /** 远程video标签Dom*/
+    Msg = {}, /** 发送消息*/
+    myMicSource = null, /** 我的麦克风音源*/
+    myVideo = null, /** 我的video标签Dom*/
     firstCandidate = 0, /** 第一候选人的seq*/
     microphoneStatus = false, /** 麦克风是否开启，true表示开着，false表示关着*/
     getRoomUserListCallback = null,/** 获取房间列表的回调函数*/
@@ -555,6 +555,7 @@ function closeMicrophone() {
         item.onclosemicrophone();
     });
     microphoneStatus = false;
+    store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
 }
 
 /**
@@ -566,6 +567,7 @@ function openMicrophone() {
         item.onopenmicrophone();
     });
     microphoneStatus = true;
+    store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:true});
 }
 
 /**
@@ -728,6 +730,23 @@ function applyToBeFirst(){
     });
 }
 
+function initVariableAudio() {
+    micphoneStream = null;
+    micphoneSource = null;
+    if(myWebAudio)myWebAudio.close();
+    myWebAudio = new (window.AudioContext || window.webkitAudioContext)();
+    myAnalyser = myWebAudio.createAnalyser();
+    prepareState = false;
+    rtcSessionList=[];
+    remoteVidoeDom = null;
+    Msg = {};
+    myMicSource = null;
+    myVideo = null;
+    firstCandidate = 0;
+    microphoneStatus = false;
+    getRoomUserListCallback = null;
+}
+
 /**
  * 获取房间信息函数
  */
@@ -799,5 +818,6 @@ export {
     getRoomInfo,
     closeMicrophone,
     openMicrophone,
-    microphoneStatus
+    microphoneStatus,
+    initVariableAudio
 };

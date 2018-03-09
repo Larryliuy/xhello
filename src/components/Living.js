@@ -1,27 +1,40 @@
 import React,{ Component } from 'react';
-
+import { Button } from 'antd';
+import { closeVideoMode, refreshVideo} from "../webrtc/webRtcVideo";
+import store from "../reducer/reducer";
+let state = store.getState();
+store.subscribe(function () {
+    state = store.getState()
+});
 class Living extends React.Component{
     componentDidMount(){
-        // let player =  new TcPlayer('idVideo', {
-        //     "m3u8": "http://www.ossrs.net:8080/live/livestream.m3u8",
-        //     "flv": "http://19657.liveplay.myqcloud.com/live/19657_ce032fcc56.flv", //增加了一个flv的播放地址，用于PC平台的播放 请替换成实际可用的播放地址
-        //     "autoplay" : true,      //iOS下safari浏览器，以及大部分移动端浏览器是不开放视频自动播放这个能力的
-        //     "coverpic" : "http://www.test.com/myimage.jpg",
-        //     "width" :  '480',//视频的显示宽度，请尽量使用视频分辨率宽度
-        //     "height" : '320'//视频的显示高度，请尽量使用视频分辨率高度
-        // });
+    }
+    isKingPlayer(){
+        let result = false;
+        if(state.homeState.userInfo.id == state.homeState.currentRoomInfo.king){
+            result = true;
+        }else {
+            if(state.homeState.userInfo.id == state.homeState.currentRoomInfo.player){
+                result = true;
+            }
+        }
+        return result;
     }
     render(){
         return (
-            <div style={{height:'100%',textAlign:'center !important'}}>
-                <div>
+            <div className={'single-live-div'}>
+                <div className={'mediaBox'}>
                         <video id={'myVideo'}
-                               style={{position:'relative',width:'640px',height:'480px'}}>不支持video</video>
+                               style={{position:'relative',width:'480px',height:'320px'}}>不支持video</video>
                         <video id={'theirVideo'}
                                style={{position:'relative',width:'200px',height:'120px'}}>不支持video</video>
                     <canvas id={'myCanvas'}></canvas>
                     <audio id={'myAudio'}></audio>
                 </div>
+                {this.isKingPlayer() ?
+                    <Button className={'closeVideoMode'} onClick={closeVideoMode}>关闭直播</Button>
+                    :
+                    <Button className={'refreshVideo'} onClick={refreshVideo}>刷新</Button>}
                 <div className='host-text'><p><a target={'_blank'} href={'http://www.xtell.cn'}>打个小广告:极智未来</a></p></div>
             </div>
         )

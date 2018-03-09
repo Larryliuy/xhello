@@ -3,12 +3,12 @@ import './media.js';
 import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
-    getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone
+    getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam
 } from "../webrtc/webRtcAudio";
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
-    setRoomInfo
+    setRoomInfo, initVariableVideo, getRoomInfoVideo
 } from "../webrtc/webRtcVideo";
 import { ajustUserOrder, ajustRoomOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
@@ -407,9 +407,10 @@ function onmessage(response){
                 }
                 if(dataJson.microphoneMode == 3){
                     if(state.homeState.userInfo.level < 4) {
-                        if(!microphoneStatus){
-                            openMicrophone();
-                        }
+                        //如果我是关麦状态，没有要强行打开麦
+                        // if(!microphoneStatus){
+                        //     openMicrophone();
+                        // }
                     }else{
                         if(microphoneStatus){
                             closeMicrophone();
@@ -492,11 +493,12 @@ function onmessage(response){
             if(dataJson.typeString === 'applyToBebarley'){
                 console.log('收到连麦者申请:'+dataJson.user.id);
                 let roomInfo = state.homeState.currentRoomInfo;
-                if(!roomInfo.secondKing){
+                if(!roomInfo.secondKing && dataJson.user.id !== state.homeState.userInfo.id){
                     console.log('连麦者不存在，可同意连麦');
                     let preBarleyListsBox = document.getElementById('preBarleyLists');
                     preBarleyListsBox.style.zIndex = Number(dataJson.user.id);
                     preBarleyListsBox.innerText = '同意 '+dataJson.user.name+' 的连麦申请';
+                    preBarleyListsBox.style.visibility = 'visible';
                 }
             }
             if(dataJson.typeString === 'agreeToBebarley'){
@@ -526,7 +528,7 @@ function onmessage(response){
 
             }
             if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
-                console.log(dataJson);
+                // console.log(dataJson);
                 let roomInfo = state.homeState.currentRoomInfo;
                 if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
                     if(dataJson.offer){
@@ -623,6 +625,10 @@ function onmessage(response){
             if(dataJson.typeString === '禁麦'){
                 // console.log('禁麦');
                 let userData = state.homeState.roomMicrophoneUser;
+                //如果我是第一位，则需要关麦
+                if(userData[0].id === state.homeState.userInfo.id){
+                    closeMicrophone();
+                }
                 userData = userData.slice(1);
                 store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:userData});
                 if(userData[0] && userData[0].id === state.homeState.userInfo.id){
@@ -763,17 +769,36 @@ function onmessage(response){
             }
             if(dataJson.typeString === 'changeRoomMode'){
                 log('收到改变房间模式消息：'+dataJson.mode+','+dataJson.player);
+                //初始化原有模式的变量
+                if(getPrepareConnectionState()){
+                    onLeave(state.homeState.userInfo);
+                    initVariableAudio();
+                }
+                if(getPrepareConnectionStateVideo()){
+                    onLeaveVideo(state.homeState.userInfo);
+                    initVariableVideo();
+                }
                 let currentRoomInfo = state.homeState.currentRoomInfo;
                 console.log(currentRoomInfo);
                 console.log(dataJson);
                 currentRoomInfo.mode = dataJson.mode;
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});//保证先切换房间模式，已保证下面能读取到audioBox
+                currentRoomInfo.king = '';
                 if(dataJson.user.id == state.homeState.userInfo.id && dataJson.player){
-                    currentRoomInfo.player = dataJson.player;
+                    if(dataJson.mode != 0){
+                        currentRoomInfo.player = dataJson.player;
+                        getRoomInfoVideo(currentRoomInfo.roomId);
+                    }
                 }
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
-                if(state.homeState.microphoneMode != dataJson.mode){
-                    console.log(dataJson.mode);
-                    store.dispatch({type:CONSTANT.MICROPHONEMODE,val:dataJson.mode});
+                if(dataJson.mode == 0){
+                    let videoBox = document.getElementById('audioBox');
+                    startMyCam(videoBox);
+                    getRoomInfo(currentRoomInfo.roomId);
+                }
+                if(state.homeState.microphoneMode != 1){
+                    console.log(state.homeState.microphoneMode);
+                    store.dispatch({type:CONSTANT.MICROPHONEMODE,val:1});
                 }
                 return;
             }
@@ -1058,6 +1083,11 @@ function onmessage(response){
             }else {
                 //啥都不做
             }
+            if (roomInfo.mode == 0){
+                initVariableVideo();
+            }else{
+                initVariableAudio();
+            }
             if(roomInfo.king && roomInfo.king != state.homeState.userInfo.id){
                 store.dispatch({type:CONSTANT.NUMBERONE,val:roomInfo.king});
                 if(state.homeState.currentRoomInfo.mode == 0){
@@ -1091,26 +1121,28 @@ function onmessage(response){
             // console.log(dataJson);
             if(dataJson.result === 'ok'){
                 log('我成为了新的王：');
+                let roomInfo = state.homeState.currentRoomInfo,
+                    userInfo = state.homeState.userInfo;
                 // console.log(state.homeState.userInfo);
                 store.dispatch({type:CONSTANT.NUMBERONE,val:dataJson.user.id});
                 // console.log(state.homeState.currentRoomInfo.mode);
-                if(state.homeState.currentRoomInfo.mode == 1){
+                if(roomInfo.mode == 1){
                     //直播模式,更新服务器player
                     console.log('直播模式，等待人连接');
                     //从语音模式房间进来的时候children会有，则需要置空,是否需要更新到服务器，且看rtc连接成功后是否会更新
-                    let userInfo = state.homeState.userInfo;
                     userInfo.Children = [];
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     let myVideoTag = document.getElementById('myVideo');
                     startMyCamVideo(myVideoTag,true);
                 }
-                if(state.homeState.currentRoomInfo.mode == 3){
+                if(roomInfo.mode == 3){
                     //直播模式,更新服务器player
                     console.log('连麦直播模式，等待人连接');
                     //从语音模式房间进来的时候children会有，则需要置空,是否需要更新到服务器，且看rtc连接成功后是否会更新
-                    let userInfo = state.homeState.userInfo;
                     userInfo.Children = [];
+                    roomInfo.king = userInfo.id;
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
+                    store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
                     let myVideoTag = document.getElementById('firstVideo');
                     startMyCamVideo(myVideoTag,true);
                 }
