@@ -13,7 +13,10 @@ module.exports = {
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new webpack.DefinePlugin({
-            'process.env.NODE.ENV': "production"
+            // 'process.env.NODE.ENV': "production"
+            'process.env': {
+                NODE_ENV: JSON.stringify('production')
+            }
         }),
         new ExtractTextPlugin({filename:"style.css",disable: false,allChunks: true}),
         new webpack.optimize.CommonsChunkPlugin({
@@ -23,18 +26,18 @@ module.exports = {
             //     resource.indexOf('node_modules') >= 0 &&
             //     resource.match(/\.js$/)
             // ),
-            // fileName:'vendors.js'
+            fileName:'vendors.js'
         }),
-        // new webpack.optimize.UglifyJsPlugin({
-        //     output: {
-        //         comments: false,  // remove all comments
-        //     },
-        //     compress: {
-        //         warnings: false,
-        //         drop_debugger: true,
-        //         drop_console: true //去掉console
-        //     }
-        // })
+        new webpack.optimize.UglifyJsPlugin({
+            output: {
+                comments: false,  // remove all comments
+            },
+            compress: {
+                warnings: false,
+                drop_debugger: true,
+                drop_console: true //去掉console
+            }
+        })
     ],
     module: {
         rules: [
@@ -42,10 +45,10 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 loader: 'babel-loader',
-                query: {
+                /*query: {
                     presets: [ 'react','es2015','stage-0'],
                     plugins: ["transform-runtime",["import", { "libraryName": "antd", "style": true}]]
-                }
+                }*/
             },
             {
                 test: /\.css$/,
@@ -56,7 +59,7 @@ module.exports = {
                         {
                             loader: 'css-loader',
                             options:{
-                                minimize: false //css压缩,dev环境不用压缩
+                                minimize: true //css压缩,dev环境不用压缩
                             }
                         }
                     ]
