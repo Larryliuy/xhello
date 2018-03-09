@@ -67,12 +67,8 @@ class FooterBottom extends React.Component{
                 // let audioTrack = state.homeState.myAudioTrack;
                 if(state.homeState.microphoneOpen){
                     closeMicrophone();
-                    // this.setState({microphoneOpen:false});
-                    store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
                 }else{
                     openMicrophone();
-                    // this.setState({microphoneOpen:true});
-                    store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:true});
                 }
                 break;
             case 'user-name':
@@ -158,6 +154,23 @@ class FooterBottom extends React.Component{
         // console.log(value);
         if(!value) return;
     }
+    micBtnDisabled(){
+        let micMode = state.homeState.microphoneMode,
+            userInfo = state.homeState.userInfo,
+            micUsers = state.homeState.roomMicrophoneUser,
+            result = false;
+        if(userInfo.level > 3) {
+            if (micMode == 2 || micMode == 3) {
+                result = true;
+            }
+        }else{
+            result = false;
+        }
+        if(micUsers instanceof Array && micUsers.length !== 0 && micUsers[0].id === userInfo.id){
+            return false;
+        }
+        return result;
+    }
     render(){
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
             <div>
@@ -194,7 +207,7 @@ class FooterBottom extends React.Component{
             <div>
                 <span style={{marginLeft:80}}>
                     <Button id='open-microphone-btn'
-                            disabled={(state.homeState.microphoneMode == 2 || state.homeState.microphoneMode == 3 && state.homeState.userInfo.level > 3) ? true : false}
+                            disabled={this.micBtnDisabled()}
                             type='primary'>{state.homeState.microphoneOpen?'点击关麦':'点击开麦'}</Button>
                 </span>
             </div>
