@@ -37,47 +37,59 @@ class HeaderTop extends React.Component{
     };
     vodPlay(e){
         console.log(e.target.innerText);
-        // let roomInfo = state.homeState.currentRoomInfo ;
-        if(e.target.innerText === '播放网络视频'){
-            let roomInfo = state.homeState.currentRoomInfo;
-            if(roomInfo.mode === 1){
-                message.warn('已开启直播模式，不能点播');
-                return;
-            }
-            if(roomInfo.mode === 2){
-                message.warn('已开启点播模式，不用重复点播');
-                return;
-            }
-            roomInfo.mode = 2;
-            roomInfo.player = state.homeState.userInfo.id;
-            // store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
-            //切换房间模式，mode
-            let sendMsg = {
-                type:'msg',
-                typeString:'changeRoomMode',
-                roomId:roomInfo.roomId,
-                roomName:roomInfo.roomName,
-                user:state.homeState.userInfo,
-                mode:2,
-                player:state.homeState.userInfo.id
-            };
-            // console.log(sendMsg);
-            send(JSON.stringify(sendMsg),function () {
-                console.log('发送改变房间模式消息成功');
-                //http请求改变数据库mode=2
-                //ws 发送set_room_info
-                let setRoomMsg = {
-                    type:'set_room_info',
-                    roomId: roomInfo.roomId,		//房间唯一标识符
-                    roomName: roomInfo.roomName,
-                    user:state.homeState.userInfo,
-                    data:roomInfo
-                };
-                send(JSON.stringify(setRoomMsg),function(){
-                    console.log('更新房间mode信息');
-                });
-            })
+        let roomInfo = state.homeState.currentRoomInfo ;
+        console.log(roomInfo);
+        switch(e.target.innerText){
+            case '播放网络视频':
+                if(roomInfo.mode === 2){
+                    message.error('已开启点播模式！');
+                    return;
+                }
+                roomInfo.mode = 2;
+                break;
+            case '开启单人直播':
+                if(roomInfo.mode === 1){
+                    message.error('已开启单人直播！');
+                    return;
+                }
+                //初始化视频模式webRtcVideo下的变量以及各种对象
+                roomInfo.mode = 1;
+                break;
+            case '开启双人直播':
+                if(roomInfo.mode === 3){
+                    message.error('已开启双人直播！');
+                    return;
+                }
+                roomInfo.mode = 3;
+                break;
         }
+        //切换房间模式，mode
+        roomInfo.player = state.homeState.userInfo.id;
+        let sendMsg = {
+            type:'msg',
+            typeString:'changeRoomMode',
+            roomId:roomInfo.roomId,
+            roomName:roomInfo.roomName,
+            user:state.homeState.userInfo,
+            mode:roomInfo.mode,
+            player:state.homeState.userInfo.id
+        };
+        // console.log(sendMsg);
+        send(JSON.stringify(sendMsg),function () {
+            console.log('发送改变房间模式消息成功');
+            //http请求改变数据库mode=2
+            //ws 发送set_room_info
+            let setRoomMsg = {
+                type:'set_room_info',
+                roomId: roomInfo.roomId,		//房间唯一标识符
+                roomName: roomInfo.roomName,
+                user:state.homeState.userInfo,
+                data:roomInfo
+            };
+            send(JSON.stringify(setRoomMsg),function(){
+                console.log('更新房间mode信息');
+            });
+        });
     }
     render(){
         const data = ['播放网络视频','开启单人直播','开启双人直播'];
@@ -97,7 +109,7 @@ class HeaderTop extends React.Component{
                 中华人民共和国商务部直销查询信息管理系统
             </h2>
             <span style={{cursor:'pointer',position:'absolute',width:80,fontSize:16,right:60,top:3,display:'flex',justifyContent:'space-around',alignItems:'center'}}>
-                <span style={{display:state.homeState.userInfo.level < 4?'block':'none'}}>
+                <span style={{display:state.homeState.userInfo.level < 3?'block':'none'}}>
                     <Popover placement="bottomLeft"
                                content={content}
                                trigger="click">
