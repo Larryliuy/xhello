@@ -1,9 +1,10 @@
 import React,{ Component } from 'react';
-import { message ,Input, Button, Slider } from 'antd';
+import { message ,Input, Button, Slider, Popover } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import { generalApi } from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
+import {send} from "../static/webSocket";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -17,6 +18,8 @@ class FooterBottom extends React.Component{
         this.state={
             visible: false,
             inputVisible:false,
+            popVisible:false,
+            musicAddress:'',
             inputValue:'',
             audioTrack:'',
             microphoneOpen:false
@@ -171,7 +174,76 @@ class FooterBottom extends React.Component{
         }
         return result;
     }
+    playMusic(){
+        if(state.homeState.userInfo.level < 3){//房主及副房主才可以播放音乐
+            this.setState({popVisible:true});
+        }else{
+            message.error('您的权限不够');
+        }
+    }
+    musicAddressChange(e){
+        console.log(e.target.value);
+        this.setState({musicAddress:e.target.value});
+    }
+    planeCancelHandle(){
+        this.setState({popVisible:false});
+    }
+    planeOkHandle(){
+        console.log('play music');
+        let musicSrc = this.state.musicAddress;
+        console.log(musicSrc);
+        if(this.checkFileType(musicSrc)){
+            let videoTag = document.getElementById('play-audio');
+            videoTag.src = musicSrc;
+            videoTag.autoplay = true;
+            this.setState({popVisible:false});
+
+            let msg = {
+                type:'msg',
+                typeString:'playMusic',
+                roomId:state.homeState.currentRoomInfo.roomId,
+                user:state.homeState.userInfo,
+                musicSrc:musicSrc
+            };
+            send(JSON.stringify(msg),function () {
+                console.log('send play music msg');
+                /*let roomInfo = state.homeState.currentRoomInfo;
+                roomInfo.videoSrc = musicSrc;
+                let setRoomMsg = {
+                    type:'set_room_info',
+                    roomId:state.homeState.currentRoomInfo.roomId,
+                    roomName:state.homeState.currentRoomInfo.roomName,
+                    user:state.homeState.userInfo,
+                    data:roomInfo
+                };
+                console.log(setRoomMsg);
+                send(JSON.stringify(setRoomMsg),function () {
+                    console.log('发送set videoSrc消息发服务器');
+                });*/
+            })
+        }
+    }
+    checkFileType(musicSrc){
+        if(musicSrc.indexOf('.mp3') || musicSrc.indexOf('.m4a')){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+    getContent(){
+        return  (<div style={{width:'300px'}}>
+            <Input onChange={(e)=>this.musicAddressChange(e)} placeholder={'请输入音乐地址'}/>
+            <br/>
+            <br/>
+            <span style={{display:'flex',justifyContent:'space-between'}}>
+                <Button onClick={()=>this.planeCancelHandle()}>取消</Button>
+                <Button type={'primary'} onClick={()=>this.planeOkHandle()}>确定</Button>
+            </span>
+        </div>);
+    }
     render(){
+        console.log('footer');
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
             <div>
                 <span className={'user-info'}>
@@ -216,12 +288,21 @@ class FooterBottom extends React.Component{
                 <span id='applause-span' style={{marginLeft:10}}>鼓掌</span>
             </div>
             <div className='play-sound'>
-                <span><img id='play-img' src='./images/icons/music.png' /><span id={'play-span'}>播放</span></span>
+                <span>
+                    <img id='play-img' src='./images/icons/music.png' />
+                    <Popover placement="top"
+                             title={'播放网络音乐'}
+                             content={this.getContent()}
+                             visible={this.state.popVisible}
+                             trigger="click">
+                    <span id={'play-span'} onClick={()=>this.playMusic()}>播放</span>
+                    </Popover>
+                </span>
             </div>
             <div className={'cheer-applause-audioBox'}>
                 <audio id={'cheer-audio'}></audio>
                 <audio id={'applause-audio'}></audio>
-                <audio id={'play-audio'}></audio>
+                <video id={'play-audio'}></video>
             </div>
         </div>)
     }

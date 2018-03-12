@@ -315,7 +315,7 @@ function onmessage(response){
             }
             if(dataJson.typeString === 'preAnswer'){
                 log('收到 '+dataJson.fromUser.id + '的申请答复， 结果：'+ dataJson.status);
-                console.log(dataJson);
+                // console.log(dataJson);
                 let roomInfo = state.homeState.currentRoomInfo;
                 if(dataJson.status === 'ok'){
                     //这里发offer
@@ -329,7 +329,7 @@ function onmessage(response){
                         toUser:dataJson.fromUser,
                         sessionId:state.homeState.userInfo.id+'-'+dataJson.fromUser.id
                     };
-                    console.log(dataJson.fromUser);
+                    // console.log(dataJson.fromUser);
                     setTimeout(function () {/*intval = */
                         let roomMode = state.homeState.currentRoomInfo.mode;
                         if(getPrepareConnectionState() &&  roomMode == 0){
@@ -533,6 +533,7 @@ function onmessage(response){
                 if(dataJson.user.id !== state.homeState.userInfo.id && dataJson.user.id !== state.homeState.currentRoomInfo.king){
                     getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
                 }
+                return;
             }
             if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
                 // console.log(dataJson);
@@ -773,11 +774,18 @@ function onmessage(response){
                     store.dispatch({type:CONSTANT.ISYOUKU,val:true})
                 }
                 if(!isPlaying){
-                    let vodVideo = document.getElementById('vodVideo');
+                    let vodVideo = document.getElementById('vodVideo') || document.getElementById('play-audio');
                     //这里可能需要延时一小会
                     playVideo(vodVideo,dataJson.vodSrc);
                 }
                 return;
+            }
+            if(dataJson.typeString === 'playMusic'){
+                let videoTag = document.getElementById('play-audio');
+                if(videoTag){
+                    videoTag.src = dataJson.musicSrc;
+                    videoTag.autoplay = true;
+                }
             }
             if(dataJson.typeString === 'changeRoomMode'){
                 log('收到改变房间模式消息：'+dataJson.mode+','+dataJson.player);
@@ -797,6 +805,7 @@ function onmessage(response){
                 console.log(dataJson);
                 currentRoomInfo.mode = dataJson.mode;
                 currentRoomInfo.king = '';
+                currentRoomInfo.secondKing = '';
                 if(dataJson.user.id == state.homeState.userInfo.id && dataJson.player){
                     if(dataJson.mode != 0){
                         currentRoomInfo.player = dataJson.player;
