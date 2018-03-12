@@ -63,7 +63,7 @@ class LivingDouble extends React.Component{
                     </div>
                 :
                     <div className={'refreshVideo'}>
-                        <Button onClick={refreshVideo}>刷新</Button>
+                        {state.homeState.currentRoomInfo.secondKing!=state.homeState.userInfo.id && <Button onClick={refreshVideo}>刷新</Button>}
                     </div>}
                 <div className='host-text'><p><a target={'_blank'} href={'http://www.xtell.cn'}>打个小广告:极智未来</a></p></div>
             </div>

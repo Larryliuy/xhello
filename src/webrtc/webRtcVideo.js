@@ -308,8 +308,15 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         setRoomInfo(roomInfo);
                         //通知房间中的其他人重新连接
                         let msg = {
-
-                        }
+                            type:'msg',
+                            typeString:'reconnectVideo',
+                            roomId: roomInfo.roomId,		//房间唯一标识符
+                            roomName: roomInfo.roomName,
+                            user:userInfo
+                        };
+                        send(JSON.stringify(msg),function () {
+                            console.log('发送重新连接消息')
+                        })
                     }
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     send(JSON.stringify(updateUserMsg),function () {

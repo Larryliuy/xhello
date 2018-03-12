@@ -500,6 +500,7 @@ function onmessage(response){
                     preBarleyListsBox.innerText = '同意 '+dataJson.user.name;
                     preBarleyListsBox.style.visibility = 'visible';
                 }
+                return;
             }
             if(dataJson.typeString === 'agreeToBebarley'){
                 console.log('收到同意连麦的消息');
@@ -525,7 +526,13 @@ function onmessage(response){
                 setTimeout(function () {
                     offerPeerConnectionVideo(Msg,'firstVideo',true);
                 },1000);
-
+                return;
+            }
+            if(dataJson.typeString === 'reconnectVideo'){
+                console.log(state.homeState.currentRoomInfo.king);
+                if(dataJson.user.id !== state.homeState.userInfo.id && dataJson.user.id !== state.homeState.currentRoomInfo.king){
+                    getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
+                }
             }
             if(dataJson.typeString === 'webrtc' && dataJson.data !== '消息成功发出' ){
                 // console.log(dataJson);
@@ -556,8 +563,8 @@ function onmessage(response){
                             }
                         }else if(roomInfo.mode == 3){
                             if(getPrepareConnectionStateVideo()){
-                                if(state.homeState.userInfo.Children.length <=1){
-                                    console.log('孩子节点数小于等于1,连接人是连麦者');
+                                /*if(state.homeState.userInfo.Children.length <=1){
+                                    // console.log('孩子节点数小于等于1,连接人是连麦者');
                                     // console.log(dataJson);
                                     if(dataJson.secondKing){
                                         answerPeerConnectionVideo(Msg,dataJson.offer,'secondVideo',true);
@@ -567,6 +574,11 @@ function onmessage(response){
                                 }else{
                                     console.log('孩子节点数大于1,连接人不是连麦者');
                                     answerPeerConnectionVideo(Msg,dataJson.offer,'liveCanvas',false);
+                                }*/
+                                if(dataJson.secondKing){
+                                    answerPeerConnectionVideo(Msg,dataJson.offer,'secondVideo',true);
+                                }else{
+                                    answerPeerConnectionVideo(Msg,dataJson.offer,'secondVideo',false);//顺序进入房间需改为true
                                 }
                             }else{
                                 console.log('本地流未获取，连接人是观众');
@@ -797,6 +809,8 @@ function onmessage(response){
                         startMyCam(videoBox);
                         getRoomInfo(currentRoomInfo.roomId);
                         //这里不能直接getRoomInfo，不然会各自连成很多小的圈子
+                    }else{
+                        getRoomInfoVideo(currentRoomInfo.roomId)
                     }
                 }
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
@@ -1105,10 +1119,6 @@ function onmessage(response){
                     if(roomInfo.secondKing){
                         log('连麦者已存在，我要入网:'+state.homeState.currentRoomInfo.mode);
                         startMyCamVideo(null,false);
-                    }else{
-                        log('连麦者不存在，我要申请连麦:'+state.homeState.currentRoomInfo.mode);
-                        let myVideoTag = document.getElementById('secondVideo');
-                        // startMyCamVideo(myVideoTag,true);
                     }
                     getRoomUserListVideo(startOnlineVideo);
                 }else{
