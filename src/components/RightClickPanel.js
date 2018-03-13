@@ -6,7 +6,7 @@ import SetRoom from './SetRoom';
 import SortRoom from './SortRoom';
 import { getSendData, send } from '../static/webSocket.js';
 import store, {CONSTANT} from "../reducer/reducer";
-import {generalApi} from "../static/apiInfo";
+import {generalApi, blockUserApi, blockIpApi} from "../static/apiInfo";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -165,10 +165,33 @@ class RightClickPanel extends React.Component{
 
                     break;
                 case '封IP':
-                    alert(text);
+                    let blockMsg = {
+                        type:'msg',
+                        typeString:'blockIp',
+                        ToUserOnly:objId.substring(1),
+                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                        user:state.homeState.userInfo
+                    };
+                    send(JSON.stringify(blockMsg),function () {
+                        console.log('发送封IP消息');
+                        message.success('禁止成功');
+                    });
                     break;
                 case '封ID':
-                    alert(text);
+                    //直接插入表backlist
+                    console.log(objId);
+                    let userId = objId.substring(1);
+                    let args = "?action=get&table=xuser&cond=Id="+userId;
+                    fetch(generalApi+args)
+                        .then(res=>res.json())
+                        .then(data=>{
+                            console.log(data);
+                            let userInfo = data.data[0];
+                            console.log(userInfo);
+                            args = "?username="+userInfo.LoginName;
+                            fetch(blockUserApi+args).then(res=>{message.success('禁止成功');}).catch(e=>console.error(e));
+                        })
+                        .catch(e=>console.error(e));
                     break;
                 case '禁止此人图片':
                     // console.log(objId);
@@ -185,7 +208,6 @@ class RightClickPanel extends React.Component{
                         args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=2';
                         limitFetch(args);
                     });
-
                     break;
                 case '禁止此人语音':
                     Msg = {

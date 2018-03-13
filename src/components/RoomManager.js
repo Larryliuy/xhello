@@ -3,6 +3,7 @@ import { Modal,Row, Col, Select, Table, Button, List } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import { generalApi } from "../static/apiInfo";
 import {send} from "../static/webSocket";
+import { getUserIconSrc } from "../static/comFunctions";
 import {message} from "antd/lib/index";
 import store, {CONSTANT} from "../reducer/reducer";
 
@@ -14,152 +15,127 @@ store.subscribe(function () {
 class RoomManager extends React.Component{
     constructor(props){
         super(props);
-        this.state={uploadModalVisible:false,tableColumns:[],tableData:[]}
+        this.state={
+            uploadModalVisible:false,
+            clickMenu:'管理员设置',
+            tableColumns:[],
+            tableData:[]
+        }
     }
-    componentDidMount(){
-        const getUserIconSrc = (sex,level) =>{
-            let src = '';
-            switch(level){
-                case 1:
-                /*if(sex === 1){
-                    src = 'p_man.png';
-                }else{
-                    src = 'p_female.png';
-                }
-                break;*/
-                case 2:
-                    if(sex === 1){
-                        src = 'p_man.png';
-                    }else{
-                        src = 'p_female.png';
-                    }
-                    break;
-                case 3:
-                    if(sex === 1){
-                        src = 'admin_man1.png';
-                    }else{
-                        src = 'admin_female1.png';
-                    }
-                    break;
-                case 4:
-                    if(sex === 1){
-                        src = 'admin_man2.png';
-                    }else{
-                        src = 'admin_female2.png';
-                    }
-                    break;
-                case 5:
-                    if(sex === 1){
-                        src = 'vip_man1.png';
-                    }else{
-                        src = 'vip_female1.png';
-                    }
-                    break;
-                case 6:
-                    if(sex === 1){
-                        src = 'vip_man2.png';
-                    }else{
-                        src = 'vip_female2.png';
-                    }
-                    break;
-                case 7:
-                    if(sex === 1){
-                        src = 'c_man.png';
-                    }else{
-                        src = 'c_female.png';
-                    }
-                    break;
-            }
-            // console.log(src);
-            return "./images/icons/"+src;
-        };
-
-        let columns = [{
-            title: '身份',
-            dataIndex: 'name',
-            key: 'name',
-            render: (text, record) => {return <img src={getUserIconSrc(record.sex,record.type)} />},
-        }, {
-            title: '房间名片',
-            dataIndex: 'roomName',
-            key: 'roomName',
-        }, {
-            title: '操作',
-            key: 'action',
-            render: (text, record) => (
-                <span>
-                  <Button size={'small'} type={'default'} onClick={() => this.handleClick(record.key)}>{'撤销'}</Button>
-                </span>
-            ),
-            width:'80px',
-        }];
-        let datas = [{
-            key: '1',
-            name: 'larry',
-            roomName: 'larry',
-            type: 1,
-            sex: 1,
-        }, {
-            key: '2',
-            name: 'larry',
-            roomName: 'larry',
-            type: 2,
-            sex: 2,
-        }, {
-            key: '3',
-            name: 'larry',
-            roomName: 'larry',
-            type: 3,
-            sex: 1,
-        }, {
-            key: '4',
-            name: 'larry',
-            roomName: 'larry',
-            type: 4,
-            sex: 2,
-        }, {
-            key: '5',
-            name: 'larry5',
-            roomName: 'larry',
-            type: 2,
-            sex: 1,
-        }, {
-            key: '6',
-            name: 'larry',
-            roomName: 'larry',
-            type: 4,
-            sex: 1,
-        }];
-        //请求获取管理员用户
-        let args = '?action=get&table=xuser',_this=this;
-        fetch(generalApi+args)
-            .then(response=>{/*console.log(response);*/return response.json()})
-            .then(data=>{
-                // console.log(data);
-                data.data.map(function (item) {
-                    if(parseInt(item.Type) <= 4){
+    getColumns(type){
+        let columns;
+        if(type === '管理员设置'){
+            columns = [{
+                title: '身份',
+                dataIndex: 'type',
+                key: 'type',
+                render: (text, record) => {return <img src={getUserIconSrc(record.sex,record.type)} />},
+            }, {
+                title: '用户名',
+                dataIndex: 'name',
+                key: 'name',
+            }, {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => (
+                    <span>
+                      <Button size={'small'} type={'default'} onClick={() => this.handleClick(record.key)}>{'撤销'}</Button>
+                    </span>
+                ),
+                width:'80px',
+            }];
+        }else if(type === '黑名单管理'){
+            columns =  [{
+                title: '用户名',
+                dataIndex: 'userName',
+                key: 'userName',
+                // render: (text, record) => {return <span>record.name</span>},
+            }, {
+                title: '用户IP',
+                dataIndex: 'userIp',
+                key: 'userIp',
+            }, {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => (
+                    <span>
+                      <Button size={'small'} type={'default'} onClick={() => this.removeBlackListHandle(record.key,record.userName,record.userIp)}>{'解封'}</Button>
+                    </span>
+                ),
+                width:'80px',
+            }];
+        }else{
+            console.error("未知的type:"+type);
+        }
+        this.setState({tableColumns:columns})
+    }
+    getDatas(type){
+        let datas = [],args,_this=this;
+        if(type === '管理员设置'){
+            //请求获取管理员用户
+            args = '?action=get&table=xuser&cond=Type<5';
+            fetch(generalApi+args)
+                .then(response=>{/*console.log(response);*/return response.json()})
+                .then(data=>{
+                    // console.log(data);
+                    data.data.map(function (item) {
+                        // if(parseInt(item.Type) <= 4){
                         let adminUserInfo = {};
                         adminUserInfo.key = item.Id;
                         adminUserInfo.name = item.LoginName;
-                        adminUserInfo.roomName = item.LoginName;
+                        // adminUserInfo.roomName = item.LoginName;
                         adminUserInfo.type = parseInt(item.Type);
                         adminUserInfo.sex = parseInt(item.Sex);
                         datas.push(adminUserInfo);
+                        // }
+                    });
+                    // console.log(datas);
+                    if(_this.refs.myRoomRef){
+                        _this.setState({tableData:datas});
                     }
-                });
-                // console.log(datas);
-                if(_this.refs.myRoomRef){
-                    _this.setState({tableColumns:columns,tableData:datas});
-                }
-            })
-            .catch(e=>console.log(e));
+                })
+                .catch(e=>console.log(e));
+        }else if (type === '黑名单管理'){
+            args = '?action=get&table=blacklist';
+            fetch(generalApi+args)
+                .then(response=>{/*console.log(response);*/return response.json()})
+                .then(data=>{
+                    // console.log(data);
+                    data.data.map(function (item) {
+                        let adminUserInfo = {};
+                        adminUserInfo.key = item.id;
+                        adminUserInfo.userName = item.username;
+                        // adminUserInfo.roomName = item.LoginName;
+                        adminUserInfo.userIp = item.userip;
+                        datas.push(adminUserInfo);
+                    });
+                    // console.log(datas);
+                    if(_this.refs.myRoomRef){
+                        // console.log(datas);
+                        _this.setState({tableData:datas});
+                    }
+                })
+                .catch(e=>console.log(e));
+        }else{
+            console.error("未知的type:"+type);
+        }
+    }
+    componentDidMount(){
+        this.getColumns('管理员设置');
+        this.getDatas('管理员设置');
     }
     HandleOk = () => {
         this.setState({
             visible: false,
         });
     };
-
+    removeBlackListHandle(blackListId,userName,userIp){
+        // console.log(blackListId,userName,userIp);
+        let args = "?action=del&table=blacklist&cond=id="+blackListId;
+        fetch(generalApi+args)
+            .then(res=>{/*console.log(res.json());*/message.success('解封成功')})
+            .catch(e=>console.error(e));
+    }
     handleClick(id){
         console.log(id);
         //提升用户等级时更新用户等级信息
@@ -259,10 +235,16 @@ class RoomManager extends React.Component{
     menuClickhandle(e){
         let text = e.target.innerText;
         console.log(text);
+        this.setState({clickMenu:text});
         if(text === '管理员设置'){
             //获取管理员数据，更新this.state.tableColumns与this.state.tableData
+            // this.setState({clickMenu:text});
+            this.getColumns('管理员设置');
+            this.getDatas('管理员设置');
         }
         if(text === '黑名单管理'){
+            this.getColumns('黑名单管理');
+            this.getDatas('黑名单管理');
         }
     }
     render(){

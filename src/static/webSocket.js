@@ -12,6 +12,7 @@ import {
 } from "../webrtc/webRtcVideo";
 import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
+import {blockIpApi} from "./apiInfo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -844,6 +845,12 @@ function onmessage(response){
                     }
                 });
                 // return;
+            }
+            //封ip消息
+            if (dataJson.typeString === 'blockIp'){
+                console.log('收到blockIp消息');
+                //直接请求封Ip接口即可
+                fetch(blockIpApi).then(res=>{console.log('您已被禁止')}).catch(e=>console.error(e));
             }
             // console.log(dataJson);
             if (dataJson.typeString !== 'withdraw') {

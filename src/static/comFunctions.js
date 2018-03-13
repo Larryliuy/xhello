@@ -128,4 +128,63 @@ function callback(user)
     console.log(user);
 }
 
-export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback }
+/**
+ * 根据性别sex与级别level获取图标名称
+ * */
+function getUserIconSrc(sex,level) {
+    let src = '';
+    switch(level){
+        case 1:
+        /*if(sex === 1){
+            src = 'p_man.png';
+        }else{
+            src = 'p_female.png';
+        }
+        break;*/
+        case 2:
+            if(sex === 1){
+                src = 'p_man.png';
+            }else{
+                src = 'p_female.png';
+            }
+            break;
+        case 3:
+            if(sex === 1){
+                src = 'admin_man1.png';
+            }else{
+                src = 'admin_female1.png';
+            }
+            break;
+        case 4:
+            if(sex === 1){
+                src = 'admin_man2.png';
+            }else{
+                src = 'admin_female2.png';
+            }
+            break;
+        case 5:
+            if(sex === 1){
+                src = 'vip_man1.png';
+            }else{
+                src = 'vip_female1.png';
+            }
+            break;
+        case 6:
+            if(sex === 1){
+                src = 'vip_man2.png';
+            }else{
+                src = 'vip_female2.png';
+            }
+            break;
+        case 7:
+            if(sex === 1){
+                src = 'c_man.png';
+            }else{
+                src = 'c_female.png';
+            }
+            break;
+    }
+    // console.log(src);
+    return "./images/icons/"+src;
+}
+export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,getUserIconSrc }
