@@ -82,19 +82,19 @@ module.exports = {
             }
         ]
     },
-    devServer:{
-        // contentBase:path.join(__dirname, "build"),
-        contentBase:__dirname + "/build",
-        historyApiFallback:true,
-        hot:true,
-        inline:true,
-        port:3006,
-        // host:'10.1.1.127'
-        // proxy: {
-        //     '/': {
-        //         target: 'https://192.168.6.3/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/',
-        //         secure: false
-        //     }
-        // }
-    }
+    // devServer:{
+    //     // contentBase:path.join(__dirname, "build"),
+    //     contentBase:__dirname + "/build",
+    //     historyApiFallback:true,
+    //     hot:true,
+    //     inline:true,
+    //     port:3006,
+    //     // host:'10.1.1.127'
+    //     // proxy: {
+    //     //     '/': {
+    //     //         target: 'https://192.168.6.3/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/',
+    //     //         secure: false
+    //     //     }
+    //     // }
+    // }
 };
