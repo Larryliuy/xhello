@@ -13,6 +13,7 @@ import {
 import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 import {blockIpApi, getImgApi} from "./apiInfo";
+import {updataFirstUserAvatar} from "./comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -391,15 +392,7 @@ function onmessage(response){
                 }
                 if(userData.length === 1){//只需要第一个人放麦时更换头像，其他的禁麦和离麦会处理
                     //更换第一个用户的头像，如果与在麦人ID一致，则不需要重复获取
-                    if(userData[0].fileId){
-                        //根据请求获取用户头像
-                        fetch(getImgApi+userData[0].fileId+".dat")
-                            .then(res=>{/*console.log(res)*/return res.text()})
-                            .then(data=>{
-                               store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
-                            })
-                            .catch(e=>console.error(e))
-                    }
+                    updataFirstUserAvatar(userData[0]);
                 }
                 return;
             }
@@ -422,18 +415,8 @@ function onmessage(response){
                         openMicrophone();
                     }
                 }
-                //更换第一个用户的头像
-                if(userData[0] && userData[0].fileId){
-                    //根据请求获取用户头像
-                    fetch(getImgApi+userData[0].fileId+".dat")
-                        .then(res=>{/*console.log(res)*/return res.text()})
-                        .then(data=>{
-                            store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
-                        })
-                        .catch(e=>console.error(e))
-                }else{
-                    store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:'./images/avatar.png'});
-                }
+                console.log(tmp[0]);
+                updataFirstUserAvatar(tmp[0]);
                 return;
             }
             if(dataJson.typeString === '禁麦'){
@@ -450,18 +433,7 @@ function onmessage(response){
                         openMicrophone();
                     }
                 }
-                //更换第一个用户的头像
-                if(userData[0] && userData[0].fileId){
-                    //根据请求获取用户头像
-                    fetch(getImgApi+userData[0].fileId+".dat")
-                        .then(res=>{/*console.log(res)*/return res.text()})
-                        .then(data=>{
-                            store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
-                        })
-                        .catch(e=>console.error(e))
-                }else{
-                    store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:'./images/avatar.png'});
-                }
+                updataFirstUserAvatar(userData[0]);
                 return;
             }
             if(dataJson.typeString === 'microphoneMode'){//麦序模式改变

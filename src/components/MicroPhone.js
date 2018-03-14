@@ -2,8 +2,7 @@ import React,{ Component }  from 'react'
 import { Select, List, Icon, Modal, message } from 'antd';
 import store, {CONSTANT} from "../reducer/reducer";
 import { send } from "../static/webSocket";
-import { ajustUserOrder } from  '../static/comFunctions';
-import {getImgApi} from "../static/apiInfo";
+import { updataFirstUserAvatar } from  '../static/comFunctions';
 const Option = Select.Option;
 
 let state = store.getState();
@@ -15,16 +14,7 @@ class MicroPhone extends React.Component {
     componentDidMount(){
         setTimeout(function () {
             let userData = state.homeState.roomMicrophoneUser;
-            //更换第一个用户的头像
-            if(userData[0].fileId){
-                //根据请求获取用户头像
-                fetch(getImgApi+userData[0].fileId+".dat")
-                    .then(res=>{/*console.log(res)*/return res.text()})
-                    .then(data=>{
-                        store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
-                    })
-                    .catch(e=>console.error(e))
-            }
+            updataFirstUserAvatar(userData[0]);
         },500);
     }
     handleChange(e){

@@ -2,6 +2,9 @@
  * 整体说明，可变变量使用let定义，需要se6及以上才可以直接使用
  */
 
+import {getImgApi} from "./apiInfo";
+import store, {CONSTANT} from "../reducer/reducer";
+
 /**
  * 用于生产随机字符串的数组
  * @param randomFlag 是否随机
@@ -121,6 +124,24 @@ function ajustRoomOrder(roomList,orderInfo) {
 }
 
 /**
+ * 更新麦序位置的头像
+ * */
+
+function updataFirstUserAvatar(userInfo) {
+    //更换第一个用户的头像
+    if(userInfo && userInfo.fileId){
+        //根据请求获取用户头像
+        fetch(getImgApi+userInfo.fileId+".dat")
+            .then(res=>{/*console.log(res)*/return res.text()})
+            .then(data=>{
+                store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
+            })
+            .catch(e=>console.error(e))
+    }else{
+        store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:'./images/avatar.png'});
+    }
+}
+/**
  *用于QQ登录获取openId的回调函数
  */
 function callback(user)
@@ -187,4 +208,4 @@ function getUserIconSrc(sex,level) {
     // console.log(src);
     return "./images/icons/"+src;
 }
-export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,getUserIconSrc }
+export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback, getUserIconSrc, updataFirstUserAvatar }
