@@ -19,6 +19,7 @@ export const CONSTANT = {
     ROOMSTATUS:'ROOMSTATUS',
     MESSAGEDATA:'MESSAGEDATA',
     SENDDATA:'SENDDATA',
+    FIRSTUSERAVATAR:'FIRSTUSERAVATAR',
     PREOFFERCOUNT:'PREOFFERCOUNT',
     MICROPHONEMODE:'MICROPHONEMODE',
     MICROPHONEOPEN:'MICROPHONEOPEN',
@@ -29,6 +30,7 @@ export const CONSTANT = {
     USERINFOLIST:'USERINFOLIST',
     NUMBERONE:'NUMBERONE',
     ISYOUKU:'ISYOUKU',
+    ISANSWER:'ISANSWER',
 };
 export function collapsed(bool) {
     return {
@@ -63,14 +65,16 @@ const homeInitState = {
     roomStatus:{},//用于存储各房间打开/关闭状态
     messageData:[],//所有消息数据
     sendData:'',//自己发送的消息数据
+    firstUserAvatar:'./images/avatar.png',//麦序第一个用户的头像
     preOfferCount:0,
     numberOne:0,//表示老大的id
+    isAnswer:false,//表示老大的id
     microphoneMode:1,//表示自由模式
     microphoneOpen:false,//表示自己麦克风的开关状态
     microphoneInput:false,//表示麦克风是否有音源舒服
     microphoneInputUsers:{},//表示有音源输入的其他人
     myAudioTrack:'',//自己的音轨
-    userIdList:'',//循环给用户发送preOffer的列表
+    userIdList:'',//循环给用户发送preOffer的ID列表
     userInfoList:'',//循环给用户发送preOffer的列表
     isYouku:false//点播的连接是否是youku(优酷)
 };
@@ -109,6 +113,8 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{messageData:action.val});
         case CONSTANT.SENDDATA:
             return Object.assign({},tmpState,{sendData:action.val});
+        case CONSTANT.FIRSTUSERAVATAR:
+            return Object.assign({},tmpState,{firstUserAvatar:action.val});
         case CONSTANT.PREOFFERCOUNT:
             return Object.assign({},tmpState,{preOfferCount:action.val});
         case CONSTANT.MYAUDIOTRACK:
@@ -121,6 +127,8 @@ export const homeState = (state = homeInitState,action)=>{
             return Object.assign({},tmpState,{numberOne:action.val});
         case CONSTANT.ISYOUKU:
             return Object.assign({},tmpState,{isYouku:action.val});
+        case CONSTANT.ISANSWER:
+            return Object.assign({},tmpState,{isAnswer:action.val});
         default:
             // console.log('default');
             return homeInitState;

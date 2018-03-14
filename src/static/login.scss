@@ -419,7 +419,12 @@ ul{
 .host-text{
   width: 100%;
   height: 30%;
-  padding-top: 10px;
+  padding-top: 60px;
+  z-index: 10;
+  #edit-contents{
+    cursor: pointer;
+    color:#108ee9
+  }
 }
 .upload-btn{
   #file-input{
@@ -437,8 +442,8 @@ ul{
 #pre-show{
   margin-top: 20px;
   img{
-    width: 200px;
-    height: 250px;
+    max-width: 200px;
+    max-height: 250px;
   }
 }
 
@@ -672,6 +677,14 @@ ul{
     position: absolute;
     right: 20px;
     top: 50px;
+  }
+  #theirVideo{
+    margin-top: 12px;
+    display: none;
+  }
+  #myCanvas{
+    width: 1px;
+    height: 1px;
   }
 }
 #preBarleyLists{

@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import { message ,Input, Button, Slider, Popover } from 'antd';
 import UploadAvatar from './UploadAvatar';
-import { generalApi } from "../static/apiInfo";
+import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
 import {send} from "../static/webSocket";
@@ -22,8 +22,26 @@ class FooterBottom extends React.Component{
             musicAddress:'',
             inputValue:'',
             audioTrack:'',
-            microphoneOpen:false
+            microphoneOpen:false,
+            avatar:'./images/avatar.png'
         }
+    }
+    componentDidMount(){
+        const _this = this;
+        setTimeout(function () {
+            let userInfo = state.homeState.userInfo;
+            //根据请求获取用户头像
+            if(userInfo.fileId){
+                fetch(getImgApi+userInfo.fileId+".dat")
+                    .then(res=>{/*console.log(res)*/return res.text()})
+                    .then(data=>{
+                       _this.setState({avatar:data});
+                    })
+                    .catch(e=>console.error(e))
+            }else{
+                _this.setState({avatar:'./images/avatar.png'});
+            }
+        },500);
     }
     clickHandle(e){
         // alert(e.target)
@@ -84,8 +102,48 @@ class FooterBottom extends React.Component{
                 break;
         }
     }
-    handOk(){
+    handOk(imgData){
+        // console.log(data);
         this.setState({visible: false});
+        //请求头像API
+        let fileName = new Date().getTime() + '.jpeg',
+            userInfo = state.homeState.userInfo;
+        let args;
+        if(userInfo.fileId){
+            args = "uid="+userInfo.id+"&fileId="+ userInfo .fileId +"&name="+fileName+"&img="+encodeURIComponent(imgData);
+        }else{
+            args = "uid="+userInfo.id+"&name="+fileName+"&img="+encodeURIComponent(imgData);
+        }
+        fetch(uploadJpegApi,{
+            method:'POST',
+            // credentials: "include",
+            headers:{
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body:args//JSON.stringify(args)
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                let fileId = data.data[0].id;
+                console.log(fileId);
+                if(data.status === 'ok'){
+                    userInfo.avatar = imgData;
+                    userInfo.fileId = fileId;
+                    store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
+                    //将fileId存入用户表
+                    args = "?action=update&table=xuser&cond=Id="+userInfo.id+"&AvatarFileId="+fileId;
+                    fetch(generalApi+args)
+                        .then(res=>res.json())
+                        .then(data=>{
+                            console.log(data);
+                            if(data.status === 'ok'){
+                                message.success('更换成功');
+                            }
+                        })
+                        .catch(e=>console.error(e));
+                }
+            })
+            .catch(e=>console.error(e));
     }
     handleCancel(){
         this.setState({visible: false});
@@ -207,19 +265,6 @@ class FooterBottom extends React.Component{
             };
             send(JSON.stringify(msg),function () {
                 console.log('send play music msg');
-                /*let roomInfo = state.homeState.currentRoomInfo;
-                roomInfo.videoSrc = musicSrc;
-                let setRoomMsg = {
-                    type:'set_room_info',
-                    roomId:state.homeState.currentRoomInfo.roomId,
-                    roomName:state.homeState.currentRoomInfo.roomName,
-                    user:state.homeState.userInfo,
-                    data:roomInfo
-                };
-                console.log(setRoomMsg);
-                send(JSON.stringify(setRoomMsg),function () {
-                    console.log('发送set videoSrc消息发服务器');
-                });*/
             })
         }
     }
@@ -243,11 +288,10 @@ class FooterBottom extends React.Component{
         </div>);
     }
     render(){
-        console.log('footer');
         return (<div className ='footer' onClick={e => this.clickHandle(e)}>
             <div>
                 <span className={'user-info'}>
-                    <img id='avatar-img' src={state.homeState.userInfo.avatar}></img>
+                    <img id='avatar-img' src={this.state.avatar?this.state.avatar:'./images/avatar.png'}></img>
                     <span>
                         {this.state.inputVisible ?
                             <span className={'modify-username'}><Input onChange={e=>this.onchangeHandle(e)} onPressEnter={()=>this.onblurHandle()} onBlur={()=>this.onblurHandle()} placeholder={'请输入用户名'}/></span>

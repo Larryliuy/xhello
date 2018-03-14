@@ -12,7 +12,7 @@ import {
 } from "../webrtc/webRtcVideo";
 import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
-import {blockIpApi} from "./apiInfo";
+import {blockIpApi, getImgApi} from "./apiInfo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -73,7 +73,7 @@ function reconnect(){
         // console.log('调用重连函数');
         createWebSocket(wsUrl);
         lockReconnect = false;
-    }, 2000);
+    }, 1000);
 }
 
 let heartCheck = {
@@ -186,6 +186,11 @@ function scrollToBottom(){
         console.log('hello:'+this.refs.messageBox.clientHeight);*/
     },200);
 }
+
+/**
+ * 设置ws服务器房间信息
+ * */
+
 
 let sempher = 0,//表示申请连接的锁
     isPlaying = false;//表示是否正在播放视频
@@ -383,6 +388,79 @@ function onmessage(response){
                     if(!microphoneStatus){
                         openMicrophone();
                     }
+                }
+                if(userData.length === 1){//只需要第一个人放麦时更换头像，其他的禁麦和离麦会处理
+                    //更换第一个用户的头像，如果与在麦人ID一致，则不需要重复获取
+                    if(userData[0].fileId){
+                        //根据请求获取用户头像
+                        fetch(getImgApi+userData[0].fileId+".dat")
+                            .then(res=>{/*console.log(res)*/return res.text()})
+                            .then(data=>{
+                               store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
+                            })
+                            .catch(e=>console.error(e))
+                    }
+                }
+                return;
+            }
+            if(dataJson.typeString === '离麦'){
+                log('收到离麦消息');
+                let userInfo = state.homeState.userInfo;
+                if(dataJson.user.id == userInfo.id){
+                    if(microphoneStatus && userInfo.level > 3){
+                        closeMicrophone();
+                    }
+                }
+                let userData = state.homeState.roomMicrophoneUser;
+                // console.log(state.homeState.roomMicrophoneUser);
+                let tmp = userData.filter(function(item){
+                    return item.id !== dataJson.user.id;
+                });
+                store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:tmp});
+                if(tmp[0] && tmp[0].id === userInfo.id){//有人离麦后如果我是第一个了则我开麦
+                    if(!microphoneStatus){
+                        openMicrophone();
+                    }
+                }
+                //更换第一个用户的头像
+                if(userData[0] && userData[0].fileId){
+                    //根据请求获取用户头像
+                    fetch(getImgApi+userData[0].fileId+".dat")
+                        .then(res=>{/*console.log(res)*/return res.text()})
+                        .then(data=>{
+                            store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
+                        })
+                        .catch(e=>console.error(e))
+                }else{
+                    store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:'./images/avatar.png'});
+                }
+                return;
+            }
+            if(dataJson.typeString === '禁麦'){
+                // console.log('禁麦');
+                let userData = state.homeState.roomMicrophoneUser;
+                //如果我是第一位，则需要关麦
+                if(userData[0].id === state.homeState.userInfo.id){
+                    closeMicrophone();
+                }
+                userData = userData.slice(1);
+                store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:userData});
+                if(userData[0] && userData[0].id === state.homeState.userInfo.id){
+                    if(!microphoneStatus){
+                        openMicrophone();
+                    }
+                }
+                //更换第一个用户的头像
+                if(userData[0] && userData[0].fileId){
+                    //根据请求获取用户头像
+                    fetch(getImgApi+userData[0].fileId+".dat")
+                        .then(res=>{/*console.log(res)*/return res.text()})
+                        .then(data=>{
+                            store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
+                        })
+                        .catch(e=>console.error(e))
+                }else{
+                    store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:'./images/avatar.png'});
                 }
                 return;
             }
@@ -615,43 +693,7 @@ function onmessage(response){
                 }
                 return;
             }
-            if(dataJson.typeString === '离麦'){
-                log('收到离麦消息');
-                let userInfo = state.homeState.userInfo;
-                if(dataJson.user.id == userInfo.id){
-                    if(microphoneStatus && userInfo.level > 3){
-                        closeMicrophone();
-                    }
-                }
-                let userData = state.homeState.roomMicrophoneUser;
-                // console.log(state.homeState.roomMicrophoneUser);
-                let tmp = userData.filter(function(item){
-                    return item.id !== dataJson.user.id;
-                });
-                store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:tmp});
-                if(tmp[0] && tmp[0].id === userInfo.id){//有人离麦后如果我是第一个了则我开麦
-                    if(!microphoneStatus){
-                        openMicrophone();
-                    }
-                }
-                return;
-            }
-            if(dataJson.typeString === '禁麦'){
-                // console.log('禁麦');
-                let userData = state.homeState.roomMicrophoneUser;
-                //如果我是第一位，则需要关麦
-                if(userData[0].id === state.homeState.userInfo.id){
-                    closeMicrophone();
-                }
-                userData = userData.slice(1);
-                store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:userData});
-                if(userData[0] && userData[0].id === state.homeState.userInfo.id){
-                    if(!microphoneStatus){
-                        openMicrophone();
-                    }
-                }
-                return;
-            }
+
             //移动到我所在房间
             if(dataJson.typeString === 'moveToRoom'){
                 let roomStatueTmp = state.homeState.roomStatus,
@@ -851,6 +893,13 @@ function onmessage(response){
                 console.log('收到blockIp消息');
                 //直接请求封Ip接口即可
                 fetch(blockIpApi).then(res=>{console.log('您已被禁止')}).catch(e=>console.error(e));
+                return;
+            }
+            if(dataJson.typeString === 'updateContents'){
+                let roomInfo = state.homeState.currentRoomInfo;
+                roomInfo.contents = dataJson.roomContents;
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
+                return;
             }
             // console.log(dataJson);
             if (dataJson.typeString !== 'withdraw') {
@@ -1102,6 +1151,7 @@ function onmessage(response){
             log('收到get_room_info消息');
             // console.log(state.homeState.currentRoomInfo);
             console.log(dataJson.data);
+            // alert(dataJson.data.advertisementFileId,dataJson.data.avatarFileId);
             let roomInfo = dataJson.data;
             store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
             store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:roomInfo.onMicrophoneUsers});
@@ -1155,6 +1205,8 @@ function onmessage(response){
                 let roomInfo = state.homeState.currentRoomInfo,
                     userInfo = state.homeState.userInfo;
                 // console.log(state.homeState.userInfo);
+                roomInfo.king = userInfo.id;
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
                 store.dispatch({type:CONSTANT.NUMBERONE,val:dataJson.user.id});
                 // console.log(state.homeState.currentRoomInfo.mode);
                 if(roomInfo.mode == 1){
@@ -1171,9 +1223,9 @@ function onmessage(response){
                     console.log('连麦直播模式，等待人连接');
                     //从语音模式房间进来的时候children会有，则需要置空,是否需要更新到服务器，且看rtc连接成功后是否会更新
                     userInfo.Children = [];
-                    roomInfo.king = userInfo.id;
+                    // roomInfo.king = userInfo.id;
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-                    store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
+                    // store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
                     let myVideoTag = document.getElementById('firstVideo');
                     startMyCamVideo(myVideoTag,true);
                 }

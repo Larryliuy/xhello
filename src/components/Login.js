@@ -29,20 +29,20 @@ class Login extends React.Component {
         //         });
         //     },300);
         // }
-        console.log(document.domain);
+        // console.log(document.domain);
     }
     componentWillMount(){
         let locationUrl = window.location.href,
             accessToken,_this=this,
             allQueryString = window.location.hash.substring(3);
-        console.log(allQueryString);
+        // console.log(allQueryString);
         //邀请登录
         if(locationUrl.indexOf('inviteCode=') !== -1){
             //这里做邀请登录的功能
             let inviteCode = GetQueryString(allQueryString,'inviteCode'),//截取URL中的invitedCode值
                 userName = GetQueryString(allQueryString,'userName'),//截取URL中的userName值
                 arg = 'LoginName='+userName+'&inviteCode='+inviteCode;
-            console.log(inviteCode);
+            // console.log(inviteCode);
             if(!inviteCode)return;
             fetch(loginApi,{
                 method:'POST',
@@ -55,10 +55,6 @@ class Login extends React.Component {
                 .then(data=>{
                     // console.log(data);
                     let datatmp = JSON.parse(data);
-                    // try {
-                    //     datatmp = JSON.parse(data);
-                    //JSON.parse没问题的情况
-                    // console.log(datatmp);
                     if(datatmp.status === 'ok'){
                         message.success('登录成功');
                         _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
@@ -143,65 +139,23 @@ class Login extends React.Component {
         let userName = this.state.userName,
             password = this.state.password,
             _this = this;
-        // let url = 'http://192.168.6.3:82/softwares/xtell_projects_dev/24_YUN_VIDEO/server/app/api/user/login.php';
-        let args = {};//'LoginName='+userName+'&Password='+password;
-        let arg = 'LoginName='+userName+'&Password='+password;
+        let arg = '?LoginName='+userName+'&Password='+password;
+        // let args = {LoginName:userName,Password:password};
         // if('fetch' in window){
-            fetch(loginApi,{
-                method:'POST',
-                // credentials: "include",
-                headers:{
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body:arg//JSON.stringify(args)
-            }).then((response) => {/*console.log(response);*/return response.text()})
+            fetch(loginApi+arg)
+                .then((response) => {/*console.log(response);*/return response.json()})
               .then(data=>{
-                  // console.log(data);
-                  let datatmp;
-                  try {
-                      datatmp = JSON.parse(data);
-                      //JSON.parse没问题的情况
-                      // console.log(datatmp);
-                      if(datatmp.status === 'ok'){
-                          message.success('登录成功');
-                          _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
-                      }else {
-                          message.error('用户名与密码不匹配');
-                      }
-                  }catch (e){
-                      //JSON.parse有问题的情况,手动截取返回信息中JSON字符串,此处不严格，如果严格需要使用正则
-                      console.log(data.substring(data.indexOf('>{'),data.indexOf('}<br')+1));
-                      try{
-                        datatmp = JSON.parse(data.substring(data.indexOf('{')));
-                      }catch (e){
-                          datatmp = JSON.parse(data.substring(data.indexOf('{'),data.indexOf('}<br')+1));
-                      }
-                      console.log(datatmp);
-                      if(datatmp.status === 'ok'){
-                          message.success('登录成功');
-                          _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
-                      }else {
-                          message.error('用户名与密码不匹配');
-                      }
+                  if(data.status === 'ok'){
+                      message.success('登录成功');
+                      _this.props.login(true,{name:userName,level:data.data.Type,id:data.data.Id,sex:data.data.Sex,limit:data.data.Limit,fileId:data.data.AvatarFileId});
+                  }else {
+                      message.error('用户名与密码不匹配');
                   }
 
               }).catch(err=>{
                   console.log(err);
-                  // props.login(true,{name:'haha',level:1,id:7,sex:2,limit:0});
               });
 
-    };
-    onChangeCheckBox(e){
-        // if(!cookieUtil.get('loginChecked')){
-            cookieUtil.set('loginChecked',e.target.checked);
-            console.log(document.cookie);
-            console.log(cookieUtil.get('loginChecked'))
-       /* if(e.target.checked){
-        }else {
-            cookieUtil.unset('userName')
-            cookieUtil.unset('password')
-        }*/
-        // }
     };
     qqSpanHandle(){
         //https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101454868&redirect_uri="+redirect_uri+"&state=test

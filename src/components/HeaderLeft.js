@@ -47,6 +47,11 @@ class HeaderLeft extends Component{
             visible: false,
         });
     };
+    handleOk = () => {
+        this.setState({
+            visible: false,
+        });
+    };
     planeClickHandle(){
         this.setState({
             planeVisible: true,
@@ -106,9 +111,12 @@ class HeaderLeft extends Component{
                             <Icon style={{fontSize:'28px',color:'#fff'}} type="home" />
                         </Popover>
                         <label style={{paddingLeft:'10px'}}>{state.homeState.currentRoomInfo.roomName}</label>
+                        {this.state.visible &&
                         <RoomManager handleCancel={() => this.handleCancel()}
+                                     handleOk={() => this.handleOk()}
                                      title={'房间管理'}
-                                     visible={this.state.visible}></RoomManager>
+                                     visible={this.state.visible}>
+                        </RoomManager>}
                     </div>
                     <div style={{height:'50%',width:'100%',color:'white',fontSize:'14px',lineHeight:'24px'}}>
                         在线:

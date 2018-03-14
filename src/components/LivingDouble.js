@@ -54,7 +54,7 @@ class LivingDouble extends React.Component{
                     <canvas id={'liveCanvas'}></canvas>
                     <audio id={'myAudio'}></audio>
                 </div>
-                {state.homeState.userInfo.id != state.homeState.currentRoomInfo.king && !state.homeState.currentRoomInfo.secondKing &&
+                {state.homeState.userInfo.id != state.homeState.currentRoomInfo.king && state.homeState.currentRoomInfo.secondKing !== state.homeState.userInfo.id &&
                 <Button className={'apply-tobe-barley-btn'} onClick={()=>this.onApplyToBebarley()}>申请连麦</Button>}
                 {state.homeState.userInfo.id == state.homeState.currentRoomInfo.king ?
                     <div className={'closeVideoMode'}>
@@ -63,7 +63,7 @@ class LivingDouble extends React.Component{
                     </div>
                 :
                     <div className={'refreshVideo'}>
-                        {state.homeState.currentRoomInfo.secondKing!=state.homeState.userInfo.id && <Button onClick={refreshVideo}>刷新</Button>}
+                        {!state.homeState.isAnswer && <Button onClick={refreshVideo}>刷新</Button>}
                     </div>}
                 <div className='host-text'><p><a target={'_blank'} href={'http://www.xtell.cn'}>打个小广告:极智未来</a></p></div>
             </div>

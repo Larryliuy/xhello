@@ -19,6 +19,7 @@ import '../static/login.scss'
 import { send } from "../static/webSocket";
 import { startMyCam } from '../webrtc/webRtcAudio';
 import {startMyCamVideo} from "../webrtc/webRtcVideo";
+import { getImgApi } from "../static/apiInfo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -115,6 +116,7 @@ class HomeLayout extends React.Component {
         //     event.returnValue = "离开页面将丢失信息";
         //     // return "离开页面将丢失信息！";
         // }
+        //获取用户头像并更换
     }
     componentWillUnmount(){
         //解绑事件监听

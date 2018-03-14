@@ -252,7 +252,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                             item.pcState = 'connected';
                             item.pcStateTime = new Date().getTime()/1000;
                             if(type === 'offer'){
-                                console.log(item);
+                                // console.log(item);
                                 if(item.myMicStream){
                                     let myTrack = item.myMicStream.getAudioTracks();
                                     console.log(myTrack);
@@ -284,6 +284,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         if(vidoeId === 'secondVideo' && localStream && isKing){
                             mixerAudio();
                         }
+                        store.dispatch({type:CONSTANT.ISANSWER,val:true});
                     }
                     updateUserMsg = {
                         type:'update_user',
@@ -314,9 +315,11 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                             roomName: roomInfo.roomName,
                             user:userInfo
                         };
-                        send(JSON.stringify(msg),function () {
-                            console.log('发送重新连接消息')
-                        })
+                        setTimeout(function () {
+                            send(JSON.stringify(msg),function () {
+                                console.log('发送重新连接消息')
+                            })
+                        },1000);
                     }
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     send(JSON.stringify(updateUserMsg),function () {

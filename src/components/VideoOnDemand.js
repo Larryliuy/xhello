@@ -41,7 +41,7 @@ class VideoOnDemand extends React.Component{
         }
         //如果是优酷视频，则需要截取出优酷视频id
         if(videoSrc.indexOf('v.youku.') !== -1){
-            store.dispatch({type:CONSTANT.ISYOUKU,val:true})
+            store.dispatch({type:CONSTANT.ISYOUKU,val:true});
             let videoId = videoSrc.substring(videoSrc.indexOf('id_')+3,videoSrc.indexOf('.html'));
             videoSrc = 'https://player.youku.com/embed/'+ videoId+'?isAutoPlay=true';//不用加https
             sendSrcMsg.webSite = 'youku';
@@ -78,8 +78,8 @@ class VideoOnDemand extends React.Component{
         console.log(e.target.value);
         this.setState({vodSrc:e.target.value});
     }
-    render(){
-        const content = (<div style={{width:'300px'}}>
+    getContent(){
+        return  (<div style={{width:'300px'}}>
             <Input onChange={(e)=>this.userNameChange(e)} placeholder={'请输入视频网址'}/>
             <br/>
             <br/>
@@ -88,13 +88,14 @@ class VideoOnDemand extends React.Component{
                 <Button type={'primary'} onClick={()=>this.planeOkHandle()}>确定</Button>
             </span>
         </div>);
-
+    }
+    render(){
         return (
             <div style={{height:'100%',textAlign:'center !important'}}>
                 <div style={{textAlign:'center',display:(state.homeState.currentRoomInfo.mode !== 0 && state.homeState.currentRoomInfo.player == state.homeState.userInfo.id)?'block':'none'}}>
                     <Popover placement="bottom"
                              title={'添加网络视频连接'}
-                             content={content}
+                             content={this.getContent()}
                              visible={this.state.popVisible}
                              trigger="click">
                         <Button onClick={()=>this.addVideoSrc()}>添加视频网址</Button>

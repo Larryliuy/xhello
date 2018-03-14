@@ -1,11 +1,12 @@
 import React,{ Component } from 'react';
 import { Modal,Row, Col, Select, Table, Button, List } from 'antd';
 import UploadAvatar from './UploadAvatar';
-import { generalApi } from "../static/apiInfo";
+import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
 import {send} from "../static/webSocket";
 import { getUserIconSrc } from "../static/comFunctions";
 import {message} from "antd/lib/index";
 import store, {CONSTANT} from "../reducer/reducer";
+import {setRoomInfo} from "../webrtc/webRtcVideo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -19,8 +20,10 @@ class RoomManager extends React.Component{
             uploadModalVisible:false,
             clickMenu:'管理员设置',
             tableColumns:[],
-            tableData:[]
-        }
+            tableData:[],
+            roomAvatar:'./images/avatar.png'
+        };
+        // this.getRoomAvatar = this.getRoomAvatar.bind(this)
     }
     getColumns(type){
         let columns;
@@ -123,12 +126,25 @@ class RoomManager extends React.Component{
     componentDidMount(){
         this.getColumns('管理员设置');
         this.getDatas('管理员设置');
+        //根据房间头像ID获取房间头像
+        const _this = this;
+        // setTimeout(function () {
+            let fileId = state.homeState.currentRoomInfo.avatarFileId;
+            console.log(fileId);
+            //根据请求获取用户头像
+            console.log(getImgApi+fileId+".dat");
+            fetch(getImgApi+fileId+".dat")
+                .then(res=>{/*console.log(res)*/return res.text()})
+                .then(data=>{
+                    // console.log(data);
+                    _this.setState({roomAvatar:data});
+                })
+                .catch(e=>console.error(e))
+        // },10);
     }
-    HandleOk = () => {
-        this.setState({
-            visible: false,
-        });
-    };
+    // HandleOk = () => {
+    //     this.setState({visible: false,});
+    // };
     removeBlackListHandle(blackListId,userName,userIp){
         // console.log(blackListId,userName,userIp);
         let args = "?action=del&table=blacklist&cond=id="+blackListId;
@@ -226,8 +242,70 @@ class RoomManager extends React.Component{
     uploadAvatarBtnHandle(){
         this.setState({uploadModalVisible:true});
     }
-    uploadHandOk(){
+    uploadHandOk(imgData){
         this.setState({uploadModalVisible: false});
+        console.log(imgData);
+        console.log(typeof imgData);
+        let imgType = imgData.toString().substring(0,17);//data:image/jpeg;base64
+        if(imgType.indexOf('jpeg')){
+            imgType = '.jpeg';
+        }else if (imgType.indexOf('png')){
+            imgType = '.png';
+        }else if (imgType.indexOf('git')){
+            imgType = '.git';
+        }else{
+            imgType = '.jpeg';
+        }
+        let fileName = new Date().getTime() + imgType,
+            roomInfo = state.homeState.currentRoomInfo,
+            _this = this,
+            args;
+        console.log(roomInfo.avatarFileId);
+        if(roomInfo.avatarFileId){
+            args = "uid="+roomInfo.roomId+"&fileId="+ roomInfo.avatarFileId +"&name="+fileName+"&img="+encodeURIComponent(imgData);
+        }else{
+            args = "uid="+roomInfo.roomId+"&name="+roomInfo+"&img="+encodeURIComponent(imgData);
+        }
+        fetch(uploadJpegApi,{
+            method:'POST',
+            // credentials: "include",
+            headers:{
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body:args//JSON.stringify(args)
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                console.log(data);
+                let fileId = data.data[0].id;
+                console.log(fileId);
+                if(data.status === 'ok'){
+                    // roomInfo.advertisement = imgData;
+                    roomInfo.avatarFileId = fileId;
+                    store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
+                    setRoomInfo(roomInfo);
+                    //将fileId存入房间表
+                    args = "?action=update&table=room&cond=id="+roomInfo.roomId+"&avatarFileId="+fileId;
+                    fetch(generalApi+args)
+                        .then(res=>res.json())
+                        .then(data=>{
+                            console.log(data);
+                            if(data.status === 'ok'){
+                                message.success('更换成功');
+                                let fileId = roomInfo.avatarFileId;
+                                //根据请求获取用户头像
+                                fetch(getImgApi+fileId+".dat")
+                                    .then(res=>{/*console.log(res)*/return res.text()})
+                                    .then(data=>{
+                                        _this.setState({roomAvatar:data});
+                                    })
+                                    .catch(e=>console.error(e))
+                            }
+                        })
+                        .catch(e=>console.error(e));
+                }
+            })
+            .catch(e=>console.error(e));
     }
     uploadHandleCancel(){
         this.setState({uploadModalVisible: false});
@@ -253,7 +331,7 @@ class RoomManager extends React.Component{
             <Modal
                 title={this.props.title}
                 visible={this.props.visible}
-                onOk={this.HandleOk}
+                onOk={this.props.handleOk}
                 onCancel={this.props.handleCancel}
                 okText="确认"
                 cancelText="取消"
@@ -264,7 +342,7 @@ class RoomManager extends React.Component{
                         <div className='room-manage-dialog'>
                             <div className='room-manage-list'>
                                 <div className="Dialog-room-avatar">
-                                    <img src="./images/icons/menu.png" alt="logo"/>
+                                    <img src={this.state.roomAvatar} alt="logo"/>
                                     <div><button onClick={this.uploadAvatarBtnHandle.bind(this)}>更换头像</button></div>
                                 </div>
                                 <List
@@ -290,7 +368,6 @@ class RoomManager extends React.Component{
             <UploadAvatar visible={this.state.uploadModalVisible}
                           handleOk={this.uploadHandOk.bind(this)}
                           handleCancel={this.uploadHandleCancel.bind(this)}>
-
             </UploadAvatar>
         </div>)
     }

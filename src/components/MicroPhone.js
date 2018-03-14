@@ -3,6 +3,7 @@ import { Select, List, Icon, Modal, message } from 'antd';
 import store, {CONSTANT} from "../reducer/reducer";
 import { send } from "../static/webSocket";
 import { ajustUserOrder } from  '../static/comFunctions';
+import {getImgApi} from "../static/apiInfo";
 const Option = Select.Option;
 
 let state = store.getState();
@@ -11,6 +12,21 @@ store.subscribe(function () {
     // console.log(store.getState())
 });
 class MicroPhone extends React.Component {
+    componentDidMount(){
+        setTimeout(function () {
+            let userData = state.homeState.roomMicrophoneUser;
+            //更换第一个用户的头像
+            if(userData[0].fileId){
+                //根据请求获取用户头像
+                fetch(getImgApi+userData[0].fileId+".dat")
+                    .then(res=>{/*console.log(res)*/return res.text()})
+                    .then(data=>{
+                        store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
+                    })
+                    .catch(e=>console.error(e))
+            }
+        },500);
+    }
     handleChange(e){
         // let microphoneMode = 1;
         let Msg = {
@@ -144,80 +160,6 @@ class MicroPhone extends React.Component {
         };
         // console.log(micrpMsg);
         send(JSON.stringify(micrpMsg),function(){console.log('发送 '+text+' 消息')});
-        /*powerArr.map(function(item){
-            if(text.indexOf(item) !== -1){
-                //如果自己已经在排序，则给出提示并返回
-                let filter = false;
-                let roomInfo = state.homeState.currentRoomInfo,
-                    roomMicrophoneUser = state.homeState.roomMicrophoneUser;
-                if(item === '放麦'){
-                    // console.log(roomMicrophoneUser);
-                    // console.log(roomInfo);
-                    roomMicrophoneUser.map(function(item){
-                        if(item.id === state.homeState.userInfo.id){
-                            filter = true;
-                            tips('您已经在排序了，请耐性等待');
-                        }
-                    });
-                    if(!filter){
-                        console.log('MIC:');
-                        roomInfo.onMicrophoneUsers.push(state.homeState.userInfo);
-                    }
-                }
-                if(item === '禁麦'){
-                    //管理员才可禁麦
-                    if(state.homeState.userInfo.level > 3){
-                        tips('只有管理才可以禁麦！');
-                        return;
-                    }
-                    if(roomMicrophoneUser.length === 0){
-                        tips('麦序上没有人');
-                        return;
-                    }
-                    if(roomInfo.onMicrophoneUsers[0]){
-                        roomInfo.onMicrophoneUsers = roomInfo.onMicrophoneUsers.slice(1);//将第一个上麦的人kill掉
-                    }
-                }
-                if(item === '离麦'){
-                    filter = true;
-                    if(roomMicrophoneUser.length === 0){
-                        tips('您不在麦序');
-                        return;
-                    }
-                    // console.log(state.homeState.roomMicrophoneUser);
-                    roomMicrophoneUser.map(function(item){
-                        // console.log(typeof item.id+','+typeof state.homeState.userInfo.id);
-                        if(item.id === state.homeState.userInfo.id){
-                            filter = false;
-                            roomInfo.onMicrophoneUsers.splice(state.homeState.userInfo);
-                        }
-                    });
-                    if(filter){
-                        tips('您不在麦序');
-                    }
-                }
-                if(filter) return;
-                let setRoomMsg = {
-                    type:'set_room_info',
-                    roomId: roomInfo.roomId,		//房间唯一标识符
-                    roomName: roomInfo.roomName,
-                    user:state.homeState.userInfo,
-                    data:roomInfo
-                };
-                send(JSON.stringify(setRoomMsg),function(){
-                    console.log('更新服务器onMicrophoneUsers信息');
-                });
-                let micrpMsg = {
-                    type:'msg',
-                    typeString:item,
-                    roomId: roomInfo.roomId,		//房间唯一标识符
-                    roomName: roomInfo.roomName,
-                    user:state.homeState.userInfo
-                };
-                // console.log(micrpMsg);
-                send(JSON.stringify(micrpMsg),function(){console.log('发送 '+item+' 消息')});
-            }
-        });*/
     }
     getMicModeText() {
         // console.log('进入getMicModeText');
@@ -290,7 +232,7 @@ class MicroPhone extends React.Component {
         return (<div className='microphone-a'>
             {/*头像区域*/}
             <div className="avatar-area" >
-                <img src='./images/avatar.png' />
+                <img src={state.homeState.firstUserAvatar?state.homeState.firstUserAvatar:'./images/avatar.png'} />
                 <p className='user-name'>
                     {state.homeState.roomMicrophoneUser[0]?state.homeState.roomMicrophoneUser[0].name:'暂无人员'}
                     </p>
