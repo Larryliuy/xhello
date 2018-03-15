@@ -38,39 +38,14 @@ class LoginBox extends React.Component {
             avatar:'./images/avatar.png',
             maxChildren:2,Children:[]
         };
-        // if(data.fileId){
-        //     //根据请求获取用户头像
-        //     fetch(getImgApi+data.fileId+".dat")
-        //         .then(res=>{/*console.log(res)*/return res.text()})
-        //         .then(data=>{
-        //             // console.log(data);
-        //             // console.log(encodeURIComponent(data));
-        //             userInfo.avatar = data ;
-        //             store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-        //         })
-        //         .catch(e=>console.error(e))
-        // }else {
-        //     userInfo.avatar = './images/avatar.png';
+        if(data.avatar){
+            userInfo.avatar = data.avatar;
+        }
         store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
         // }
         location.replace("#/home");
     }
     componentDidMount(){
-        // if(cookieUtil.get('userName') && cookieUtil.get('password')){
-        //     this.setState({login:true,data:cookieUtil.get('userData')})
-        // }
-        //uri参数截取函数
-        // function GetQueryString(str,key) {
-        //     let reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
-        //     let r = str.match(reg);
-        //     if (r != null) return decodeURI(r[2]);
-        //     return null;
-        // }
-        // if(this.props.location.search.indexOf('invited=') !== -1){
-        //     // let queryStr = location.href.substring(location.href.indexOf('invited')+8);
-        //     let username = GetQueryString(this.props.location.search,'userName');
-        //     console.log(username)
-        // }
     }
     render(){
         // console.log(this.props.match);

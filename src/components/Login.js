@@ -4,7 +4,7 @@ import { Form, Icon, Input, Button, Checkbox, message } from 'antd';
 const FormItem = Form.Item;
 import cookieUtil from '../libs/cookieUtil';
 import '../static/login.scss'
-import { loginApi, redirect_uri, domian } from "../static/apiInfo";
+import { loginApi, redirect_uri, getUserInfoApi } from "../static/apiInfo";
 import store,{CONSTANT} from "../reducer/reducer";
 import { GetQueryString } from '../static/comFunctions';
 // document.domain = domian;
@@ -34,13 +34,14 @@ class Login extends React.Component {
     componentWillMount(){
         let locationUrl = window.location.href,
             accessToken,_this=this,
-            allQueryString = window.location.hash.substring(3);
-        // console.log(allQueryString);
+            inviteQueryString = window.location.hash.substring(3);
+        // console.log(locationUrl);
+        // console.log(inviteQueryString);
         //邀请登录
         if(locationUrl.indexOf('inviteCode=') !== -1){
             //这里做邀请登录的功能
-            let inviteCode = GetQueryString(allQueryString,'inviteCode'),//截取URL中的invitedCode值
-                userName = GetQueryString(allQueryString,'userName'),//截取URL中的userName值
+            let inviteCode = GetQueryString(inviteQueryString,'inviteCode'),//截取URL中的invitedCode值
+                userName = GetQueryString(inviteQueryString,'userName'),//截取URL中的userName值
                 arg = 'LoginName='+userName+'&inviteCode='+inviteCode;
             // console.log(inviteCode);
             if(!inviteCode)return;
@@ -72,54 +73,33 @@ class Login extends React.Component {
         //QQ快捷登录
         if(locationUrl.indexOf('access_token=') !== -1){
             console.log('QQ login');
-            accessToken = GetQueryString(allQueryString,'access_token');//截取URL中的code值
+            let qqQueryString = locationUrl.substring(locationUrl.indexOf('access_token='));
+            // console.log(qqQueryString);
+            accessToken = GetQueryString(qqQueryString,'access_token');//截取URL中的code值
             // console.log(code);
             if(accessToken){
                 _this.setState({loginComponent:false});
                 cookieUtil.set('accessToken',accessToken);
                 //使用Access Token来获取用户的OpenID
-                let args = 'access_token='+accessToken+'&callback=callback';
-                let path = "https://graph.qq.com/oauth2.0/me?";
-                let url = path + args;
-                let script = document.createElement('script');
-                script.src = url;
-                document.body.appendChild(script);
-                //根据accessToken获取openID
-                /*let args = 'access_token='+accessToken;
-                fetch("https://graph.qq.com/oauth2.0/me?"+args)
-                    .then((response) => {return response.text()})
+                let args = '?access_token='+accessToken;
+                fetch(getUserInfoApi+args)
+                    .then(res=>{
+                        // console.log(res);
+                        return res.json()
+                    })
                     .then(data=>{
                         console.log(data);
-                        data = data.substring(10,data.length-4);
-                        data = JSON.parse(data);
-                        // console.log(data);
-                        if(data.openid){
-                            //openid 需要和用户绑定在一起
-                            let clientId = data.client_id,
-                                openId = data.openid,
-                                args = 'access_token='+accessToken+'&oauth_consumer_key='+clientId+'&openid='+openId;
-                            // console.log(clientId+','+openId);
-                            fetch('https://graph.qq.com/user/get_user_info?'+args)
-                                .then((response) => {return response.json()})
-                                .then(data=>{
-                                    //这里获取用户信息
-                                    console.log(data);
-                                    if(data.ret === 0){
-                                        store.dispatch({type:CONSTANT.USERINFO,val:{id:openId,name:data.nickname,sex:data.gender === '男'?1:2,level:7,limit:0,avatar:data.figureurl_2,maxChildren:2,Children:[]}});
-                                        location.replace("#/home");
-                                    }
-                                })
-                                .catch(err=>{
-                                    console.log(err);
-                                })
-                        }else {
-                            message.error('openid为获取到');
-                            location.replace("#/home");
+                        if(data.status === 'ok'){
+                            message.success('登录成功!');
+                            if(data.data.ret == 0){
+                                let timestamps = new Date().getTime();
+                                _this.props.login(true,{id:timestamps,name:data.data.nickname,sex:data.data.gender === '男'?1:2,level:7,limit:0,avatar:data.data.figureurl_2,maxChildren:1,Children:[]});
+                            }
+                        }else{
+                            message.error('登录失败');
                         }
                     })
-                    .catch(err=>{
-                        console.log(err);
-                    });*/
+                    .catch(e=>console.error(e));
                 }
             }
     }
@@ -160,11 +140,12 @@ class Login extends React.Component {
     qqSpanHandle(){
         //https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101454868&redirect_uri="+redirect_uri+"&state=test
         let url = 'https://graph.qq.com/oauth2.0/authorize?';
-        let args = 'response_type=code&client_id=101454868&redirect_uri='+redirect_uri+'&state=test';
+        let args = 'response_type=code&client_id=101454868&redirect_uri='+redirect_uri+'&state=xtell';
         fetch(url+args).then((response) => {
             console.log(response);
+            console.log(response.url);
             console.log(response.location);
-            location.replace(response.url);
+            // location.replace(response.url);
             return response.text()})
             .then(data=>{
                 // document.

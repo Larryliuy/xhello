@@ -37,10 +37,10 @@ function randomWord(randomFlag, min, max){
  * @constructor
  */
 function GetQueryString(str,name) {
-    console.log(str,name);
+    // console.log(str,name);
     let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
     let r = str.match(reg);
-    console.log(r);
+    // console.log(r);
     if (r != null) return decodeURI(r[2]);
     return null;
 }

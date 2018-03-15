@@ -1,5 +1,3 @@
-import './pageClose.js';
-import './media.js';
 import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
@@ -102,7 +100,7 @@ let heartCheck = {
 
 function initEventHandle(WS) {
     WS.onclose = function () {
-        log('webSocket关闭');
+        // log('webSocket关闭');
         reconnect(wsUrl);
     };
     WS.onerror = function () {
@@ -110,7 +108,7 @@ function initEventHandle(WS) {
     };
     WS.onopen = function () {
         //心跳检测重置
-        log('webSocket连接成功');
+        // log('webSocket连接成功');
         heartCheck.reset().start();
     };
     WS.onmessage = onmessage;

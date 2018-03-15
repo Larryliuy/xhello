@@ -48,9 +48,12 @@ class FooterBottom extends React.Component{
         if(!e.target.id) return;
         console.log(e.target.id);
         let audioDom = '';
+        let userInfo = state.homeState.userInfo;
         switch (e.target.id){
             case 'avatar-img':
-                this.setState({visible: true});
+                if (userInfo.length < 7){
+                    this.setState({visible: true});
+                }
                 break;
             case 'audio-img':
                 // alert('控制音量');
@@ -93,7 +96,9 @@ class FooterBottom extends React.Component{
                 }
                 break;
             case 'user-name':
-                this.setState({inputVisible:true});
+                if (userInfo.length < 7){
+                    this.setState({inputVisible:true});
+                }
                 break;
             case 'play-span':
             case 'play-img':
