@@ -1,5 +1,9 @@
 # live 直播网站PC端
 
+    软件架构：p2p架构
+    服务端：php+nginx
+    前端：react技术栈+webRTC+webAudio
+    网址：https://a701.xtell.cn/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/index.php
     ### 更新日志
     2017.12.06
     1， 环境初步搭建完成
