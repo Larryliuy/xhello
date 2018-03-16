@@ -6,9 +6,9 @@
     前端：react技术栈+webRTC+webAudio+webSocket
     网址：https://a701.xtell.cn/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/index.php
     混音频架构：如图所示
-    ![](https://github.com/Larryliuy/live/blob/master/screenshots/audioMixer.png)
+![](https://github.com/Larryliuy/live/blob/master/screenshots/audioMixer.png)
     混视频架构：如图所示
-    ![](https://github.com/Larryliuy/live/blob/master/screenshots/videoMixer.png)
+![](https://github.com/Larryliuy/live/blob/master/screenshots/videoMixer.png)
 ## 图片展示
 主页
 ![](https://github.com/Larryliuy/live/blob/master/screenshots/homepage.png)
