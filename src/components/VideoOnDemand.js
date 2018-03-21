@@ -45,8 +45,14 @@ class VideoOnDemand extends React.Component{
             let videoId = videoSrc.substring(videoSrc.indexOf('id_')+3,videoSrc.indexOf('.html'));
             videoSrc = 'https://player.youku.com/embed/'+ videoId+'?isAutoPlay=true';//不用加https
             sendSrcMsg.webSite = 'youku';
+        }else if(videoSrc.indexOf('.qq.com') !== -1){
+            //https://v.qq.com/x/cover/g7m84rhikqkd772.html
+            let videoId = videoSrc.substring(videoSrc.indexOf('cover/')+6,videoSrc.indexOf('.html'));
+            if(videoId.indexOf('/') !== -1){
+                videoId = videoId.substring(videoId.indexOf('/')+1);
+            }
+            videoSrc = "https://v.qq.com/iframe/player.html?vid="+videoId+"&tiny=0";
         }
-
         console.log(videoSrc);
         vodVideo.src = videoSrc;
         vodVideo.autoplay=true;
