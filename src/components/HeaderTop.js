@@ -11,6 +11,7 @@ store.subscribe(function () {
 });
 
 import Skin from './Skin';
+import {getRoomInfoVideo} from "../webrtc/webRtcVideo";
 
 class HeaderTop extends React.Component{
     constructor(){
@@ -35,7 +36,7 @@ class HeaderTop extends React.Component{
         }
         // location.reload();
     };
-    vodPlay(e){
+    switchVideoMode(e){
         console.log(e.target.innerText);
         let roomInfo = state.homeState.currentRoomInfo ;
         console.log(roomInfo);
@@ -65,35 +66,47 @@ class HeaderTop extends React.Component{
         }
         //切换房间模式，mode
         roomInfo.player = state.homeState.userInfo.id;
-        let sendMsg = {
-            type:'msg',
-            typeString:'changeRoomMode',
-            roomId:roomInfo.roomId,
-            roomName:roomInfo.roomName,
+        roomInfo.secondKing = '';
+        //ws 发送set_room_info
+        let setRoomMsg = {
+            type:'set_room_info',
+            roomId: roomInfo.roomId,		//房间唯一标识符
+            roomName: roomInfo.roomName,
             user:state.homeState.userInfo,
-            mode:roomInfo.mode,
-            player:state.homeState.userInfo.id
+            data:roomInfo
         };
-        // console.log(sendMsg);
-        send(JSON.stringify(sendMsg),function () {
-            console.log('发送改变房间模式消息成功');
-            //http请求改变数据库mode=2
-            //ws 发送set_room_info
-            let setRoomMsg = {
-                type:'set_room_info',
+        send(JSON.stringify(setRoomMsg),function(){
+            console.log('更新服务器房间mode信息');
+            // store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
+            //取消房间的king
+            let nullKingMsg = {
+                type:'reset_king',
                 roomId: roomInfo.roomId,		//房间唯一标识符
-                roomName: roomInfo.roomName,
+                roomName: roomInfo.roomNam,
                 user:state.homeState.userInfo,
-                data:roomInfo
             };
-            send(JSON.stringify(setRoomMsg),function(){
-                console.log('更新房间mode信息');
+            send(JSON.stringify(nullKingMsg),function(){
+                let sendMsg = {
+                    type:'msg',
+                    typeString:'changeRoomMode',
+                    roomId:roomInfo.roomId,
+                    roomName:roomInfo.roomName,
+                    user:state.homeState.userInfo,
+                    mode:roomInfo.mode,
+                    player:state.homeState.userInfo.id
+                };
+                send(JSON.stringify(sendMsg),function () {
+                    console.log('发送改变房间模式消息成功');
+                    //http请求改变数据库mode=2
+                });
             });
+
         });
+
     }
     render(){
         const data = ['播放网络视频','开启单人直播','开启双人直播'];
-        const content = (<div className={'vodMenu'} style={{width:'200px',cursor:'pointer'}} onClick={(e)=>this.vodPlay(e)}>
+        const content = (<div className={'vodMenu'} style={{width:'200px',cursor:'pointer'}} onClick={(e)=>this.switchVideoMode(e)}>
             <List dataSource={data}
                   size="small"
                   bordered

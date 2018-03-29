@@ -2,6 +2,7 @@ import React,{ Component } from 'react';
 import store ,{ CONSTANT } from "../reducer/reducer";
 import { Popover } from 'antd';
 import {message} from "antd/lib/index";
+import {getLocationBtUserId} from "../static/comFunctions";
 let state = store.getState();
 store.subscribe(function(){
     state = store.getState();
@@ -14,17 +15,22 @@ class SearchResult extends React.Component{
     componentDidMount(){
     }
     handleClickUser(e){
+        let uId = e.target.id.substring(1);
+        let location = getLocationBtUserId(uId);
         // console.log(e.target.id);
-        //定位到id为e.target.id的元素位置;
-        let selfDom = document.getElementById('u'+e.target.id.substring(1));
-        if(!selfDom) {
-            message.error('用户所在的房间未展开或不在公共房间');
-            return;
-        }
-        // console.log(selfDom);
-        store.dispatch({type:CONSTANT.SEARCHKEYWORD,val:''});
-        selfDom.scrollIntoView();
-        selfDom.style.color = 'green';
+        setTimeout(function () {
+            //定位到id为e.target.id的元素位置;
+            let selfDom = document.getElementById('u'+uId);
+            if(!selfDom) {
+                message.error('未找到或用户已下线');
+                return;
+            }
+            // console.log(selfDom);
+            store.dispatch({type:CONSTANT.SEARCHKEYWORD,val:''});
+            selfDom.scrollIntoView();
+            selfDom.style.color = 'green';
+        },200);
+
 
     }
     render(){

@@ -3,6 +3,7 @@ import { Input, Icon, message } from 'antd';
 import SearchResult from './SearchResult';
 
 import store ,{ CONSTANT } from "../reducer/reducer";
+import { getLocationBtUserId } from '../static/comFunctions';
 
 let state = store.getState();
 store.subscribe(function(){
@@ -44,13 +45,18 @@ class UserSearch extends React.Component{
     }
     // 定位自己
     clickLocationHandle(){
-        let selfDom = document.getElementById('u'+state.homeState.userInfo.id);
-        if(!selfDom) {
-            message.warn('自己所在的房间未展开');
-            return;
-        }
-        selfDom.scrollIntoView();
-        selfDom.style.color = 'green';
+        let location = getLocationBtUserId(state.homeState.userInfo.id);
+        console.log(location);
+        setTimeout(function () {
+            let selfDom = document.getElementById('u'+state.homeState.userInfo.id);
+            if(!selfDom) {
+                message.warn('未找到');
+                return;
+            }
+            selfDom.scrollIntoView();
+            selfDom.style.color = 'green';
+        },200)
+
     }
     render(){
         return (

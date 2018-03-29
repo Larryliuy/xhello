@@ -5,8 +5,9 @@ import CreateRoom from './CreateRoom';
 import SetRoom from './SetRoom';
 import SortRoom from './SortRoom';
 import { getSendData, send } from '../static/webSocket.js';
+import { deleteRoomById } from '../static/comFunctions';
 import store, {CONSTANT} from "../reducer/reducer";
-import {generalApi, blockUserApi, blockIpApi} from "../static/apiInfo";
+import {generalApi, blockUserApi} from "../static/apiInfo";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -464,6 +465,7 @@ class RightClickPanel extends React.Component{
                                 user:state.homeState.userInfo
                             };
                             send(JSON.stringify(deleteMsg),function () {
+                                deleteRoomById(objId);
                                 //删除完成后获取最新的房间列表
                                 let getRoomsMsg = {
                                     type:'get_rooms',

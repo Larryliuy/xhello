@@ -28,6 +28,10 @@ const clickRoomData = [
     {title:'删除房间'},
     {title:'子房间排序'}
 ];
+//点击空白处时数据
+const clickblankData = [
+    {title:'创建同级别房间'}
+];
 class RightClickPanelBox extends React.Component{
     constructor(props){
         super(props);
@@ -40,6 +44,8 @@ class RightClickPanelBox extends React.Component{
             return clickChildRoomData;
         }else if(str.indexOf('r') !== -1){
             return clickRoomData;
+        }else if(str === '0'){
+            return clickblankData;
         }else{
             return [];
         }

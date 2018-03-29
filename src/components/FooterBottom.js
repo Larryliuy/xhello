@@ -5,6 +5,7 @@ import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
 import {send} from "../static/webSocket";
+import { sendCheerAudio } from "../static/comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -51,7 +52,7 @@ class FooterBottom extends React.Component{
         let userInfo = state.homeState.userInfo;
         switch (e.target.id){
             case 'avatar-img':
-                if (userInfo.length < 7){
+                if (userInfo.level < 7){
                     this.setState({visible: true});
                 }
                 break;
@@ -71,6 +72,7 @@ class FooterBottom extends React.Component{
                     setTimeout(function () {
                         isAudioPlay = false;
                     },5000);
+                    sendCheerAudio('cheer');
                 }
                 break;
             case 'applause-span':
@@ -83,6 +85,7 @@ class FooterBottom extends React.Component{
                     setTimeout(function () {
                         isAudioPlay = false;
                     },5000);
+                    sendCheerAudio('applause');
                 }
                 break;
             case 'open-microphone-btn':
@@ -96,7 +99,7 @@ class FooterBottom extends React.Component{
                 }
                 break;
             case 'user-name':
-                if (userInfo.length < 7){
+                if (userInfo.level < 7){
                     this.setState({inputVisible:true});
                 }
                 break;
@@ -271,10 +274,12 @@ class FooterBottom extends React.Component{
             send(JSON.stringify(msg),function () {
                 console.log('send play music msg');
             })
+        }else{
+            message.error('请输入有效音频连接,音频格式 .mp3 .m4a ogg 等')
         }
     }
     checkFileType(musicSrc){
-        if(musicSrc.indexOf('.mp3') || musicSrc.indexOf('.m4a')){
+        if(musicSrc.indexOf('.mp3') || musicSrc.indexOf('.m4a')|| musicSrc.indexOf('.ogg')){
             return true;
         }else{
             return false;

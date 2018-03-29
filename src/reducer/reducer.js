@@ -68,7 +68,7 @@ const homeInitState = {
     firstUserAvatar:'./images/avatar.png',//麦序第一个用户的头像
     preOfferCount:0,
     numberOne:0,//表示老大的id
-    isAnswer:false,//表示老大的id
+    isAnswer:false,//表示是否是被连接节点
     microphoneMode:1,//表示自由模式
     microphoneOpen:false,//表示自己麦克风的开关状态
     microphoneInput:false,//表示麦克风是否有音源舒服

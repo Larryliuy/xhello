@@ -2,7 +2,7 @@ import React,{ Component } from 'react';
 import ChannelList from '../components/ChannelList';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from '../static/webSocket.js';
-
+import { updateAllRoomListTimer, removeTimer } from '../static/comFunctions';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -10,6 +10,7 @@ store.subscribe(function () {
 });
 
 const rightClickHandle = (e) => {
+    // console.log(e.target.getAttribute('class'));
     // console.log(state.homeState.userInfo.level);
     if(state.homeState.userInfo.level > 4)return;
     if(e.button !== 2){
@@ -35,6 +36,13 @@ const rightClickHandle = (e) => {
                 type: CONSTANT.LOCATION,
                 val: {x: e.clientX, y: e.clientY, display: 'block', obj: id}
             });
+        }else if(e.target.getAttribute('class') === 'channel-list') {
+            //这里为一级房间
+            console.log('创建房间');
+            store.dispatch({
+                type: CONSTANT.LOCATION,
+                val: {x: e.clientX, y: e.clientY, display: 'block', obj: '0'}
+            });
         }else{
             store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
             return;
@@ -45,9 +53,6 @@ const rightClickHandle = (e) => {
 };
 
 class ChannelListBox extends  React.Component{
-    /*state = {
-        data:[]
-    };*/
     componentDidMount(){
         //发送get_rooms消息
         let getRoomsMsg = {
@@ -56,9 +61,12 @@ class ChannelListBox extends  React.Component{
             data:''
         };
         send(JSON.stringify(getRoomsMsg),function () {
-            // console.log('get_rooms');
+            console.log('send get_rooms');
         });
-
+        updateAllRoomListTimer();
+    }
+    componentWillUnmount(){
+        removeTimer();
     }
     render(){
         return(

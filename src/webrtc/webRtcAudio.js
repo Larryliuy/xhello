@@ -76,13 +76,14 @@ function sourceConnectAnalyser(stream) {//观察者模式
         user:state.homeState.userInfo,
     };
     intval = setInterval(function () {
+        // console.log(getVoiceSize(myAnalyser),state.homeState.microphoneOpen,state.homeState.microphoneInput);
         if(getVoiceSize(myAnalyser)>100 && state.homeState.microphoneOpen){
             if(!state.homeState.microphoneInput){
                 console.log('有音源输入');
                 store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:true});
                 msg.inputSource = true;
                 send(JSON.stringify(msg),function () {
-                    // console.log('发送audioSourceInput消息');
+                    console.log('发送audioSourceInput消息：true');
                 })
             }
         }else {
@@ -91,7 +92,7 @@ function sourceConnectAnalyser(stream) {//观察者模式
                 store.dispatch({type: CONSTANT.MICROPHONEINPUT, val: false});
                 msg.inputSource = false;
                 send(JSON.stringify(msg),function () {
-                    // console.log('发送audioSourceInput消息');
+                    console.log('发送audioSourceInput消息：false');
                 })
             }
         }
@@ -107,6 +108,8 @@ function startMyCam(videoBox){
     if (hasUserMedia()) {
         navigator.getUserMedia({ video: false, audio: true }, function(myStream) {
             micphoneStream = myStream;
+            prepareState = true;
+            console.error('prepareState is true');
             //将自己的音轨存入全局state
             // store.dispatch({type:CONSTANT.MYAUDIOTRACK,val:micphoneStream.getAudioTracks()});
             sourceConnectAnalyser(micphoneStream);
@@ -124,10 +127,12 @@ function startMyCam(videoBox){
             myVideo.autoplay=true;
             myVideo.controls=true;
             videoBox.appendChild(myVideo);
-            prepareState = true;
         }, function(error){
-            console.log(error);
+            console.error(error);
+            alert('获取麦克风失败');
         });
+    }else{
+        alert('您的浏览器不支持音视频获取');
     }
 }
 
@@ -179,7 +184,9 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
         myMicSource = webAudio.createMediaStreamSource(micphoneStream);
         mixedOutput  = webAudio.createMediaStreamDestination();
         moMicOutputStream = webAudio.createMediaStreamDestination();
-        // myMicSource.connect(mixedOutput);
+        if(state.homeState.microphoneOpen){
+            myMicSource.connect(mixedOutput);
+        }
         // myMicSource.disconnect(mixedOutput);
         newConnection.addStream(mixedOutput.stream);
         newConnection.onaddstream = function (e) {
@@ -551,9 +558,13 @@ function mixerAudio(stream,pc,type) {
  */
 function closeMicrophone() {
     log('进入closeMicrophone');
-    rtcSessionList.map(function (item) {
-        item.onclosemicrophone();
-    });
+    if(rtcSessionList.length !== 0){
+        rtcSessionList.map(function (item) {
+            item.onclosemicrophone();
+        });
+    }else{
+        console.error('没有人连接,rtcSessionList长度为0');
+    }
     microphoneStatus = false;
     store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
 }
@@ -563,9 +574,14 @@ function closeMicrophone() {
  */
 function openMicrophone() {
     log('进入openMicrophone');
-    rtcSessionList.map(function (item) {
-        item.onopenmicrophone();
-    });
+    console.log(rtcSessionList);
+    if(rtcSessionList.length !== 0){
+        rtcSessionList.map(function (item) {
+            item.onopenmicrophone();
+        });
+    }else{
+        console.error('没有人连接,rtcSessionList长度为0');
+    }
     microphoneStatus = true;
     store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:true});
 }
@@ -601,17 +617,6 @@ function hasRTCPeerConnection() {
  */
 function onLeave(userInfo) {
     log('进入onLeave!'+userInfo.id);
-    // if(userInfo.id == state.homeState.userInfo.id){
-    //     rtcSessionList = rtcSessionList.filter(function (item) {
-    //         // console.log(item);
-    //         if(item.fromUserId == userInfo.id){
-    //             removeInstance(item);
-    //             // log('my peerConnection closed');
-    //             log("我断开连接");
-    //         }
-    //         return item.fromUserId != userInfo.id;
-    //     })
-    // }else{
     rtcSessionList = rtcSessionList.filter(function (item) {
         // console.log(item);
         if(item.toUserId == userInfo.id || item.fromUserId == userInfo.id){
@@ -745,6 +750,10 @@ function initVariableAudio() {
     firstCandidate = 0;
     microphoneStatus = false;
     getRoomUserListCallback = null;
+    store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:false});
+    store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
+    store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:{}});
+    clearInterval(intval);
 }
 
 /**
@@ -766,6 +775,7 @@ function getRoomInfo(roomId){
 /**
  * 入网函数（开始入网）
  */
+let count = 0;
 function startOnline() {
     if(state.homeState.numberOne == state.homeState.userInfo.id){
         console.log('我已经是王了，不需要连别人');
@@ -778,9 +788,13 @@ function startOnline() {
     if(!objUser.minSeqUser){
         console.error('目标用户不存在');
         //目标用户不存在,继续用户用户列表并返回
-        getRoomUserList();
+        if(count<10){
+            getRoomUserList(startOnline);
+            count++;
+        }
         return;
     }
+    count = 0;
     let preOfferMsg = {
         type:'msg',
         typeString:'preOffer',
@@ -790,10 +804,17 @@ function startOnline() {
         fromUser: state.homeState.userInfo,
         toUser:objUser.minSeqUser
     };
-    // console.log(preOfferMsg);
-    send(JSON.stringify(preOfferMsg),function () {
-        log('发送准备连接（pre-offer）消息给 ' + objUser.minSeqUser.id);
-    });
+    if(!prepareState){
+        setTimeout(function () {
+            send(JSON.stringify(preOfferMsg),function () {
+                log('发送准备连接（pre-offer）消息给 ' + objUser.minSeqUser.id);
+            });
+        },500);
+    }else {
+        send(JSON.stringify(preOfferMsg),function () {
+            log('发送准备连接（pre-offer）消息给 ' + objUser.minSeqUser.id);
+        });
+    }
     console.log('nextCandidate:'+objUser.nextCandidate);
     firstCandidate = objUser.nextCandidate;
 }

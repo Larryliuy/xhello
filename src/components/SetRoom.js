@@ -1,10 +1,10 @@
 import React,{ Component } from 'react';
 import { Modal, Input, Select  } from 'antd';
 const Option = Select.Option;
-import WS,{ getSendData, send } from '../static/webSocket.js';
 import store, {CONSTANT} from "../reducer/reducer";
 import {message} from "antd/lib/index";
 import {generalApi} from "../static/apiInfo";
+import { updateRoomInfoById } from "../static/comFunctions";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -34,11 +34,13 @@ class SetRoom extends React.Component{
     }
     handleOk(){
         let roomId = this.props.roomInfo.id,
-            createMsg;
+            roomName = this.state.title,
+            roomColor = this.state.color,
+            roomPassword = this.state.password;
         console.log(roomId+';');
         //这里请求修改房间
         // console.log(this.state);
-        let args = 'action=update&table=room&cond=id='+roomId+'&color='+this.state.color+'&roomName='+this.state.title+'&password='+this.state.password;
+        let args = 'action=update&table=room&cond=id='+roomId+'&color='+roomColor+'&roomName='+roomName+'&password='+roomPassword;
         fetch(generalApi,{
             method:'POST',
             // credentials: "include",
@@ -46,30 +48,14 @@ class SetRoom extends React.Component{
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body:args//JSON.stringify(args)
-        }).then((response) => {/*console.log(response);*/return response.text()})
+        }).then((response) => {/*console.log(response);*/return response.json()})
             .then(data=>{
-                console.log(data);
-                let datatmp;
-                try {
-                    datatmp = JSON.parse(data);
-                    //JSON.parse没问题的情况
-                    console.log(datatmp);
-                    if(datatmp.status === 'ok'){
-                        message.success('修改成功');
-                        //需要更新allRoomList中房间信息,如需要其他用户也及时收到改变信息需要发送websock消息
-                    }else {
-                        message.error('修改失败');
-                    }
-                }catch (e){
-                    //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
-                    datatmp = JSON.parse(data.substring(data.indexOf('{')));
-                    console.log(datatmp);
-                    if(datatmp.status === 'ok'){
-                        message.success('修改成功');
-                        //需要更新allRoomList中房间信息
-                    }else {
-                        message.error('修改失败');
-                    }
+                if(data.status === 'ok'){
+                    message.success('修改成功');
+                    //需要更新allRoomList中房间信息,还有服务器中的房间列表
+                    updateRoomInfoById(roomId,roomName,roomColor,roomPassword);
+                }else {
+                    message.error('修改失败:'+data.data);
                 }
 
             }).catch(err=>{

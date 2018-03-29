@@ -6,12 +6,12 @@ import {
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
-    setRoomInfo, initVariableVideo, getRoomInfoVideo
+    setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream
 } from "../webrtc/webRtcVideo";
 import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 import {blockIpApi, getImgApi} from "./apiInfo";
-import {updataFirstUserAvatar} from "./comFunctions";
+import { updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, enterRoomDelay, leaveRoom} from "./comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -22,13 +22,14 @@ store.subscribe(function () {
 if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
 }
+// let WS = null,lockReconnect = false ,wsUrl = 'ws://192.168.6.3:5555' ;
 // let WS = null,lockReconnect = false ,wsUrl = 'wss://192.168.6.3:443/wss' ;
 let WS = null,lockReconnect = false ,wsUrl = 'wss://a701.xtell.cn:443/wss' ;
 
 if (window.WebSocket) {
     createWebSocket(wsUrl);
 } else {
-    alert("Your browser does not support Web Socket.");
+    alert("您的电脑不支持webSocket,请告更换版本更高的浏览器");
 }
 
 function createWebSocket(url) {
@@ -114,11 +115,6 @@ function initEventHandle(WS) {
     WS.onmessage = onmessage;
 }
 
-export default WS;
-
-//
-
-export {send, heartCheck};
 
 
 //消息对象返回函数
@@ -274,18 +270,27 @@ function onmessage(response){
                     sendFailed();
                     return;
                 }
+                //如果房间模式时1或3，并且downStream不存在则失败
+                let roomInfo = state.homeState.currentRoomInfo;
+                console.error('sempher:'+sempher);
+                console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfoTmp.id);
+                if((roomInfo.mode == 1 || roomInfo.mode == 3) && (!hasDownStream() && roomInfo.king != userInfoTmp.id)){
+                    console.error('Error');
+                    sendFailed();
+                    return;
+                }
                 sempher = sempher - 1;
+                console.error('Children:'+userInfoTmp.Children,userInfoTmp.maxChildren);
                 if(userInfoTmp.Children.length < userInfoTmp.maxChildren){
                     //先占位
                     userInfoTmp.Children.push(dataJson.fromUser.id);//占位符这里的时间差
-                    sempher = sempher + 1;
                     // userInfoTmp.seq = dataJson.toUser.seq;//将我的seq设置给本地state
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
                     sendOK();
                 }else{
-                    sempher = sempher + 1;
                     sendFailed();
                 }
+                sempher = sempher + 1;
                 function sendFailed() {
                     preAnswerMsg = {
                         type:'msg',
@@ -349,6 +354,8 @@ function onmessage(response){
                             }
                         }else {
                             console.error('未知的房间模式或状态：'+ roomMode +',' + getPrepareConnectionState());
+                            //告知来者我这边连接失败
+
                         }
                     },500);
                 }else if(dataJson.status === 'failed'){
@@ -373,6 +380,30 @@ function onmessage(response){
                     }
                     return;
                 }
+            }
+            if(dataJson.typeString === 'childReconnect'){
+                let userInfo = state.homeState.userInfo;
+                let toChildrenMsg = {
+                    type:'msg',
+                    typeString:'childReconnect',
+                    roomId:state.homeState.currentRoomInfo.roomId,
+                    user:userInfo,
+                    newKing:dataJson.newKing
+                };
+                if(getPrepareConnectionState()){
+                    onLeave(userInfo);
+                }
+                if(getPrepareConnectionStateVideo()){
+                    onLeaveVideo(userInfo);
+                }
+                if(userInfo.Children && userInfo.Children.length !== 0){
+                    userInfo.Children.map(function (uId) {
+                        if(uId === dataJson.newKing)return;
+                        toChildrenMsg.ToUserOnly = uId;
+                        send(JSON.stringify(toChildrenMsg),function () {});
+                    })
+                }
+                getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
             }
             // console.log(dataJson);
             if(dataJson.typeString === '放麦'){
@@ -521,7 +552,7 @@ function onmessage(response){
                 return;
             }
             if(dataJson.typeString === 'audioSourceInput'){
-                console.log('收到audioSourceInput消息');
+                console.log('收到audioSourceInput消息:'+dataJson.user.id);
                 // console.log(dataJson);
                 let audioInputUsers = state.homeState.microphoneInputUsers;
                 if(dataJson.inputSource){
@@ -553,7 +584,7 @@ function onmessage(response){
             }
             if(dataJson.typeString === 'agreeToBebarley'){
                 console.log('收到同意连麦的消息');
-                onLeaveVideo(state.homeState.userInfo);
+                onLeaveVideo(state.homeState.userInfo);//在ondisconnect里面会调用
                 let myVideoTag = document.getElementById('secondVideo');
                 startMyCamVideo(myVideoTag,true);
                 let user = dataJson.user;
@@ -578,8 +609,9 @@ function onmessage(response){
                 return;
             }
             if(dataJson.typeString === 'reconnectVideo'){
+                console.log(dataJson);
                 console.log(state.homeState.currentRoomInfo.king);
-                if(dataJson.user.id !== state.homeState.userInfo.id && dataJson.user.id !== state.homeState.currentRoomInfo.king){
+                if(dataJson.user.id !== state.homeState.userInfo.id && state.homeState.userInfo.id !== state.homeState.currentRoomInfo.king){
                     getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
                 }
                 return;
@@ -636,7 +668,7 @@ function onmessage(response){
                             }
 
                         }else {
-                            console.error('未知的房间模式或状态：'+ roomInfo.mode +',' + getPrepareConnectionStateVideo());
+                            console.error('未知的房间模式或状态：'+ roomInfo.mode +',' + getPrepareConnectionStateVideo()+','+getPrepareConnectionState());
                         }
                     }
                     if(dataJson.answer){
@@ -800,7 +832,21 @@ function onmessage(response){
                     videoTag.autoplay = true;
                 }
             }
+            if(dataJson.typeString === 'playAudio'){
+                console.log('receive audio msg:');
+                let audioTag ;
+                if(dataJson.audiotype === 'applause'){
+                    audioTag = document.getElementById('applause-audio');
+                    audioTag.src = './sounds/applause.mp3';
+                }else if(dataJson.audiotype === 'cheer'){
+                    audioTag = document.getElementById('cheer-audio');
+                    audioTag.src = './sounds/cheer.mp3';
+                }
+                audioTag.autoplay = true;
+                return;
+            }
             if(dataJson.typeString === 'changeRoomMode'){
+                sempher = 0;//重置preOffer的锁
                 log('收到改变房间模式消息：'+dataJson.mode+','+dataJson.player);
                 let currentRoomInfo = state.homeState.currentRoomInfo;
                 //初始化服务器userInfo
@@ -820,19 +866,31 @@ function onmessage(response){
                 currentRoomInfo.king = '';
                 currentRoomInfo.secondKing = '';
                 if(dataJson.user.id == state.homeState.userInfo.id && dataJson.player){
+                    // alert('player');
                     if(dataJson.mode != 0){
                         currentRoomInfo.player = dataJson.player;
-                        getRoomInfoVideo(currentRoomInfo.roomId);
+                        // if(!dataJson.newKing){
+                            getRoomInfoVideo(currentRoomInfo.roomId);
+                        // }
+                    }else{
+                        getRoomInfo(currentRoomInfo.roomId);
                     }
+                    // setRoomInfo(currentRoomInfo);
                 }else{
                     //如果是0，即语音模式,则需要去找别人连接
                     if(dataJson.mode == 0){
                         let videoBox = document.getElementById('audioBox');
                         startMyCam(videoBox);
-                        getRoomInfo(currentRoomInfo.roomId);
+                        setTimeout(function () {
+                            getRoomInfo(currentRoomInfo.roomId);
+                        },500);
                         //这里不能直接getRoomInfo，不然会各自连成很多小的圈子
                     }else{
-                        getRoomInfoVideo(currentRoomInfo.roomId)
+                        setTimeout(function () {
+                            // console.log('timer 500:'+new Date().getTime());
+                            // alert('viewer');
+                            getRoomInfoVideo(currentRoomInfo.roomId)
+                        },1000);
                     }
                 }
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
@@ -910,42 +968,7 @@ function onmessage(response){
             //有人进入房间时需要更新AllRoomList
             allRoomListTmp = state.homeState.allRoomList;
             // console.log(dataJson);
-            allRoomListTmp.map(function (item) {
-                if(item.childNode.length !== 0){
-                    item.childNode.map(function (item) {
-                        if(item.roomId == dataJson.roomId.toString()){
-                            let flag = true;//flag表示是否可以插入用户
-                            if(item.childNode){
-                                item.childNode.map(function (uItem) {
-                                    if(uItem.id == dataJson.user.id){
-                                        //如果用户存在列表则不让插入
-                                        flag = false;
-                                    }
-                                })
-                            }
-                            if(flag){
-                                item.childNode.push({
-                                    name:dataJson.user.name,
-                                    id:dataJson.user.id,
-                                    level:dataJson.user.level,
-                                    sex:dataJson.user.sex,
-                                    avatar:dataJson.user.avatar
-                                });
-                            }
-                        }else {
-                            if(item.childNode){
-                                item.childNode = item.childNode.filter(function (uItem) {
-                                    //删除其他房间中的该用户
-                                    return uItem.id != dataJson.user.id;
-
-                                })
-                            }
-                        }
-                    });
-                }
-            });
-            // console.log(allRoomListTmp);
-            store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
+            updateAllRoomListUserInfoByRoomId(dataJson.user,dataJson.roomId);
             //更新（增加）当前房间人数
             let roomInfoEnter = state.homeState.currentRoomInfo;
             roomInfoEnter.totalClients+=1;
@@ -1038,15 +1061,15 @@ function onmessage(response){
             break;
 
         case 'get_room_users':
-            log('收到get_room_users消息');
+            // log('收到get_room_users消息');
             let UserInfoList = [], userIdList = [], userInfo = state.homeState.userInfo;
-            console.log(dataJson.data);
+            // console.log(dataJson.data);
             if(dataJson.data && dataJson.data[userInfo.id]){
                 userInfo = dataJson.data[userInfo.id];
                 store.dispatch({type:CONSTANT.USERINFO,val:userInfo});//将从服务器获取的最新userInfo更新到本地
             }
             if(dataJson.data && Object.keys(dataJson.data).length > 1) {
-                // console.log(dataJson.user);
+                // console.log(dataJson.user);R
                 for (let item in dataJson.data) {
                     if(item != userInfo.id ){
                         UserInfoList.push(dataJson.data[item]);
@@ -1071,8 +1094,6 @@ function onmessage(response){
                     callbackTmp();
                 }
             }
-
-
            //更新左侧列表
             allRoomListTmp = state.homeState.allRoomList;
             // console.log(allRoomListTmp);
@@ -1095,7 +1116,7 @@ function onmessage(response){
                 }
             };
             allRoomListTmp.map(function (item) {
-                if(item.childNode){
+                if(item.childNode && item.childNode.length !== 0){
                     item.childNode.map(function (item) {
                         if(item.roomId == dataJson.roomId){
                             item.childNode=[];
@@ -1123,6 +1144,7 @@ function onmessage(response){
             console.log(dataJson.data);
             // alert(dataJson.data.advertisementFileId,dataJson.data.avatarFileId);
             let roomInfo = dataJson.data;
+            // console.error(roomInfo.mode);
             store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
             store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:roomInfo.onMicrophoneUsers});
             //这里如果我已经在播放，则不需要重新播放了
@@ -1143,6 +1165,7 @@ function onmessage(response){
             }else{
                 initVariableAudio();
             }
+            // console.error("king:"+roomInfo.king+','+new Date().getTime());
             if(roomInfo.king && roomInfo.king != state.homeState.userInfo.id){
                 store.dispatch({type:CONSTANT.NUMBERONE,val:roomInfo.king});
                 if(state.homeState.currentRoomInfo.mode == 0){
@@ -1158,12 +1181,14 @@ function onmessage(response){
                     }
                     getRoomUserListVideo(startOnlineVideo);
                 }else{
+                    // alert('already:'+roomInfo.king);
                     log('king已存在，我要入网:'+state.homeState.currentRoomInfo.mode);
                     startMyCamVideo(null,false);
                     getRoomUserListVideo(startOnlineVideo);
                 }
             }else{
                 //申请成为老大
+                // alert('applyToBeFirst:'+roomInfo.king);
                 log('没有king，我要申请成为新的king');
                 applyToBeFirst();
             }
@@ -1204,6 +1229,10 @@ function onmessage(response){
                 getRoomInfo(state.homeState.currentRoomInfo.roomId);
             }
             break;
+        case 'reset_king':
+           console.log('reset_king:');
+           console.log(dataJson);
+            break;
         case 'get_rooms':
             // console.log(dataJson.data);
             let dataTmp = [],
@@ -1224,16 +1253,22 @@ function onmessage(response){
                     }
                 })
             });
-
             // console.log(dataTmp);
             // console.log(ids);
             if(dataTmp.length === 0)return;
-            store.dispatch({type:CONSTANT.ALLROOMLIST,val:dataTmp});
-            store.dispatch({type:CONSTANT.CURRENTROOMINFO,
-                val:dataTmp[0].childNode[0]});
-            store.dispatch({type:CONSTANT.LASTROOMINFO,
-                val:dataTmp[0].childNode[0]});
-
+            let allRoomList = state.homeState.allRoomList;
+            if(!allRoomList){
+                store.dispatch({type:CONSTANT.ALLROOMLIST,val:dataTmp});
+            }else{
+                //将两个roomList作对比，不一样的增加进现有的就可以
+                getNewAllRoomList(dataTmp);
+            }
+            // store.dispatch({type:CONSTANT.CURRENTROOMINFO,
+            //     val:dataTmp[0].childNode[0]});
+            // store.dispatch({type:CONSTANT.LASTROOMINFO,
+            //     val:dataTmp[0].childNode[0]});
+            getUserListforAllRoomList(dataTmp);
+            // console.log(dataTmp);
             break;
         case 'create_room':
             break;
@@ -1249,6 +1284,50 @@ function onmessage(response){
     scrollToBottom();
 }
 
+/**
+ * 根据用户信息和房间ID更新room-list列表
+ * */
+function updateAllRoomListUserInfoByRoomId(userInfo,roomId) {
+    console.log('updateAllRoomListUserInfoByRoomId');
+    let allRoomListTmp = state.homeState.allRoomList;
+    // console.log(dataJson);
+    allRoomListTmp.map(function (item) {
+        if(item.childNode.length !== 0){
+            item.childNode.map(function (item) {
+                if(item.roomId == roomId.toString()){
+                    let flag = true;//flag表示是否可以插入用户
+                    if(item.childNode){
+                        item.childNode.map(function (uItem) {
+                            if(uItem.id == userInfo.id){
+                                //如果用户存在列表则不让插入
+                                flag = false;
+                            }
+                        })
+                    }
+                    if(flag){
+                        item.childNode.push({
+                            name:userInfo.name,
+                            id:userInfo.id,
+                            level:userInfo.level,
+                            sex:userInfo.sex,
+                            avatar:userInfo.avatar
+                        });
+                    }
+                }else {
+                    if(item.childNode){
+                        item.childNode = item.childNode.filter(function (uItem) {
+                            //删除其他房间中的该用户
+                            return uItem.id != userInfo.id;
+                        })
+                    }
+                }
+            });
+        }
+    });
+    store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
+}
+
+
 function log(message) {
     console.log(state.homeState.userInfo.id+'==='+message);
     //送到服务器后台
@@ -1261,3 +1340,9 @@ function log(message) {
 
     })
 }
+
+export default WS;
+
+//
+
+export {send, heartCheck, updateAllRoomListUserInfoByRoomId};

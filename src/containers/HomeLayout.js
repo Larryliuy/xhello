@@ -19,7 +19,7 @@ import '../static/login.scss'
 import { send } from "../static/webSocket";
 import { startMyCam } from '../webrtc/webRtcAudio';
 import {startMyCamVideo} from "../webrtc/webRtcVideo";
-import { getImgApi } from "../static/apiInfo";
+import {getUserInfo} from "../static/comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -48,7 +48,7 @@ class HomeLayout extends React.Component {
         // 防止websock会空闲时断, 每5秒发送一个数据包,保持心跳
         setInterval(function () {
             let Msg = {
-                roomId:state.homeState.currentRoomInfo.id,
+                roomId:state.homeState.currentRoomInfo.roomId,
                 typeString:'heartBeat',
                 check:1
             };
@@ -98,25 +98,10 @@ class HomeLayout extends React.Component {
         dragBar.onmouseup = function(event){
             document.onmousemove = null;
         };
-        //
-
-        //页面刷新时关闭socket
-        // window.onbeforeunload = function (event) {
-        //     let data = state.homeState.userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
-        //         leaveMsg = getSendData(
-        //             'leave_room',
-        //             state.homeState.currentRoomInfo.roomId,
-        //             state.homeState.currentRoomInfo.roomName,
-        //             state.homeState.userInfo,
-        //             data);
-        //     send(JSON.stringify(leaveMsg),function(){
-        //         WS.close();
-        //         onLeave(state.homeState.userInfo);
-        //     });
-        //     event.returnValue = "离开页面将丢失信息";
-        //     // return "离开页面将丢失信息！";
-        // }
-        //获取用户头像并更换
+        //获取用户环境信息，紧用于测试
+        setTimeout(function () {
+            getUserInfo();
+        },5000)
     }
     componentWillUnmount(){
         //解绑事件监听

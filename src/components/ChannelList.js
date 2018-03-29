@@ -3,9 +3,10 @@ import { Icon, Modal } from 'antd';
 import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send } from '../static/webSocket.js';
+import { getUserIconSrc, getRoomUsersCount,getSingleRoomUserCounts } from '../static/comFunctions';
 import '../static/login.scss';
-import { onLeave, getRoomInfo, getPrepareConnectionState} from "../webrtc/webRtcAudio";
-import { onLeaveVideo, getRoomInfoVideo, getPrepareConnectionStateVideo} from "../webrtc/webRtcVideo";
+import { onLeave, getRoomInfo, getPrepareConnectionState, initVariableAudio } from "../webrtc/webRtcAudio";
+import { onLeaveVideo, getPrepareConnectionStateVideo} from "../webrtc/webRtcVideo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -28,7 +29,7 @@ class ChannelList extends React.Component{
         //数据从父组件来
         let _this = this;
         //暂时使用定时器解决，后续方案需使用redux-saga解决
-        /*intval =*/ setTimeout(function () {
+        setTimeout(function () {
             if(state.homeState.allRoomList.length !== 0){
                 const datas = state.homeState.allRoomList;
                 // console.log(datas);
@@ -39,21 +40,21 @@ class ChannelList extends React.Component{
                 console.log(state.homeState.currentRoomInfo);*/
                 tRoomStatus['r'+datas[0].roomId] = true;
                 tRoomStatus['rc'+datas[0].childNode[0].roomId] = true;
-
+                let firstRoom = datas[0].childNode[0];
                 // console.log('crid：'+state.homeState.currentRoomInfo.id);
                 //判断用户是否在房间里 && WS.send(JSON.stringify({type:'in_room'}))
-                if(state.homeState.currentRoomInfo.roomId){
+                if(firstRoom.roomId){
                     let data = state.homeState.userInfo.name + "<p>进入了房间</p>",
                         enterMsg = getSendData(
                             'enter_room',
-                            state.homeState.currentRoomInfo.roomId,
-                            state.homeState.currentRoomInfo.roomName,
+                            firstRoom.roomId,
+                            firstRoom.roomName,
                             state.homeState.userInfo,
                             data);
                     // console.log(enterMsg);
                     send(JSON.stringify(enterMsg),function(){
                         // getRoomUserList(startOnline);
-                        getRoomInfo(state.homeState.currentRoomInfo.roomId);
+                        getRoomInfo(firstRoom.roomId);
                     });
                     //需要默认将默认房间信息更新到当前房间
                 }else{
@@ -72,7 +73,7 @@ class ChannelList extends React.Component{
         WS.close();
     }
     //这里做分离自己进入房间事件，其他人进入房间进去，封装一个getList
-    enterRoom(roomIdInt,roomName){
+    switchRoom(roomIdInt,roomName){
         if(!roomIdInt || !roomName) return;
             //离开上一个聊天室
         let userInfo = state.homeState.userInfo;
@@ -88,6 +89,7 @@ class ChannelList extends React.Component{
             store.dispatch({type:CONSTANT.NUMBERONE,val:0});
             if(getPrepareConnectionState()){
                 onLeave(state.homeState.userInfo);
+                initVariableAudio()
             }
             if(getPrepareConnectionStateVideo()){
                 onLeaveVideo(state.homeState.userInfo);
@@ -130,18 +132,6 @@ class ChannelList extends React.Component{
         // this.setState({roomStatus:tRoomState});
         store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
         getRoomInfo(roomIdInt.toString());
-        // getRoomUserList(startOnline);
-        // //获取房间里用户列表信息
-        // let getUsersInfo = getSendData(
-        //     'get_room_users',
-        //     roomIdInt,
-        //     roomName,
-        //     state.homeState.userInfo,
-        //     data);
-        // // WS.send(JSON.stringify(enterMsg));
-        // send(JSON.stringify(getUsersInfo),function(){
-        //
-        // });
     }
     dblClickHandle = (event) =>{
         // if(event.target.id.indexOf('rc') === -1)return;
@@ -150,7 +140,9 @@ class ChannelList extends React.Component{
         let roomIdInt = parseInt(roomId.substring(2,roomId.length));
         let roomName = event.target.innerText;
         this.setState({clickRoomInfo:{id:roomIdInt,title:roomName}});
-        // console.log(event.target.innerText);
+        // console.log(roomId,roomName);
+        // console.log(state.homeState.userInfo);
+        // console.log(state.homeState.currentRoomInfo);
         //如果双击的不是房间则直接返回
         // console.log(state.homeState.currentRoomInfo.roomId+','+roomId);
         if(roomId.indexOf('rc') === -1 || ('rc'+state.homeState.currentRoomInfo.roomId) === roomId ) return;
@@ -168,7 +160,7 @@ class ChannelList extends React.Component{
                             return;
                         }else{
                             // console.log(roomIdInt+','+roomName);
-                            _this.enterRoom(roomIdInt,roomName);
+                            _this.switchRoom(roomIdInt,roomName);
                         }
                     }
                 });
@@ -200,13 +192,12 @@ class ChannelList extends React.Component{
         // console.log(typeof this.state.roomPassword+':'+typeof this.state.inputPassword);
         if(this.state.roomPassword === this.state.inputPassword){
             this.setState({passwordModal:false});
-            this.enterRoom(this.state.clickRoomInfo.id,this.state.clickRoomInfo.title);
+            this.switchRoom(this.state.clickRoomInfo.id,this.state.clickRoomInfo.title);
         }else{
             Modal.info({
                 title:'密码错误'
             })
         }
-
     }
     handleCancel(){
         this.setState({passwordModal:false})
@@ -214,63 +205,7 @@ class ChannelList extends React.Component{
     render(){
         const { roomStatus } = state.homeState;
         const clickOpenHandle = this.clickOpenHandle;
-        const getUserIconSrc = (sex,level) =>{
-            let src = '';
-            switch(level){
-                case 1:
-                    /*if(sex === 1){
-                        src = 'p_man.png';
-                    }else{
-                        src = 'p_female.png';
-                    }
-                    break;*/
-                case 2:
-                    if(sex === 1){
-                        src = 'p_man.png';
-                    }else{
-                        src = 'p_female.png';
-                    }
-                    break;
-                case 3:
-                    if(sex === 1){
-                        src = 'admin_man1.png';
-                    }else{
-                        src = 'admin_female1.png';
-                    }
-                    break;
-                case 4:
-                    if(sex === 1){
-                        src = 'admin_man2.png';
-                    }else{
-                        src = 'admin_female2.png';
-                    }
-                    break;
-                case 5:
-                    if(sex === 1){
-                        src = 'vip_man1.png';
-                    }else{
-                        src = 'vip_female1.png';
-                    }
-                    break;
-                case 6:
-                    if(sex === 1){
-                        src = 'vip_man2.png';
-                    }else{
-                        src = 'vip_female2.png';
-                    }
-                    break;
-                case 7:
-                    if(sex === 1){
-                        src = 'c_man.png';
-                    }else{
-                        src = 'c_female.png';
-                    }
-                    break;
-            }
-            // console.log(src);
-            return "./images/icons/"+src;
-        };
-        // console.log(state.homeState.allRoomList);
+
         return (
             <div style={{paddingLeft:'20px',minWidth:'240px',overflowX:'scroll',height:'100%'}}
                  onDoubleClick={this.dblClickHandle}
@@ -281,14 +216,14 @@ class ChannelList extends React.Component{
                 {state.homeState.allRoomList && state.homeState.allRoomList.map(function (item) {
                     return <li id={'r'+item.roomId} key={'r'+item.roomId}>
                         <span onClick={clickOpenHandle}><Icon type={roomStatus['r'+item.roomId] ?"minus" : "plus"} /> </span>
-                        <span id={item.roomId+'r'}>{item.roomName}</span>
+                        <span id={item.roomId+'r'}>{item.roomName}</span><span className={'room-online-count'}>{" ("+getRoomUsersCount(item.childNode)+")"}</span>
                         {roomStatus['r'+item.roomId] && item.childNode &&
                         <ul style={{paddingLeft:'10px'}}>
                             {item.childNode.map(function (item) {
                                 // console.log(item)
                                 return <li id={'rc'+item.roomId} key={'rc'+item.roomId}>
                                     <span onClick={clickOpenHandle}><Icon type={roomStatus['rc'+item.roomId] ?"minus" : "plus"} /></span>
-                                    <span id={item.roomId+'rc'}>{item.roomName}</span>
+                                    <span id={item.roomId+'rc'}>{item.roomName}</span><span className={'room-online-count'}>{" ("+getSingleRoomUserCounts(item)+")"}</span>
                                     {roomStatus['rc'+item.roomId] && item.childNode &&
                                     <ul style={{paddingLeft:'15px'}}>
                                         {item.childNode.map(function (item) {

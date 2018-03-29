@@ -16,12 +16,14 @@ class AdvertisementBox extends React.Component{
         setTimeout(function () {
             let fileId = state.homeState.currentRoomInfo.advertisementFileId;
             //根据请求获取用户头像
-            fetch(getImgApi+fileId+".dat")
-                .then(res=>{/*console.log(res)*/return res.text()})
-                .then(data=>{
-                    _this.setState({advertisement:data});
-                })
-                .catch(e=>console.error(e))
+            if(fileId && fileId != 0){
+                fetch(getImgApi+fileId+".dat")
+                    .then(res=>{/*console.log(res)*/return res.text()})
+                    .then(data=>{
+                        _this.setState({advertisement:data});
+                    })
+                    .catch(e=>console.error(e))
+            }
         },100);
     }
     onClickHandle(e){

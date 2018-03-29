@@ -1,8 +1,9 @@
 import React,{ Component } from 'react';
 import { Modal, Input, Select  } from 'antd';
 const Option = Select.Option;
-import WS,{ getSendData, send } from '../static/webSocket.js';
-import store from "../reducer/reducer";
+import WS,{ upDateAllRoomList, send } from '../static/webSocket.js';
+import { createRoom } from '../static/comFunctions';
+import store, {CONSTANT} from "../reducer/reducer";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -20,17 +21,19 @@ class CreateRoom extends React.Component{
             parentId=0,
             roomList = state.homeState.allRoomList,
             order;//房间的排序值
-        if(roomList.length === 1){
+        if(roomList.length === 0){
             order = 1;
         }else{
             order = Number(roomList[roomList.length-1].order)+1;
         }
         if(roomType === 2){ //创建子房间
-            parentId = state.homeState.location.obj.substring(1);
+            let objId = state.homeState.location.obj;
+            parentId = parseInt(objId)? parseInt(objId):objId.substring(1);
+            console.log(parentId);
             //获取order值
             roomList.map(function (item) {
                 if(item.roomId == parentId){
-                    if(item.childNode.length === 1){
+                    if(item.childNode.length === 0){
                         order = 1;
                     }else{
                         order = Number(item.childNode[item.childNode.length-1].order)+1;
@@ -51,27 +54,7 @@ class CreateRoom extends React.Component{
         };
         // console.log(roomType);
         console.log(createMsg);
-        //这里请求创建房间
-        send(JSON.stringify(createMsg),function () {
-            //创建完成后获取最新的房间列表
-            let getRoomsMsg = {
-                type:'get_rooms',
-                user:state.homeState.userInfo,
-                data:''
-            };
-            send(JSON.stringify(getRoomsMsg),function () {
-                //创建房间后是否需要立即进入房间未知
-                /*let enterMsg = getSendData(
-                    'enter_room',
-                    state.homeState.currentRoomInfo.roomId,
-                    state.homeState.currentRoomInfo.roomName,
-                    state.homeState.userInfo);
-                // WS.send(JSON.stringify(enterMsg));
-                send(JSON.stringify(enterMsg),function(){
-
-                });*/
-            });
-        });
+        createRoom(createMsg);
         // console.log(this.state);
         this.props.setVisible();
     }

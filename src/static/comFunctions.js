@@ -2,9 +2,15 @@
  * 整体说明，可变变量使用let定义，需要se6及以上才可以直接使用
  */
 
-import {getImgApi} from "./apiInfo";
+import { generalApi, getImgApi } from "./apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
-
+import { message } from 'antd';
+import {send, updateAllRoomListUserInfoByRoomId} from "./webSocket";
+import {setRoomInfo} from "../webrtc/webRtcVideo";
+let state = store.getState();
+store.subscribe(function () {
+    state = store.getState();
+});
 /**
  * 用于生产随机字符串的数组
  * @param randomFlag 是否随机
@@ -208,4 +214,400 @@ function getUserIconSrc(sex,level) {
     // console.log(src);
     return "./images/icons/"+src;
 }
-export { randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback, getUserIconSrc, updataFirstUserAvatar }
+
+/**
+ * 创建房间
+ * */
+
+function createRoom(roomInfo) {
+    let createMsg = roomInfo;
+    createMsg.type = 'create_room';
+    // createMsg.roomId = data.data;
+    //这里请求创建房间
+    console.log(createMsg.roomId);
+    send(JSON.stringify(createMsg),function () {
+        //创建完成后获取最新的房间列表
+        let getRoomsMsg = {
+            type:'get_rooms',
+            user:state.homeState.userInfo,
+            data:''
+        };
+        send(JSON.stringify(getRoomsMsg),function () {
+            setTimeout(function () {
+                updateAllRoomListUserInfoByRoomId(state.homeState.userInfo,state.homeState.currentRoomInfo.roomId);
+            },500);
+        });
+    });
+}
+
+/**
+ * 根据房间ID更新房间信息
+ * */
+function updateRoomInfoById(roomId,roomName,roomColor,roomPassword) {
+    console.log('updateAllRoomListRoomInfoByRoomId');
+    let allRoomListTmp = state.homeState.allRoomList;
+    // console.log(dataJson);
+    let objRoomInfo = null;
+    allRoomListTmp.map(function (item) {
+        if(item.childNode.length !== 0){
+            item.childNode.map(function (item) {
+                if(item.roomId == roomId){
+                    item.roomName = roomName;
+                    item.color = roomColor;
+                    item.password = roomPassword;
+                    objRoomInfo = item;
+                }
+            });
+        }
+    });
+    let setRoomMsg = {
+        type:'set_room_info',
+        roomId:roomId,
+        user:state.homeState.userInfo,
+        data:objRoomInfo
+    };
+    console.log(objRoomInfo);
+    send(JSON.stringify(setRoomMsg),function () {
+        console.log('发送set roomInfo消息服务器:');
+    });
+    // console.log(allRoomListTmp);
+    store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
+}
+
+
+/**
+ * http 根据roomId删除房间
+ * */
+function deleteRoomById(roomId) {
+    let args = '?action=del&table=room&cond=id='+roomId;
+    fetch(generalApi+args)
+        .then(res=>res.json())
+        .then(data=>{
+            console.log(data);
+            if(data.status === 'ok'){
+                message.success('删除成功');
+            }else{
+                message.error('删除失败：'+data.msg);
+            }
+        })
+        .catch(e=>console.error(e));
+}
+
+/**
+ * 定时更新allRoomList
+ * */
+let timer = null;
+function updateAllRoomListTimer() {
+    let getRoomsMsg = {
+        type:'get_rooms',
+        user:state.homeState.userInfo,
+        data:''
+    };
+    timer = setInterval(function () {
+        console.log('timer update');
+        send(JSON.stringify(getRoomsMsg),function () {
+            // console.log('get_rooms');
+        });
+    },20000);
+}
+
+/**
+ * 清除updateAllRoomListTimer的的timer
+ * */
+
+function removeTimer() {
+    clearInterval(timer);
+}
+
+/**
+ * 根据房间id列表获取个房间的用户列表
+ * */
+function getUserListforAllRoomList(roomList) {
+    let allRoomList = roomList,
+        userInfo = state.homeState.userInfo,roomInfo = state.homeState.currentRoomInfo;
+    let getUsersMsg = {
+        type:'get_room_users',
+        user:userInfo,
+    };
+    allRoomList.map(function (item) {
+        if (item.childNode && item.childNode.length !== 0){
+            item.childNode.map(function (citem) {
+                // if(citem.roomId !== roomInfo.roomId){
+                getUsersMsg.roomId = citem.roomId;
+                send(JSON.stringify(getUsersMsg),function(){});
+                // }
+            })
+        }
+    })
+}
+
+/**
+ * 房间列表获取所有房间的用户总数
+ * */
+function getRoomUsersCount(rooms){
+    // console.log(rooms);
+    let count = 0;
+    if(rooms && rooms.length !== 0){
+        rooms.map(function (item) {
+            if(item.childNode.length !== 0){
+                count += item.childNode.length;
+            }
+        })
+    }
+    return count;
+}
+
+function getSingleRoomUserCounts(room) {
+    let count = 0;
+    if(room.childNode && room.childNode.length !== 0){
+        count = room.childNode.length;
+    }else{
+        count = 0;
+    }
+    return count;
+}
+
+/**
+ * 根据用户ID找到他所在的房间（位置）
+ * */
+
+function getLocationBtUserId(userId) {
+    let result = {r:'',cr:'',u:''};
+    let allRoomList = state.homeState.allRoomList;
+    allRoomList.map(function (item) {
+        if(item.childNode && item.childNode.length !== 0){
+            item.childNode.map(function (citem) {
+                if(citem.childNode && citem.childNode.length !== 0){
+                    citem.childNode.map(function (uitem) {
+                        if(uitem.id === userId){
+                            result.u = uitem.id;
+                            result.cr = citem.roomId;
+                            result.r = item.roomId;
+                            let roomStatueTmp = state.homeState.roomStatus;
+                            roomStatueTmp['rc'+citem.roomId] = true;
+                            roomStatueTmp['r'+item.roomId] = true;
+                            store.dispatch({type:CONSTANT.ROOMSTATUS,val:roomStatueTmp});
+                        }
+                    })
+                }
+            })
+        }
+    });
+    return result;
+}
+
+/**
+ * 用于发送欢呼鼓掌音频
+ * */
+function sendCheerAudio(type) {
+    let msg = {
+        type:'msg',
+        typeString:'playAudio',
+        roomId:state.homeState.currentRoomInfo.roomId,
+        user:state.homeState.userInfo
+    };
+    if(type === 'cheer'){
+        msg.audiotype = 'cheer'
+    }else if(type === 'applause'){
+        msg.audiotype = 'applause'
+    }
+    send(JSON.stringify(msg),function () {
+        console.log('send play music msg');
+    })
+
+}
+
+/**
+ * 将新的allRoomList做比较
+ * */
+function getNewAllRoomList(newRoomList) {
+    let oldAllRoomList = state.homeState.allRoomList,
+        newAllRoomList = state.homeState.allRoomList;
+    newRoomList.map(function (item) {
+        if (inRoomList(item.roomId, oldAllRoomList)) {
+            item.childNode && item.childNode.map(function (cItem) {
+                if (!incRoomList(cItem.roomId, item.roomId, oldAllRoomList)) {
+                    newAllRoomList.map(function (xitem) {
+                        if (item.roomId === xitem.roomId) {
+                            xitem.childNode.push(cItem);
+                        }
+                    })
+                }
+            })
+        } else {
+            newAllRoomList.push(item);
+        }
+    });
+    store.dispatch({type: CONSTANT.ALLROOMLIST, val: newAllRoomList});
+}
+
+/**
+ * 判断是否在父房间列表
+ * */
+function inRoomList(roomId,rooms) {
+    let result = false;
+    rooms.map(function (item) {
+        if(item.roomId === roomId){
+            result = true;
+        }
+    });
+    return result;
+}
+
+
+/**
+ * 判断是否在子房间列表
+ * */
+function incRoomList(cRoomId,roomId,rooms) {
+    let result = false;
+    rooms.map(function (item) {
+        if(item.roomId === roomId){
+            item.childNode && item.childNode.map(function (cItem) {
+                if(cRoomId === cItem.roomId){
+                    result = true;
+                }
+            })
+        }
+    });
+    return result;
+}
+
+
+/**
+ * 离开房间
+ * */
+function leaveRoom(roomId) {
+   alert(roomId);
+    let msg = {
+        type:'leave_room',
+        roomId:roomId,
+        user:state.homeState.userInfo
+    };
+    send(JSON.stringify(msg),function () {
+    });
+}
+
+/**
+ * 延时进入房间
+ * */
+function enterRoomDelay(roomId) {
+    let msg = {
+        type:'enter_room',
+        roomId:roomId,
+        user:state.homeState.userInfo
+    };
+    setTimeout(function () {
+        send(JSON.stringify(msg),function () {
+        });
+    },500);
+
+}
+/**
+ * 用户情况抓取，比如浏览器代理，是否只是webSocket，webRTC，webAudio等,用户测试
+ * */
+
+function getUserInfo() {
+    let info = {};
+    //getUserMedia
+    info.name = state.homeState.userInfo.name;
+    navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia;
+    info.getUserMedia =  !!navigator.getUserMedia;
+    //RTCPeerConnection
+    window.RTCPeerConnection = window.RTCPeerConnection ||
+        window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+    window.RTCSessionDescription = window.RTCSessionDescription ||
+        window.webkitRTCSessionDescription ||
+        window.mozRTCSessionDescription;
+    window.RTCIceCandidate = window.RTCIceCandidate ||
+        window.webkitRTCIceCandidate || window.mozRTCIceCandidate;
+    info.RTCPeerConnection =  !!window.RTCPeerConnection+','+!!window.RTCSessionDescription+','+!!window.RTCIceCandidate;
+    //webAudio
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    info.webAudio =  !!window.AudioContext;
+    //webSocket
+    window.WebSocket = window.WebSocket || window.MozWebSocket;
+    info.WebSocket = !!window.WebSocket;
+    //user-agent
+    info.appName = navigator.appName;
+    info.appVersion = navigator.appVersion;
+    info.appCodeName = navigator.appCodeName;
+    info.userAgent = navigator.userAgent;
+    console.log(info);
+    //浏览器信息
+    /*let browser = getBrowserInfo();
+    console.log(browser);
+    let getArgs = '?action=get&table=userTestInfo&cond=userName=%22'+info.name+'%22=userMedia=%22'+info.getUserMedia+'%22=rtc=%22'+info.RTCPeerConnection
+    +'%22=webSocket=%22'+info.WebSocket+'%22=webAudio=%22'+info.webAudio+'%22=appName=%22'+browser.type+'%22=userAgent=%22'+info.userAgent+'%22=appCodeName=%22'+browser.ver+'%22';
+    let addArgs = '?action=add&table=userTestInfo&userName='+info.name+'&userMedia='+info.getUserMedia+'&rtc='+info.RTCPeerConnection
+        +'&webSocket='+info.WebSocket+'&webAudio='+info.webAudio+'&appName='+browser.type+'&userAgent='+info.userAgent+'&appCodeName='+browser.ver;
+    fetch(generalApi+getArgs)
+        .then(res=>res.json())
+        .then(data=>{
+            console.log(data);
+            if(data.data && data.data.length === 0){
+                fetch(generalApi+addArgs)
+                    .then(res=>res.json())
+                    .then(data=>{
+                        if(data.status === 'ok'){
+                            console.log('添加成功');
+                        }
+                    })
+                    .catch(e=>console.error(e));
+            }
+        })
+        .catch(e=>console.error(e));*/
+}
+
+function getBrowserInfo(){
+    var Sys={};
+    var ua=navigator.userAgent.toLowerCase();
+    var s;
+    (s=ua.match(/msie ([\d.]+)/))?Sys.ie=s[1]:
+        (s=ua.match(/firefox\/([\d.]+)/))?Sys.firefox=s[1]:
+            (s=ua.match(/chrome\/([\d.]+)/))?Sys.chrome=s[1]:
+                (s=ua.match(/opera.([\d.]+)/))?Sys.opera=s[1]:
+                    (s=ua.match(/version\/([\d.]+).*safari/))?Sys.safari=s[1]:0;
+    if(Sys.ie){//Js判断为IE浏览器
+        return {
+            'type':'ie',
+            'ver':Sys.ie
+        };
+    }
+    if(Sys.firefox){//Js判断为火狐(firefox)浏览器
+        return {
+            'type':'firefox',
+            'ver':Sys.firefox
+        };
+    }
+    if(Sys.chrome){//Js判断为谷歌chrome浏览器
+        return {
+            'type':'chrome',
+            'ver':Sys.chrome
+        };
+    }
+    if(Sys.opera){//Js判断为opera浏览器
+        return {
+            'type':'opera',
+            'ver':Sys.opera
+        };
+    }
+    if(Sys.safari){//Js判断为苹果safari浏览器
+        return {
+            'type':'safari',
+            'ver':Sys.safari
+        };
+    }
+    return {
+        'type':'unknow',
+        'ver':-1
+    };
+}
+export {
+    randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,
+    getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
+    deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
+    getRoomUsersCount,getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
+    getNewAllRoomList, getUserInfo, leaveRoom, enterRoomDelay
+}

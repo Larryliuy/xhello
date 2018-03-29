@@ -91,6 +91,10 @@ class HeaderLeft extends Component{
                 }).catch(err=>console.log(err));
         }
     }
+    getUserCounts(){
+        let roomInfo = state.homeState.currentRoomInfo;
+        return roomInfo.totalClients ? roomInfo.totalClients : 0;
+    }
     render(){
         const content = (<div style={{width:'200px'}}>
             <Input onChange={(e)=>this.userNameChange(e)} placeholder={'请输入用户名'}/>
@@ -120,7 +124,7 @@ class HeaderLeft extends Component{
                     </div>
                     <div style={{height:'50%',width:'100%',color:'white',fontSize:'14px',lineHeight:'24px'}}>
                         在线:
-                        <label style={{paddingRight:'23px'}}>{state.homeState.currentRoomInfo.totalClients}</label>
+                        <label style={{paddingRight:'23px'}}>{this.getUserCounts()}</label>
                         <img onClick={collectImgClick}
                              style={headLeftImg}
                              src="./images/icons/star.png"

@@ -54,9 +54,8 @@ class VideoOnDemand extends React.Component{
             videoSrc = "https://v.qq.com/iframe/player.html?vid="+videoId+"&tiny=0";
         }
         console.log(videoSrc);
+        sendSrcMsg.vodSrc = videoSrc;
         vodVideo.src = videoSrc;
-        vodVideo.autoplay=true;
-        vodVideo.controls=true;
         send(JSON.stringify(sendSrcMsg),function () {
             console.log('视频连接已广播');
             //set_room_info

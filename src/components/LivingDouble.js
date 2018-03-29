@@ -30,7 +30,7 @@ class LivingDouble extends React.Component{
 
     }
     onAgreeToBebarley(e){
-        onLeaveVideo(state.homeState.userInfo);
+        // onLeaveVideo(state.homeState.userInfo);//ondisconnect里面有调用此方法
         console.log(e.target.style.zIndex);
         if(!e.target.style.zIndex){console.error('用户ID未获取到:'+e.target.style.zIndex);return;}
         let msg = {

@@ -19,3 +19,4 @@ export {
     domian, homePage , blockIpApi, blockUserApi,
     uploadJpegApi, getImgApi, getUserInfoApi
 };
+
