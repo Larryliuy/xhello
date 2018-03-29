@@ -114,7 +114,7 @@ function startMyCam(videoBox){
             //将自己的音轨存入全局state
             // store.dispatch({type:CONSTANT.MYAUDIOTRACK,val:micphoneStream.getAudioTracks()});
             sourceConnectAnalyser(micphoneStream);
-            console.log(micphoneStream);
+            // console.log(micphoneStream);
             myVideo = document.createElement('video');
             myVideo.src = window.URL.createObjectURL(micphoneStream);
             myVideo.addEventListener('canplay', function(){
@@ -207,6 +207,8 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 Msg.candidate = event.candidate;
                 send(JSON.stringify(Msg),function () {
                     log("发送 candidate 给 "+Msg.toUser.id);
+                    //5秒后去检查这个链接是否连接成功，没有连接成功，则清除rtcSessionList，并重新发出连接请求
+                    checkPeerConnectionStatus(Msg.toUser.id,type);
                 })
             }
         };
@@ -630,6 +632,40 @@ function onLeave(userInfo) {
     });
     // }
     // console.log(rtcSessionList);
+}
+
+/**
+ * 用于检测pc是否连接成功,成功不坐任何事，失败直接kill
+ * */
+function checkPeerConnectionStatus(toUserId,type) {
+    //3秒后如果还是在连接中，则answer清除rtsSession,offer清除并重新连接
+    setTimeout(function () {
+        rtcSessionList.map(function (item) {
+            // console.log(item);
+            if(item.toUserId == toUserId || item.fromUserId == toUserId){
+                if(item.state === 'connecting'){
+                    removeInstance(item);
+                    delRtcSession(toUserId);
+                    //是否需要重新连接
+                    if(type === 'offer'){
+                        // 重新去连接(入网)
+                        console.error('连接超时,重新入网');
+                        getRoomInfo(state.homeState.currentRoomInfo.roomId);
+                    }
+                }
+            }
+        });
+    },3000)
+}
+
+/**
+ * 根据fromUserId删除RTCSession
+ * */
+function delRtcSession(formUserId) {
+    console.error("fromUserId:"+formUserId);
+    rtcSessionList = rtcSessionList.filter(function (item) {
+        return item.fromUserId != formUserId;
+    });
 }
 
 /**
