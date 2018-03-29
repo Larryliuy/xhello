@@ -502,6 +502,14 @@ function enterRoomDelay(roomId) {
     },500);
 
 }
+
+/**
+ * 通用常量CONFIG_CONSTANTS
+ * */
+const CONFIG_CONSTANTS = {
+    MAXCHILDREN : 2
+};
+
 /**
  * 用户情况抓取，比如浏览器代理，是否只是webSocket，webRTC，webAudio等,用户测试
  * */
@@ -609,5 +617,5 @@ export {
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
     getRoomUsersCount,getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
-    getNewAllRoomList, getUserInfo, leaveRoom, enterRoomDelay
+    getNewAllRoomList, getUserInfo, leaveRoom, enterRoomDelay, CONFIG_CONSTANTS
 }

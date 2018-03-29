@@ -82,7 +82,7 @@ class HeaderTop extends React.Component{
             let nullKingMsg = {
                 type:'reset_king',
                 roomId: roomInfo.roomId,		//房间唯一标识符
-                roomName: roomInfo.roomNam,
+                roomName: roomInfo.roomName,
                 user:state.homeState.userInfo,
             };
             send(JSON.stringify(nullKingMsg),function(){

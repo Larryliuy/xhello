@@ -5,6 +5,7 @@
 import { send } from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
 import {getRoomInfo, startMyCam, getPrepareConnectionState} from "./webRtcAudio";
+import { CONFIG_CONSTANTS } from '../static/comFunctions';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -278,6 +279,9 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         //如果是连麦主播，则需要将混音加入downStream,mixerAudio
                         if(vidoeId === 'secondVideo' && localStream && isKing){
                             mixerAudio();
+                            //连麦成功时将连麦者作为自己的唯一孩子(目的是为了删除其他孩子);
+                            userInfo.Children = [];
+                            userInfo.Children.push(wbMsg.toUser.id);
                         }
                         store.dispatch({type:CONSTANT.ISANSWER,val:true});
                     }
@@ -310,11 +314,11 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                             roomName: roomInfo.roomName,
                             user:userInfo
                         };
-                        setTimeout(function () {
-                            send(JSON.stringify(msg),function () {
-                                console.log('通知其他用户重新连接')
-                            })
-                        },1000);
+                        // setTimeout(function () {
+                        send(JSON.stringify(msg),function () {
+                            console.log('通知其他用户重新连接')
+                        })
+                        // },1000);
                     }
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     send(JSON.stringify(updateUserMsg),function () {
@@ -339,7 +343,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         objItem.ondisconnected();
                     }
                     //切换房间时，需要设置回原来的最大连接数
-                    userInfo.maxChildren = 2;
+                    userInfo.maxChildren = CONFIG_CONSTANTS.MAXCHILDREN;
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     break;
                 default:
@@ -724,11 +728,6 @@ function startOnlineVideo() {
         console.log('我已经是王了，不需要连别人');
         return;
     }
-    /*if(!prepareState){//如果我这边没有准备好，则重新获取下音视频流
-        // let myVideoTag = document.getElementById('myVideo');
-        console.warn('重新startMyCamVideo');
-        startMyCamVideo(null,false);
-    }*/
     let objUser = getCandidate(state.homeState.userInfoList,firstCandidate);
     console.log(state.homeState.userInfoList);
     console.log(objUser);
@@ -785,8 +784,14 @@ function mixerAudio() {
     if(localStream){
         let localAudioTrack = localStream.getAudioTracks();
         if(downStream){
-            downStream.addTrack(localAudioTrack[0]);
-            downStream.addTrack(barleyAudioTrack[0]);
+            console.log(localAudioTrack);
+            if(localAudioTrack){
+                downStream.addTrack(localAudioTrack[0]);
+            }
+            console.log(barleyAudioTrack);
+            if(barleyAudioTrack){
+                downStream.addTrack(barleyAudioTrack[0]);
+            }
         }
     }
 }

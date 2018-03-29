@@ -2,8 +2,9 @@
  * webRTC与web audio函数库
  */
 
-import WS, { send } from "../static/webSocket";
+import { send } from "../static/webSocket";
 import store, {CONSTANT, homeState} from "../reducer/reducer";
+import { CONFIG_CONSTANTS } from '../static/comFunctions';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -498,9 +499,6 @@ function onCandidate(candidate,sessionId) {
 	// console.log("onCandidate:"+candidate);
 //     console.log("Adding candidate for " + g_username);
     let tmpStr = sessionId.split('-')[1]+'-'+sessionId.split('-')[0];
-    // console.log(sessionId);
-    // console.log(tmpStr);
-    // console.log(rtcSessionList);
     rtcSessionList.map(function (item) {
         if(item.sessionId == tmpStr){
             if(item.pc){
@@ -523,7 +521,7 @@ function mixerAudio(stream,pc,type) {
             if(item.wa){
                 let awTmpStream = item.wa.createMediaStreamSource(stream);
                 awTmpStream.connect(item.mixer);
-                awTmpStream.connect(item.noMicMixer);
+                // awTmpStream.connect(item.noMicMixer);
             }else{
                 log('item.wa不存在')
             }
@@ -538,13 +536,17 @@ function mixerAudio(stream,pc,type) {
                         if(item.wa){
                             let awTmpStream = item.wa.createMediaStreamSource(item1.pcOutStream);
                             awTmpStream.connect(item.mixer);
-                            awTmpStream.connect(item.noMicMixer);
+                            // awTmpStream.connect(item.noMicMixer);
                         }else{
                             log('item.wa不存在');
                         }
                     }else{
                         // console.log(item1.pcOutStream);//这里的pcOutStream偶尔会没有，这是因为item1这个连接还在建立过程中，当他建立成功的时候还会到这个onaddStream来添加
-                        console.log('pcOutStream is not exist');
+                        console.error('pcOutStream is not exist! and pcStatus:'+item.pcState);
+                        //如果pcOutStream不存在，过1s再尝试混音
+                        setTimeout(function () {
+                            mixerAudio(stream,pc,type);
+                        },1000);
                     }
                 }
             })
@@ -745,7 +747,7 @@ function initVariableAudio() {
     rtcSessionList=[];
     remoteVidoeDom = null;
     Msg = {};
-    myMicSource = null;
+    // myMicSource = null;
     myVideo = null;
     firstCandidate = 0;
     microphoneStatus = false;
@@ -825,6 +827,8 @@ function startOnline() {
 function updateServerUserInfo() {
     let userInfo = state.homeState.userInfo;
     userInfo.Children = [];
+    userInfo.maxChildren = CONFIG_CONSTANTS.MAXCHILDREN;
+    console.log(userInfo);
     let updateUserMsg = {
         type:'update_user',
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符

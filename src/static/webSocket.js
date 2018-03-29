@@ -23,8 +23,8 @@ if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
 }
 // let WS = null,lockReconnect = false ,wsUrl = 'ws://192.168.6.3:5555' ;
-// let WS = null,lockReconnect = false ,wsUrl = 'wss://192.168.6.3:443/wss' ;
-let WS = null,lockReconnect = false ,wsUrl = 'wss://a701.xtell.cn:443/wss' ;
+let WS = null,lockReconnect = false ,wsUrl = 'wss://192.168.6.3:443/wss' ;
+// let WS = null,lockReconnect = false ,wsUrl = 'wss://a701.xtell.cn:443/wss' ;
 
 if (window.WebSocket) {
     createWebSocket(wsUrl);
@@ -585,6 +585,7 @@ function onmessage(response){
             if(dataJson.typeString === 'agreeToBebarley'){
                 console.log('收到同意连麦的消息');
                 onLeaveVideo(state.homeState.userInfo);//在ondisconnect里面会调用
+                initVariableVideo();
                 let myVideoTag = document.getElementById('secondVideo');
                 startMyCamVideo(myVideoTag,true);
                 let user = dataJson.user;
@@ -612,7 +613,11 @@ function onmessage(response){
                 console.log(dataJson);
                 console.log(state.homeState.currentRoomInfo.king);
                 if(dataJson.user.id !== state.homeState.userInfo.id && state.homeState.userInfo.id !== state.homeState.currentRoomInfo.king){
-                    getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
+                    onLeaveVideo(state.homeState.userInfo);
+                    initVariableVideo();
+                    setTimeout(function () {
+                        getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
+                    },1000);
                 }
                 return;
             }
@@ -847,6 +852,7 @@ function onmessage(response){
             }
             if(dataJson.typeString === 'changeRoomMode'){
                 sempher = 0;//重置preOffer的锁
+                isPlaying = false;//重置点播模式的播放标志
                 log('收到改变房间模式消息：'+dataJson.mode+','+dataJson.player);
                 let currentRoomInfo = state.homeState.currentRoomInfo;
                 //初始化服务器userInfo
@@ -1058,8 +1064,14 @@ function onmessage(response){
             messagedata.push({userName:dataJson.user.name,
                 time:getDateString(),
                 data:'<p>'+ dataJson.user.name + '已离开房间'+'</p>'});
+            //如果在我的音源列表，则删除
+            let audioInputUsers = state.homeState.microphoneInputUsers;
+            if(audioInputUsers[dataJson.user.id]){
+                delete audioInputUsers[dataJson.user.id];
+                store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:audioInputUsers});
+                // console.log(audioInputUsers);
+            }
             break;
-
         case 'get_room_users':
             // log('收到get_room_users消息');
             let UserInfoList = [], userIdList = [], userInfo = state.homeState.userInfo;
