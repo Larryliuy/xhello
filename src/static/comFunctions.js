@@ -614,6 +614,21 @@ function getBrowserInfo(){
 }
 
 /**
+ * 将log信息存到后台
+ * */
+function sendToServer(info) {
+    let addArgs = '?action=add&table=userTestInfo&userName='+info.name+'&userLog='+info.msg;
+    fetch(generalApi+addArgs)
+        .then(res=>res.json())
+        .then(data=>{
+            if(data.status === 'ok'){
+                // console.log('添加成功');
+            }
+        })
+        .catch(e=>console.error(e));
+}
+
+/**
  * 打印函数，本地打印并发送到服务器
  * @param message 表示打印的消息
  * @param file 代码所在文件名
@@ -632,8 +647,15 @@ function log(msg,funName,file) {
     logInfos[logCount] = logInfo;
     logCount++;
 }
+/**
+ * 打印关键信息函数
+ * */
 function keylog(msg) {
-    console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:#df402a');
+    let info = {};
+    info.name = state.homeState.userInfo.name;
+    info.msg = msg;
+    console.log('%c'+info.name+'==='+msg,'color:#df402a');
+    sendToServer(info);
 }
 function error(msg,funName,file) {
     // console.error(state.homeState.userInfo.name+'==='+msg+'===caller:'+funName+'===file:'+file);
@@ -647,6 +669,9 @@ function error(msg,funName,file) {
     erroInfos[logCount] = errorInfo;
     errorCount++;
 }
+/**
+ * 打印关键错误
+ * */
 function keyerror(msg) {
     console.error('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
 

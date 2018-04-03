@@ -7,7 +7,7 @@ import {
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
-    setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream
+    setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo
 } from "../webrtc/webRtcVideo";
 import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
@@ -288,7 +288,7 @@ function onmessage(response){
                 }*/
                 // console.error('Children:'+userInfoTmp.Children,userInfoTmp.maxChildren);
                 if(userInfoTmp.Children.length < userInfoTmp.maxChildren){
-                    if(amISendPreOffer(dataJson.fromUser.id)){
+                    if(amISendPreOffer(dataJson.fromUser.id) || amISendPreOfferVideo(dataJson.fromUser.id)){
                         sendFailed();
                     }else{
                         //先占位
@@ -632,7 +632,7 @@ function onmessage(response){
                     initVariableVideo();
                     setTimeout(function () {
                         getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
-                    },1000);
+                    },2000);
                 }
                 return;
             }
@@ -641,7 +641,8 @@ function onmessage(response){
                 let roomInfo = state.homeState.currentRoomInfo;
                 if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
                     if(dataJson.offer){
-                        log('从'+ dataJson.fromUser.id+'收到offer','onmessage-webrtc','websocket.js');
+                        // log('从'+ dataJson.fromUser.id+'收到offer','onmessage-webrtc','websocket.js');
+                        keylog('从'+ dataJson.fromUser.name+'收到offer');
                         // console.log(dataJson);
                         let Msg = {
                             type:'msg',
@@ -692,7 +693,8 @@ function onmessage(response){
                         }
                     }
                     if(dataJson.answer){
-                        log('从 '+dataJson.fromUser.id+'收到answer','onmessage-webrtc','websocket.js');
+                        // log('从 '+dataJson.fromUser.id+'收到answer','onmessage-webrtc','websocket.js');
+                        keylog('从'+ dataJson.fromUser.name+'收到answer');
                         if(roomInfo.mode == 0){
                             onAnswer(dataJson.answer,dataJson.sessionId,dataJson.fromUser.id);
                         }else if(roomInfo.mode == 1 || roomInfo.mode == 3){
