@@ -1,7 +1,8 @@
 import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
-    getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam, updateServerUserInfo
+    getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam,
+    updateServerUserInfo, amISendPreOffer
 } from "../webrtc/webRtcAudio";
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
@@ -11,7 +12,7 @@ import {
 import { ajustUserOrder } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 import {blockIpApi, getImgApi} from "./apiInfo";
-import { updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, enterRoomDelay, leaveRoom} from "./comFunctions";
+import { updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, keylog} from "./comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -23,8 +24,9 @@ if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
 }
 // let WS = null,lockReconnect = false ,wsUrl = 'ws://192.168.6.3:5555' ;
-let WS = null,lockReconnect = false ,wsUrl = 'wss://192.168.6.3:443/wss' ;
+// let WS = null,lockReconnect = false ,wsUrl = 'wss://192.168.6.3:443/wss' ;
 // let WS = null,lockReconnect = false ,wsUrl = 'wss://a701.xtell.cn:443/wss' ;
+let WS = null,lockReconnect = false ,wsUrl = 'wss://www.xtell.cn:443/wss' ;
 
 if (window.WebSocket) {
     createWebSocket(wsUrl);
@@ -261,32 +263,40 @@ function onmessage(response){
     switch(dataJson.type){
         case 'msg':
             if(dataJson.typeString === 'preOffer'){
-                log('从'+dataJson.fromUser.id+'收到准备连接申请');
+                log('从'+dataJson.fromUser.name+'收到准备连接申请','onmessage-preOffer','websocket.js');
                 // console.log(state.homeState.userInfo);
                 // console.log(dataJson.fromUser);
                 let preAnswerMsg,userInfoTmp = state.homeState.userInfo;
+                console.log(userInfoTmp.Children);
                 // console.log(dataJson.toUser.yes+','+state.homeState.userInfo.Children.length +','+ state.homeState.userInfo.maxChildren);
                 if(sempher < 0) {
                     sendFailed();
                     return;
                 }
+                sempher = sempher - 1;
                 //如果房间模式时1或3，并且downStream不存在则失败
                 let roomInfo = state.homeState.currentRoomInfo;
-                console.error('sempher:'+sempher);
-                console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfoTmp.id);
+                // console.error('sempher:'+sempher);
+                // console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfoTmp.id);
+                //视频模式下如果我不是king（直播的人，则拒绝连接）
                 if((roomInfo.mode == 1 || roomInfo.mode == 3) && (!hasDownStream() && roomInfo.king != userInfoTmp.id)){
-                    console.error('Error');
+                    console.error('Error: i am not king');
                     sendFailed();
+                    sempher = sempher + 1;
                     return;
-                }
-                sempher = sempher - 1;
-                console.error('Children:'+userInfoTmp.Children,userInfoTmp.maxChildren);
+                }/*else if(roomInfo.mode == 0){
+                }*/
+                // console.error('Children:'+userInfoTmp.Children,userInfoTmp.maxChildren);
                 if(userInfoTmp.Children.length < userInfoTmp.maxChildren){
-                    //先占位
-                    userInfoTmp.Children.push(dataJson.fromUser.id);//占位符这里的时间差
-                    // userInfoTmp.seq = dataJson.toUser.seq;//将我的seq设置给本地state
-                    store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
-                    sendOK();
+                    if(amISendPreOffer(dataJson.fromUser.id)){
+                        sendFailed();
+                    }else{
+                        //先占位
+                        userInfoTmp.Children.push(dataJson.fromUser.id);//占位符这里的时间差
+                        // userInfoTmp.seq = dataJson.toUser.seq;//将我的seq设置给本地state
+                        store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                        sendOK();
+                    }
                 }else{
                     sendFailed();
                 }
@@ -303,7 +313,7 @@ function onmessage(response){
                     };
                     send(JSON.stringify(preAnswerMsg),function () {
                         // console.log('send preAnswer for failed status ');
-                        log('发送连接申请的回复结果给 '+dataJson.fromUser.id+',结果：申请失败');
+                        log('发送连接申请的回复结果给 '+dataJson.fromUser.name+',结果：申请失败','onmessage-preOffer','websocket.js');
                     });
                 }
                 function sendOK() {
@@ -318,13 +328,13 @@ function onmessage(response){
                     };
                     // console.log(userInfoTmp);
                     send(JSON.stringify(preAnswerMsg),function () {
-                        log('发送连接申请的回复结果给 '+dataJson.fromUser.id+',结果：申请成功');
+                        log('发送连接申请的回复结果给 '+dataJson.fromUser.name+',结果：申请成功','onmessage-preOffer','websocket.js');
                     })
                 }
                 return;
             }
             if(dataJson.typeString === 'preAnswer'){
-                log('收到 '+dataJson.fromUser.id + '的申请答复， 结果：'+ dataJson.status);
+                log('收到 '+dataJson.fromUser.name + '的申请答复， 结果：'+ dataJson.status,'onmessage-preAnswer','websocket.js');
                 // console.log(dataJson);
                 let roomInfo = state.homeState.currentRoomInfo;
                 if(dataJson.status === 'ok'){
@@ -355,18 +365,17 @@ function onmessage(response){
                         }else {
                             console.error('未知的房间模式或状态：'+ roomMode +',' + getPrepareConnectionState());
                             //告知来者我这边连接失败
-
                         }
                     },500);
                 }else if(dataJson.status === 'failed'){
                     getRoomInfo(roomInfo.roomId);
                 }else{
-                    log('未知的状态：'+dataJson.status);
+                    log('未知的状态：'+dataJson.status,'onmessage-preAnswer','websocket.js');
                 }
                 return;
             }
             if(dataJson.typeString === 'disconnect'){
-                log('收到断开连接的消息');
+                log('收到断开连接的消息','onmessage-disconnect','websocket.js');
                 // console.log('my numberOne '+state.homeState.userInfo.numberOne);
                 //在这里断开连接，并去寻找新的节点连接(最后一步)
                 if (state.homeState.userInfo.numberOne == 2){//如果我是新预备老大，则我不用离开
@@ -407,7 +416,7 @@ function onmessage(response){
             }
             // console.log(dataJson);
             if(dataJson.typeString === '放麦'){
-                log('收到放麦消息');
+                log('收到放麦消息','onmessage-放麦','websocket.js');
                 let userData = state.homeState.roomMicrophoneUser;
                 console.log(userData);
                 if(state.homeState.userInfo.id != dataJson.user.id){
@@ -426,7 +435,7 @@ function onmessage(response){
                 return;
             }
             if(dataJson.typeString === '离麦'){
-                log('收到离麦消息');
+                log('收到离麦消息','onmessage-离麦','websocket.js');
                 let userInfo = state.homeState.userInfo;
                 if(dataJson.user.id == userInfo.id){
                     if(microphoneStatus && userInfo.level > 3){
@@ -499,6 +508,7 @@ function onmessage(response){
                 }
                 return;
             }
+            //改变麦序
             if(dataJson.typeString === 'changeMicOrder'){
                 let micUsers = state.homeState.roomMicrophoneUser,newMicUsers;
                 newMicUsers = ajustUserOrder(micUsers,dataJson.orderInfo);
@@ -519,6 +529,7 @@ function onmessage(response){
                 }
                 return;
             }
+            //改变房间顺序
             if(dataJson.typeString === 'changeRoomOrder'){
                 console.log('收到changeRoomOrder消息');
                 let allRoomList = state.homeState.allRoomList,
@@ -551,8 +562,9 @@ function onmessage(response){
                 }
                 return;
             }
+            //声音源（谁在说话）
             if(dataJson.typeString === 'audioSourceInput'){
-                console.log('收到audioSourceInput消息:'+dataJson.user.id);
+                // console.log('收到audioSourceInput消息:'+dataJson.user.id);
                 // console.log(dataJson);
                 let audioInputUsers = state.homeState.microphoneInputUsers;
                 if(dataJson.inputSource){
@@ -570,6 +582,7 @@ function onmessage(response){
                 }
                 return;
             }
+            //申请成为连麦者
             if(dataJson.typeString === 'applyToBebarley'){
                 console.log('收到连麦者申请:'+dataJson.user.id);
                 let roomInfo = state.homeState.currentRoomInfo;
@@ -582,6 +595,7 @@ function onmessage(response){
                 }
                 return;
             }
+            //同意成为连麦者
             if(dataJson.typeString === 'agreeToBebarley'){
                 console.log('收到同意连麦的消息');
                 onLeaveVideo(state.homeState.userInfo);//在ondisconnect里面会调用
@@ -609,6 +623,7 @@ function onmessage(response){
                 },1000);
                 return;
             }
+            //视频重连
             if(dataJson.typeString === 'reconnectVideo'){
                 console.log(dataJson);
                 console.log(state.homeState.currentRoomInfo.king);
@@ -626,7 +641,7 @@ function onmessage(response){
                 let roomInfo = state.homeState.currentRoomInfo;
                 if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
                     if(dataJson.offer){
-                        log('从'+ dataJson.fromUser.id+'收到offer');
+                        log('从'+ dataJson.fromUser.id+'收到offer','onmessage-webrtc','websocket.js');
                         // console.log(dataJson);
                         let Msg = {
                             type:'msg',
@@ -677,7 +692,7 @@ function onmessage(response){
                         }
                     }
                     if(dataJson.answer){
-                        log('从 '+dataJson.fromUser.id+'收到answer');
+                        log('从 '+dataJson.fromUser.id+'收到answer','onmessage-webrtc','websocket.js');
                         if(roomInfo.mode == 0){
                             onAnswer(dataJson.answer,dataJson.sessionId,dataJson.fromUser.id);
                         }else if(roomInfo.mode == 1 || roomInfo.mode == 3){
@@ -700,7 +715,6 @@ function onmessage(response){
                 }
                 return;
             }
-
             //移动到我所在房间
             if(dataJson.typeString === 'moveToRoom'){
                 let roomStatueTmp = state.homeState.roomStatus,
@@ -749,7 +763,7 @@ function onmessage(response){
                             user:userInfo
                         };
                         send(JSON.stringify(Msg),function(){
-                            log('即将进入getRoomInfo');
+                            log('即将进入getRoomInfo','onmessage-moveToRoom','websocket.js');
                             getRoomInfo(dataJson.objRoomInfo.roomId);
                         });
                     });
@@ -817,7 +831,7 @@ function onmessage(response){
                 return;
             }
             if(dataJson.typeString === 'vodSrc'){
-                log('收到vodSrc:'+dataJson.vodSrc);
+                log('收到vodSrc:'+dataJson.vodSrc,'onmessage-vodSrc','websocket.js');
                 //收到vodSrc后自动播放
                 //如果是youku的视频
                 if(dataJson.webSite === 'youku'){
@@ -836,6 +850,7 @@ function onmessage(response){
                     videoTag.src = dataJson.musicSrc;
                     videoTag.autoplay = true;
                 }
+                return;
             }
             if(dataJson.typeString === 'playAudio'){
                 console.log('receive audio msg:');
@@ -850,46 +865,52 @@ function onmessage(response){
                 audioTag.autoplay = true;
                 return;
             }
-            if(dataJson.typeString === 'changeRoomMode'){
+            if(dataJson.typeString === 'changeRoomMode') {
                 sempher = 0;//重置preOffer的锁
                 isPlaying = false;//重置点播模式的播放标志
-                log('收到改变房间模式消息：'+dataJson.mode+','+dataJson.player);
+                log('收到改变房间模式消息：' + dataJson.mode + ',' + dataJson.player, 'onmessage-changeRoomMode', 'websocket.js');
                 let currentRoomInfo = state.homeState.currentRoomInfo;
+                onLeave(state.homeState.userInfo);
+                onLeaveVideo(state.homeState.userInfo);
                 //初始化服务器userInfo
                 updateServerUserInfo();
                 //初始化原有模式的变量
-                if(getPrepareConnectionState()){
-                    onLeave(state.homeState.userInfo);
-                    initVariableAudio();
+                if (currentRoomInfo.mode == '0' && (dataJson.mode == '1' || dataJson.mode == '3')) {
+                    if (getPrepareConnectionState()) {
+                        initVariableAudio();
+                    }
                 }
-                if(getPrepareConnectionStateVideo()){
-                    onLeaveVideo(state.homeState.userInfo);
-                    initVariableVideo();
+                if((currentRoomInfo.mode == '1' || currentRoomInfo.mode == '3') && dataJson.mode == '0'){
+                    if (getPrepareConnectionStateVideo()) {
+                        initVariableVideo();
+                    }
+                    // if(dataJson.user.id == state.homeState.userInfo.id){
+                    //     startMyCam(document.getElementById('audioBox'));
+                    // }
                 }
-                console.log(currentRoomInfo);
-                console.log(dataJson);
+                // console.log(currentRoomInfo);
+                // console.log(dataJson);
                 currentRoomInfo.mode = dataJson.mode;
                 currentRoomInfo.king = '';
                 currentRoomInfo.secondKing = '';
-                if(dataJson.user.id == state.homeState.userInfo.id && dataJson.player){
-                    // alert('player');
-                    if(dataJson.mode != 0){
+                if(dataJson.user.id == state.homeState.userInfo.id){
+                    if(dataJson.mode != 0 && dataJson.player){
                         currentRoomInfo.player = dataJson.player;
-                        // if(!dataJson.newKing){
-                            getRoomInfoVideo(currentRoomInfo.roomId);
-                        // }
-                    }else{
-                        getRoomInfo(currentRoomInfo.roomId);
+                        getRoomInfoVideo(currentRoomInfo.roomId);
+                    }else if(dataJson.mode == 0){
+                        keylog('audio模式，我是king，我要获取micStream');
+                        startMyCam(document.getElementById('audioBox'));
                     }
-                    // setRoomInfo(currentRoomInfo);
                 }else{
                     //如果是0，即语音模式,则需要去找别人连接
                     if(dataJson.mode == 0){
-                        let videoBox = document.getElementById('audioBox');
-                        startMyCam(videoBox);
-                        setTimeout(function () {
-                            getRoomInfo(currentRoomInfo.roomId);
-                        },500);
+                        if(dataJson.user.id != state.homeState.userInfo.id){
+                            let videoBox = document.getElementById('audioBox');
+                            startMyCam(videoBox);
+                            setTimeout(function () {
+                                getRoomInfo(currentRoomInfo.roomId);
+                            },1000);
+                        }
                         //这里不能直接getRoomInfo，不然会各自连成很多小的圈子
                     }else{
                         setTimeout(function () {
@@ -907,6 +928,20 @@ function onmessage(response){
 
                 return;
             }
+            //封ip消息
+            if(dataJson.typeString === 'blockIp'){
+                console.log('收到blockIp消息');
+                //直接请求封Ip接口即可
+                fetch(blockIpApi).then(res=>{console.log('您已被禁止')}).catch(e=>console.error(e));
+                return;
+            }
+            if(dataJson.typeString === 'updateContents'){
+                let roomInfo = state.homeState.currentRoomInfo;
+                roomInfo.contents = dataJson.roomContents;
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
+                return;
+            }
+            // console.log(dataJson);
             //消息撤回
             if(dataJson.typeString === 'withdraw'){
                 /*console.log(data);
@@ -922,20 +957,6 @@ function onmessage(response){
                 });
                 // return;
             }
-            //封ip消息
-            if (dataJson.typeString === 'blockIp'){
-                console.log('收到blockIp消息');
-                //直接请求封Ip接口即可
-                fetch(blockIpApi).then(res=>{console.log('您已被禁止')}).catch(e=>console.error(e));
-                return;
-            }
-            if(dataJson.typeString === 'updateContents'){
-                let roomInfo = state.homeState.currentRoomInfo;
-                roomInfo.contents = dataJson.roomContents;
-                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
-                return;
-            }
-            // console.log(dataJson);
             if (dataJson.typeString !== 'withdraw') {
                 // console.log(dataJson);
                 if(dataJson.typeString === 'webrtc' && dataJson.data === '消息成功发出'){
@@ -1151,7 +1172,7 @@ function onmessage(response){
 
             break;
         case 'get_room_info':
-            log('收到get_room_info消息');
+            log('收到get_room_info消息','onmessage-get_room_info','websocket.js');
             // console.log(state.homeState.currentRoomInfo);
             console.log(dataJson.data);
             // alert(dataJson.data.advertisementFileId,dataJson.data.avatarFileId);
@@ -1181,34 +1202,34 @@ function onmessage(response){
             if(roomInfo.king && roomInfo.king != state.homeState.userInfo.id){
                 store.dispatch({type:CONSTANT.NUMBERONE,val:roomInfo.king});
                 if(state.homeState.currentRoomInfo.mode == 0){
-                    log('king已存在，我要入网:'+state.homeState.currentRoomInfo.mode);
+                    log('king已存在，我要入网:'+state.homeState.currentRoomInfo.mode,'onmessage-get_room_info','websocket.js');
                     getRoomUserList(startOnline);
                 }else if(state.homeState.currentRoomInfo.mode == 3){
                     /*Object.keys(roomInfo).map(function (item) {
                         console.log(item+','+roomInfo[item]);
                     });*/
                     if(roomInfo.secondKing){
-                        log('连麦者已存在，我要入网:'+state.homeState.currentRoomInfo.mode);
+                        log('连麦者已存在，我要入网:'+state.homeState.currentRoomInfo.mode,'onmessage-get_room_info','websocket.js');
                         startMyCamVideo(null,false);
                     }
                     getRoomUserListVideo(startOnlineVideo);
                 }else{
                     // alert('already:'+roomInfo.king);
-                    log('king已存在，我要入网:'+state.homeState.currentRoomInfo.mode);
+                    log('king已存在，我要入网:'+state.homeState.currentRoomInfo.mode,'onmessage-get_room_info','websocket.js');
                     startMyCamVideo(null,false);
                     getRoomUserListVideo(startOnlineVideo);
                 }
             }else{
                 //申请成为老大
                 // alert('applyToBeFirst:'+roomInfo.king);
-                log('没有king，我要申请成为新的king');
+                log('没有king，我要申请成为新的king','onmessage-get_room_info','websocket.js');
                 applyToBeFirst();
             }
             break;
         case 'declare_king':
             // console.log(dataJson);
             if(dataJson.result === 'ok'){
-                log('我成为了新的王：');
+                log('我成为了新的王：','onmessage-declare_king','websocket.js');
                 let roomInfo = state.homeState.currentRoomInfo,
                     userInfo = state.homeState.userInfo;
                 // console.log(state.homeState.userInfo);
@@ -1237,7 +1258,7 @@ function onmessage(response){
                     startMyCamVideo(myVideoTag,true);
                 }
             }else{
-                log('我没有成为王，我要getRoomInfo');
+                log('我没有成为王，我要getRoomInfo','onmessage-declare_king','websocket.js');
                 getRoomInfo(state.homeState.currentRoomInfo.roomId);
             }
             break;
@@ -1340,18 +1361,18 @@ function updateAllRoomListUserInfoByRoomId(userInfo,roomId) {
 }
 
 
-function log(message) {
-    console.log(state.homeState.userInfo.id+'==='+message);
-    //送到服务器后台
-    let msg = {
-        type:'log',
-        log:message,
-        user:state.homeState.userInfo
-    };
-    send(JSON.stringify(msg),function () {
-
-    })
-}
+// function log(message) {
+//     console.log(state.homeState.userInfo.id+'==='+message);
+//     //送到服务器后台
+//     let msg = {
+//         type:'log',
+//         log:message,
+//         user:state.homeState.userInfo
+//     };
+//     // send(JSON.stringify(msg),function () {
+//     //
+//     // })
+// }
 
 export default WS;
 

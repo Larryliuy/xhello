@@ -99,9 +99,9 @@ class HomeLayout extends React.Component {
             document.onmousemove = null;
         };
         //获取用户环境信息，紧用于测试
-        setTimeout(function () {
-            getUserInfo();
-        },5000)
+        // setTimeout(function () {
+        //     getUserInfo();
+        // },5000)
     }
     componentWillUnmount(){
         //解绑事件监听

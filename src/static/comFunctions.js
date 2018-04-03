@@ -308,7 +308,7 @@ function updateAllRoomListTimer() {
         send(JSON.stringify(getRoomsMsg),function () {
             // console.log('get_rooms');
         });
-    },20000);
+    },30000);
 }
 
 /**
@@ -612,10 +612,50 @@ function getBrowserInfo(){
         'ver':-1
     };
 }
+
+/**
+ * 打印函数，本地打印并发送到服务器
+ * @param message 表示打印的消息
+ * @param file 代码所在文件名
+ */
+let logInfos={},erroInfos={},logCount = 0,errorCount = 0;
+function log(msg,funName,file) {
+    // console.log(msg);
+    // console.log('%c'+msg+'==='+state.homeState.userInfo.name+'==='+funName+'==='+file,'color:blue');
+    console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:blue');
+    let logInfo = {};
+    logInfo.userName = state.homeState.userInfo.name;
+    logInfo.message = msg;
+    logInfo.caller = funName;
+    logInfo.fileName = file;
+    logInfo.time = new Date().getTime();
+    logInfos[logCount] = logInfo;
+    logCount++;
+}
+function keylog(msg) {
+    console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:#df402a');
+}
+function error(msg,funName,file) {
+    // console.error(state.homeState.userInfo.name+'==='+msg+'===caller:'+funName+'===file:'+file);
+    console.error('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
+    //送到服务器后台
+    let errorInfo = {};
+    errorInfo.userName = state.homeState.userInfo.name;
+    errorInfo.message = msg;
+    errorInfo.caller = funName;
+    errorInfo.fileName = file;
+    erroInfos[logCount] = errorInfo;
+    errorCount++;
+}
+function keyerror(msg) {
+    console.error('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
+
+}
 export {
     randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
     getRoomUsersCount,getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
-    getNewAllRoomList, getUserInfo, leaveRoom, enterRoomDelay, CONFIG_CONSTANTS
+    getNewAllRoomList, getUserInfo, leaveRoom, enterRoomDelay, CONFIG_CONSTANTS,log,
+    error, keylog, keyerror
 }
