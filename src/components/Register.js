@@ -42,6 +42,10 @@ class Register extends React.Component {
     handleSubmit(e){
         e.preventDefault();
         console.log(this.state);
+        if(!this.state.userName || !this.state.password){
+            message.error('用户名和密码不能为空');
+            return;
+        }
         let args = 'LoginName='+this.state.userName+'&Password='+this.state.password+'&Sex='+this.state.sex;
         fetch(registerApi,{
             method:'POST',
