@@ -274,6 +274,20 @@ function updateRoomInfoById(roomId,roomName,roomColor,roomPassword) {
     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
 }
 
+/**
+ * 根据用户信息更新服务器用户信息
+ * */
+function updateUserInfo(userInfo) {
+    let updateUserMsg = {
+        type:'update_user',
+        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomName: state.homeState.currentRoomInfo.roomName,
+        user:userInfo
+    };
+    send(JSON.stringify(updateUserMsg),function () {
+
+    })
+}
 
 /**
  * http 根据roomId删除房间
@@ -507,7 +521,7 @@ function enterRoomDelay(roomId) {
  * 通用常量CONFIG_CONSTANTS
  * */
 const CONFIG_CONSTANTS = {
-    MAXCHILDREN : 2
+    MAXCHILDREN : 3
 };
 
 /**
@@ -650,6 +664,13 @@ function log(msg,funName,file) {
 /**
  * 打印关键信息函数
  * */
+function successlog(msg) {
+    let info = {};
+    info.name = state.homeState.userInfo.name;
+    info.msg = msg;
+    console.log('%c'+info.name+'==='+msg,'color:green');
+    sendToServer(info);
+}
 function keylog(msg) {
     let info = {};
     info.name = state.homeState.userInfo.name;
@@ -673,7 +694,11 @@ function error(msg,funName,file) {
  * 打印关键错误
  * */
 function keyerror(msg) {
-    console.error('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
+    let info = {};
+    info.name = state.homeState.userInfo.name;
+    info.msg = msg;
+    console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
+    sendToServer(info);
 
 }
 export {
@@ -681,6 +706,6 @@ export {
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
     getRoomUsersCount,getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
-    getNewAllRoomList, getUserInfo, leaveRoom, enterRoomDelay, CONFIG_CONSTANTS,log,
-    error, keylog, keyerror
+    getNewAllRoomList, getUserInfo, updateUserInfo, enterRoomDelay, CONFIG_CONSTANTS,log,
+    error, successlog, keyerror
 }

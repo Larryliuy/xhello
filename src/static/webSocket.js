@@ -2,17 +2,17 @@ import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
     getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam,
-    updateServerUserInfo, amISendPreOffer
+    updateServerUserInfo, amISendPreOffer,delSendListById
 } from "../webrtc/webRtcAudio";
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
-    setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo
+    setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo,delSendListByIdVideo
 } from "../webrtc/webRtcVideo";
-import { ajustUserOrder } from '../static/comFunctions';
+import { ajustUserOrder, updateUserInfo } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 import {blockIpApi, getImgApi} from "./apiInfo";
-import { updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, keylog} from "./comFunctions";
+import { updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, successlog} from "./comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -353,8 +353,10 @@ function onmessage(response){
                     setTimeout(function () {/*intval = */
                         let roomMode = state.homeState.currentRoomInfo.mode;
                         if(getPrepareConnectionState() &&  roomMode == 0){
+                            successlog('audio-已发offer给 '+dataJson.fromUser.name);
                             offerPeerConnection(Msg,document.getElementById('audioBox'));
                         }else if(roomMode == 1){
+                            successlog('video-已发offer给 '+dataJson.fromUser.name);
                             offerPeerConnectionVideo(Msg,'myVideo',false);
                         }else if(roomMode == 3){
                             if(!roomInfo.secondKing && dataJson.fromUser.Children.length<=1){
@@ -362,6 +364,7 @@ function onmessage(response){
                             }else{
                                 offerPeerConnectionVideo(Msg,'firstVideo',false);
                             }
+                            successlog('video-已发offer给 '+dataJson.fromUser.name);
                         }else {
                             console.error('未知的房间模式或状态：'+ roomMode +',' + getPrepareConnectionState());
                             //告知来者我这边连接失败
@@ -564,7 +567,7 @@ function onmessage(response){
             }
             //声音源（谁在说话）
             if(dataJson.typeString === 'audioSourceInput'){
-                // console.log('收到audioSourceInput消息:'+dataJson.user.id);
+                // console.log('收到audioSourceInput消息:'+dataJson.user.name+','+dataJson.inputSource);
                 // console.log(dataJson);
                 let audioInputUsers = state.homeState.microphoneInputUsers;
                 if(dataJson.inputSource){
@@ -642,7 +645,7 @@ function onmessage(response){
                 if(dataJson.toUser && dataJson.toUser.id == state.homeState.userInfo.id ){
                     if(dataJson.offer){
                         // log('从'+ dataJson.fromUser.id+'收到offer','onmessage-webrtc','websocket.js');
-                        keylog('从'+ dataJson.fromUser.name+'收到offer');
+                        successlog('从'+ dataJson.fromUser.name+'收到offer');
                         // console.log(dataJson);
                         let Msg = {
                             type:'msg',
@@ -694,7 +697,7 @@ function onmessage(response){
                     }
                     if(dataJson.answer){
                         // log('从 '+dataJson.fromUser.id+'收到answer','onmessage-webrtc','websocket.js');
-                        keylog('从'+ dataJson.fromUser.name+'收到answer');
+                        successlog('从'+ dataJson.fromUser.name+'收到answer');
                         if(roomInfo.mode == 0){
                             onAnswer(dataJson.answer,dataJson.sessionId,dataJson.fromUser.id);
                         }else if(roomInfo.mode == 1 || roomInfo.mode == 3){
@@ -813,6 +816,7 @@ function onmessage(response){
                         allRoomList = state.homeState.allRoomList;
                     userInfoTmp.level = dataJson.level;
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                    updateUserInfo(userInfoTmp);
                     //设置state.homeState.allRoomList
                     allRoomList.map(function (item1) {
                         item1.childNode.map(function (item) {
@@ -827,7 +831,7 @@ function onmessage(response){
                             }
                         })
                     });
-                    // console.log(allRoomList);
+                    // console.log(allRoomList);]
                     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
                 }
                 return;
@@ -900,15 +904,19 @@ function onmessage(response){
                         currentRoomInfo.player = dataJson.player;
                         getRoomInfoVideo(currentRoomInfo.roomId);
                     }else if(dataJson.mode == 0){
-                        keylog('audio模式，我是king，我要获取micStream');
-                        startMyCam(document.getElementById('audioBox'));
+                        successlog('audio模式，我是king，我要获取micStream');
+                        if(!getPrepareConnectionState()){
+                            startMyCam(document.getElementById('audioBox'));
+                        }
                     }
                 }else{
                     //如果是0，即语音模式,则需要去找别人连接
                     if(dataJson.mode == 0){
                         if(dataJson.user.id != state.homeState.userInfo.id){
-                            let videoBox = document.getElementById('audioBox');
-                            startMyCam(videoBox);
+                            if(!getPrepareConnectionState()) {
+                                let videoBox = document.getElementById('audioBox');
+                                startMyCam(videoBox);
+                            }
                             setTimeout(function () {
                                 getRoomInfo(currentRoomInfo.roomId);
                             },1000);
@@ -919,7 +927,7 @@ function onmessage(response){
                             // console.log('timer 500:'+new Date().getTime());
                             // alert('viewer');
                             getRoomInfoVideo(currentRoomInfo.roomId)
-                        },1000);
+                        },2000);
                     }
                 }
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
@@ -1040,6 +1048,8 @@ function onmessage(response){
         case 'leave_room':
             // console.log(dataJson);
             //有人离开房间时需要更新AllRoomList
+            delSendListById(dataJson.user.id);
+            delSendListByIdVideo(dataJson.user.id);
             allRoomListTmp = state.homeState.allRoomList;
             allRoomListTmp.map(function (item) {
                 if(item.childNode){

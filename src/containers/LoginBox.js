@@ -3,6 +3,7 @@ import Login from '../components/Login';
 import '../static/login.scss'
 import { getImgApi } from '../static/apiInfo';
 import store,{ CONSTANT } from "../reducer/reducer";
+import {CONFIG_CONSTANTS} from "../static/comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -27,7 +28,7 @@ class LoginBox extends React.Component {
         // console.log(data);
         if(!this.refs.loginRef) return;
         this.setState({login:bool,data:data});
-        let userInfo = {};
+        let userInfo;
         userInfo = {
             id:data.id,
             name:data.name,
@@ -36,7 +37,8 @@ class LoginBox extends React.Component {
             limit:data.limit,
             fileId:data.fileId,
             avatar:'./images/avatar.png',
-            maxChildren:2,Children:[]
+            maxChildren:CONFIG_CONSTANTS.MAXCHILDREN,
+            Children:[]
         };
         if(data.avatar){
             userInfo.avatar = data.avatar;

@@ -5,7 +5,7 @@
 import { send } from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
 import {getRoomInfo, startMyCam, getPrepareConnectionState} from "./webRtcAudio";
-import {CONFIG_CONSTANTS, keylog, log} from '../static/comFunctions';
+import {CONFIG_CONSTANTS, successlog, log} from '../static/comFunctions';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -57,7 +57,7 @@ function startMyCamVideo(myVideoTag,isKing){
                 if(isKing){
                     localStream = myStream;
                     console.log(localStream);
-                    keylog('video-我是直播者，已获取音视频流Video');
+                    successlog('video-我是直播者，已获取音视频流Video');
                 }
                 if(myVideoTag){//只有当我是offer的时候myVideoTag才会为空
                     myVideoTag.src = window.URL.createObjectURL(localStream);
@@ -233,7 +233,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                 Msg.candidate = event.candidate;
                 send(JSON.stringify(Msg),function () {
                     // log("发送 candidate 给 "+Msg.toUser.id,'onicecandidate','webRtcVideo.js');
-                    keylog("video-发送 candidate 给 "+Msg.toUser.name);
+                    // successlog("video-发送 candidate 给 "+Msg.toUser.name);
                 })
             }
         };
@@ -271,7 +271,8 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     // 处理成功的情况
                     // log(' 与 '+ wbMsg.toUser.id + ' 连接成功','oniceconnectionstatechange-connected','webRtcVideo.js');
                     // console.log(state.homeState.userInfo);
-                    keylog('video- 与 '+ wbMsg.toUser.name + ' 连接成功');
+                    successlog('video- 与 '+ wbMsg.toUser.name + ' 连接成功');
+                    delSendListByIdVideo(wbMsg.toUser.id);
                     if(type === 'offer'){
                         userInfo.parentNode = wbMsg.toUser.id;
                     }else{
@@ -378,7 +379,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                 this.pcState = 'disconnected';
                 console.log(this.toUser);
                 onLeaveVideo(this.toUser);
-
+                delSendListByIdVideo(this.toUser.id);
                 let userInfo = state.homeState.userInfo;
                 if(type === 'answer'){
                     console.log('子流ondisconnected');
@@ -481,7 +482,7 @@ function offerPeerConnectionVideo(wbMsg,videoTag,isKing) {
         // console.log(Msg);
         send(JSON.stringify(Msg),function () {
             // log('已发送offer给'+ Msg.toUser.id,'offerPeerConnectionVideo','webRtcVideo.js');
-            keylog('video-已发送offer给'+ Msg.toUser.name);
+            successlog('video-已发送offer给'+ Msg.toUser.name);
             xpc.pc.setLocalDescription(offer);
         });
     }, function (error) {
@@ -529,7 +530,7 @@ function answerPeerConnectionVideo(wbMsg,offer,videoId,isKing) {
         // console.log(Msg);
         send(JSON.stringify(Msg),function () {
             // log('发送answer给 ' + Msg.toUser.id,'answerPeerConnectionVideo','webRtcVideo.js');
-            keylog('video-已发送answer给'+ Msg.toUser.name);
+            successlog('video-已发送answer给'+ Msg.toUser.name);
             xpc.pc.setLocalDescription(answer);
         });
     }, function (error) {
@@ -597,18 +598,8 @@ function hasRTCPeerConnection() {
  */
 function onLeaveVideo(userInfo) {
     log('进入onLeave!'+userInfo.id,'onLeaveVideo','webRtcVideo.js');
-    // rtcSessionList = rtcSessionList.filter(function (item) {
-    //     // console.log(item);
-    //     if(item.toUserId == userInfo.id || item.fromUserId == userInfo.id){
-    //         removeInstance(item);
-    //         // log('child peerConnection closed');
-    //         // log('onLeaveVideo与'+userInfo.id+"断开连接",'onLeaveVideo','webRtcVideo.js');
-    //     }
-    //     return item.toUserId != userInfo.id;
-    // });
-
     if(userInfo.id === state.homeState.userInfo.id){
-        keylog('Video-模式，断开自己的所有连接');
+        successlog('Video-模式，断开自己的连接');
         rtcSessionList.map(function (item) {
             // console.log(item);
             if(item.fromUserId == userInfo.id){
@@ -617,7 +608,7 @@ function onLeaveVideo(userInfo) {
         });
         rtcSessionList=[];//自己断开连接的时候清除自己的所有连接
     }else{
-        keylog('Video模式，,断开与'+userInfo.name+'的连接');
+        successlog('Video模式,断开与'+userInfo.name+'的连接');
         rtcSessionList.map(function (item) {
             // console.log(item);
             if(item.toUserId == userInfo.id){
@@ -796,10 +787,18 @@ function startOnlineVideo() {
  * 设置收到申请的列表
  * */
 function amISendPreOfferVideo(userId) {
-    keylog('video-我是否已经发送preOffer给'+userId+'?:'+sendList[userId]);
+    // successlog('video-我是否已经发送preOffer给'+userId+'?:'+sendList[userId]);
     return sendList[userId];
 }
 
+/**
+ * 根据userId删除sendList中的user
+ * */
+function delSendListByIdVideo(userId) {
+    if(sendList[userId]){
+        delete sendList[userId];
+    }
+}
 
 function setRoomInfo(roomInfo) {
     let setRoomMsg = {
@@ -970,5 +969,6 @@ export {
     closeVideoMode,
     refreshVideo,
     initVariableVideo,
-    amISendPreOfferVideo
+    amISendPreOfferVideo,
+    delSendListByIdVideo
 };

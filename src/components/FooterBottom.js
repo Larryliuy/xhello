@@ -227,6 +227,7 @@ class FooterBottom extends React.Component{
         let micMode = state.homeState.microphoneMode,
             userInfo = state.homeState.userInfo,
             micUsers = state.homeState.roomMicrophoneUser,
+            roomInfo = state.homeState.currentRoomInfo,
             result = false;
         if(userInfo.level > 3) {
             if (micMode == 2 || micMode == 3) {
@@ -237,6 +238,9 @@ class FooterBottom extends React.Component{
         }
         if(micUsers instanceof Array && micUsers.length !== 0 && micUsers[0].id === userInfo.id){
             return false;
+        }
+        if(roomInfo.mode != '0'){
+            result = true;
         }
         return result;
     }
