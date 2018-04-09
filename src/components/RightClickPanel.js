@@ -48,7 +48,9 @@ class RightClickPanel extends React.Component{
             }
         }
     }
-    componentWillReceiveProps(){
+    componentWillReceiveProps(nextProps){
+        console.log(nextProps);
+        if(nextProps.listData === this.props.listData)return;
         this.setState({display:'none'});
     }
     clickHandle(e){
