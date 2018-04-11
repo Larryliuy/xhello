@@ -30,44 +30,50 @@ class ChannelList extends React.Component{
         let _this = this;
         //暂时使用定时器解决，后续方案需使用redux-saga解决
         setTimeout(function () {
-            if(state.homeState.allRoomList.length !== 0){
-                const datas = state.homeState.allRoomList;
-                // console.log(datas);
-                if(datas.length === 0)return;
-                //更新当前房间信息
-                /*console.log(state.homeState.userInfo);
-                console.log(datas);
-                console.log(state.homeState.currentRoomInfo);*/
-                tRoomStatus['r'+datas[0].roomId] = true;
-                tRoomStatus['rc'+datas[0].childNode[0].roomId] = true;
-                let firstRoom = datas[0].childNode[0];
-                // console.log('crid：'+state.homeState.currentRoomInfo.id);
-                //判断用户是否在房间里 && WS.send(JSON.stringify({type:'in_room'}))
-                if(firstRoom.roomId){
-                    let data = state.homeState.userInfo.name + "<p>进入了房间</p>",
-                        enterMsg = getSendData(
-                            'enter_room',
-                            firstRoom.roomId,
-                            firstRoom.roomName,
-                            state.homeState.userInfo,
-                            data);
-                    // console.log(enterMsg);
-                    send(JSON.stringify(enterMsg),function(){
-                        // getRoomUserList(startOnline);
-                        getRoomInfo(firstRoom.roomId);
-                    });
-                    //需要默认将默认房间信息更新到当前房间
-                }else{
-                    console.log('房间id不存在');
-                    clearInterval(intval);
-                }
-                // _this.setState({roomStatus:tRoomStatus});
-                store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
-            }
-        },300);
+            _this.initInline();
+        },500);
 
     }
-
+    initInline(){
+        const datas = state.homeState.allRoomList,_this=this;
+        if(datas.length !== 0){
+            // console.log(datas);
+            // if(datas.length === 0)return;
+            //更新当前房间信息
+            /*console.log(state.homeState.userInfo);
+            console.log(datas);
+            console.log(state.homeState.currentRoomInfo);*/
+            tRoomStatus['r'+datas[0].roomId] = true;
+            tRoomStatus['rc'+datas[0].childNode[0].roomId] = true;
+            let firstRoom = datas[0].childNode[0];
+            // console.log('crid：'+state.homeState.currentRoomInfo.id);
+            //判断用户是否在房间里 && WS.send(JSON.stringify({type:'in_room'}))
+            if(firstRoom.roomId){
+                let data = state.homeState.userInfo.name + "<p>进入了房间</p>",
+                    enterMsg = getSendData(
+                        'enter_room',
+                        firstRoom.roomId,
+                        firstRoom.roomName,
+                        state.homeState.userInfo,
+                        data);
+                // console.log(enterMsg);
+                send(JSON.stringify(enterMsg),function(){
+                    // getRoomUserList(startOnline);
+                    getRoomInfo(firstRoom.roomId);
+                });
+                //需要默认将默认房间信息更新到当前房间
+            }else{
+                console.log('房间id不存在');
+                clearInterval(intval);
+            }
+            // _this.setState({roomStatus:tRoomStatus});
+            store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
+        }else{
+            setTimeout(function () {
+                _this.initInline();
+            },1000);
+        }
+    }
     componentWillUnmount(){
         //页面卸载是关闭聊天室连接
         WS.close();
@@ -89,7 +95,7 @@ class ChannelList extends React.Component{
             store.dispatch({type:CONSTANT.NUMBERONE,val:0});
             if(getPrepareConnectionState()){
                 onLeave(state.homeState.userInfo);
-                initVariableAudio()
+                initVariableAudio();
             }
             if(getPrepareConnectionStateVideo()){
                 onLeaveVideo(state.homeState.userInfo);
@@ -228,7 +234,7 @@ class ChannelList extends React.Component{
                                     <ul style={{paddingLeft:'15px'}}>
                                         {item.childNode.map(function (item) {
                                             // console.log(item)
-                                            return <li className={'user-list-li'} id={'u'+item.id} key={'u'+item.id}>
+                                            return <li className={'user-list-li'} id={'u'+item.id} data-level={item.level} key={'u'+item.id}>
                                                 <span>
                                                     <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span>
                                                     {item.name}

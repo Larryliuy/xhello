@@ -78,7 +78,7 @@ const homeInitState = {
     userInfoList:'',//循环给用户发送preOffer的列表
     isYouku:false//点播的连接是否是youku(优酷)
 };
-export const homeState = (state = homeInitState,action)=>{
+let homeState = (state = homeInitState,action)=>{
     let tmpState = state;
     switch (action.type){
         case CONSTANT.CURRENTROOMINFO:
@@ -135,7 +135,9 @@ export const homeState = (state = homeInitState,action)=>{
     }
 };
 
+
+
 /*多个reducer合成一个reducer*/
 const reducer = combineReducers({loginState,homeState});
-
+export { homeState };
 export default createStore(reducer);

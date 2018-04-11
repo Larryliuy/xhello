@@ -137,7 +137,8 @@ class SortRoom extends React.Component{
             roomId:roomInfo.roomId,
             roomName:roomInfo.roomName,
             user:state.homeState.userInfo,
-            orderInfo:orderInfo
+            orderInfo:orderInfo,
+            newRoomList:newRoomList
         };
         send(JSON.stringify(msg),function () {
             console.log('发送changeRoomOrder消息');

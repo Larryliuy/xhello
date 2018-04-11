@@ -11,7 +11,9 @@ store.subscribe(function () {
 });
 
 import Skin from './Skin';
-import {getRoomInfoVideo} from "../webrtc/webRtcVideo";
+import {getRoomInfoVideo, initVariableVideo, onLeaveVideo} from "../webrtc/webRtcVideo";
+import {leaveRoom} from "../static/comFunctions";
+import {initVariableAudio, onLeave} from "../webrtc/webRtcAudio";
 
 class HeaderTop extends React.Component{
     constructor(){
@@ -23,17 +25,34 @@ class HeaderTop extends React.Component{
     loginOut=()=>{
         // location.reload();
         message.success('退出成功！');
-        cookieUtil.unset('userName');
-        cookieUtil.unset('password');
-        cookieUtil.unset('userData');
         let localUri = location.href,
             localUriNo = localUri.split('?')[0];
         console.log(localUri.indexOf('?') !== -1);
-        if(localUri.indexOf('?') !== -1){
-            location.replace(localUriNo+'#/');//针对QQ登录这种场景
-        }else{
-            location.reload();
-        }
+        leaveRoom(state.homeState.currentRoomInfo);
+        store.dispatch({type:CONSTANT.ALLROOMLIST,val:[]});
+        setTimeout(function () {
+            if(state.homeState.currentRoomInfo.mode == '0'){
+                onLeave(state.homeState.userInfo);
+                initVariableAudio();
+            }else{
+                onLeaveVideo(state.homeState.userInfo);
+                initVariableVideo();
+            }
+            //还是得重新加载一下
+            if(localUri.indexOf('?') !== -1){
+                location.replace(localUriNo+'#/');//针对QQ登录这种场景
+            }else{
+                location.reload();
+            }
+        },200);
+
+        // setTimeout(function () {
+        //     if(localUri.indexOf('?') !== -1){
+        //         location.replace(localUriNo+'#/');//针对QQ登录这种场景
+        //     }else{
+        //         location.reload();
+        //     }
+        // },200);
         // location.reload();
     };
     switchVideoMode(e){

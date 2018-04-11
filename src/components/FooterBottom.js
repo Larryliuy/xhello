@@ -310,7 +310,7 @@ class FooterBottom extends React.Component{
                         {this.state.inputVisible ?
                             <span className={'modify-username'}><Input onChange={e=>this.onchangeHandle(e)} onPressEnter={()=>this.onblurHandle()} onBlur={()=>this.onblurHandle()} placeholder={'请输入用户名'}/></span>
                             :
-                            <span id={'user-name'}>{this.props.userName}</span>}
+                            <span id={'user-name'} style={{color:state.homeState.userInfo.isOnline?'#108ee9':'red'}}>{this.props.userName}</span>}
                     </span>
                 </span>
                 <UploadAvatar visible={this.state.visible}

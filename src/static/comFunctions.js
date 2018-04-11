@@ -215,6 +215,11 @@ function getUserIconSrc(sex,level) {
     return "./images/icons/"+src;
 }
 
+
+/**
+ * 根据userInfo获取入网状态
+ * */
+
 /**
  * 创建房间
  * */
@@ -288,6 +293,20 @@ function updateUserInfo(userInfo) {
 
     })
 }
+/**
+ * 根据房间信息更新服务器房间信息
+ * */
+function setRoomInfoByRoomInfo(roomInfo) {
+    let updateRoomMsg = {
+        type:'set_room_info',
+        roomId: roomInfo.roomId,		//房间唯一标识符
+        roomName: roomInfo.roomName,
+        data:roomInfo
+    };
+    send(JSON.stringify(updateRoomMsg),function () {
+        console.log('set_room_info,'+roomInfo.roomName+',order:'+roomInfo.order);
+    })
+}
 
 /**
  * http 根据roomId删除房间
@@ -322,7 +341,7 @@ function updateAllRoomListTimer() {
         send(JSON.stringify(getRoomsMsg),function () {
             // console.log('get_rooms');
         });
-    },30000);
+    },CONFIG_CONSTANTS.UPDATE_TIME);
 }
 
 /**
@@ -490,11 +509,10 @@ function incRoomList(cRoomId,roomId,rooms) {
 /**
  * 离开房间
  * */
-function leaveRoom(roomId) {
-   alert(roomId);
+function leaveRoom(roomInfo) {
     let msg = {
         type:'leave_room',
-        roomId:roomId,
+        roomId:roomInfo.roomId,
         user:state.homeState.userInfo
     };
     send(JSON.stringify(msg),function () {
@@ -521,8 +539,42 @@ function enterRoomDelay(roomId) {
  * 通用常量CONFIG_CONSTANTS
  * */
 const CONFIG_CONSTANTS = {
-    MAXCHILDREN : 3
+    MAXCHILDREN : 3, //节点的最大连接数
+    UPDATE_TIME : 10*1000 //更新左侧列表的时间
 };
+
+/**
+ * 排序权重函数
+ * */
+let by = function(name,minor){
+    return function(o,p){
+        let a,b;
+        if(o && p && typeof o === 'object' && typeof p === 'object'){
+            a = o[name];
+            b = p[name];
+            if(a === b){
+                return typeof minor === 'function' ? minor(o,p):0;
+            }
+            if(typeof a === typeof b){
+                return a < b ? -1:1;
+            }
+            return typeof a < typeof b ? -1 : 1;
+        }else{
+            throw ("error");
+        }
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * 用户情况抓取，比如浏览器代理，是否只是webSocket，webRTC，webAudio等,用户测试
@@ -664,11 +716,13 @@ function log(msg,funName,file) {
 /**
  * 打印关键信息函数
  * */
+let keyInfos = [];
 function successlog(msg) {
     let info = {};
     info.name = state.homeState.userInfo.name;
     info.msg = msg;
     console.log('%c'+info.name+'==='+msg,'color:green');
+    keyInfos.push(msg);
     sendToServer(info);
 }
 function keylog(msg) {
@@ -676,8 +730,19 @@ function keylog(msg) {
     info.name = state.homeState.userInfo.name;
     info.msg = msg;
     console.log('%c'+info.name+'==='+msg,'color:#df402a');
+    keyInfos.push(msg);
     sendToServer(info);
 }
+function setToLocalStorage() {
+    window.localStorage.setItem(state.homeState.userInfo.name,keyInfos);
+}
+/**
+ * 每隔5s，丢一下数据到localStorage
+ * */
+setInterval(function () {
+    setToLocalStorage();
+},5000);
+
 function error(msg,funName,file) {
     // console.error(state.homeState.userInfo.name+'==='+msg+'===caller:'+funName+'===file:'+file);
     console.error('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
@@ -699,13 +764,12 @@ function keyerror(msg) {
     info.msg = msg;
     console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
     sendToServer(info);
-
 }
 export {
     randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
     getRoomUsersCount,getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
-    getNewAllRoomList, getUserInfo, updateUserInfo, enterRoomDelay, CONFIG_CONSTANTS,log,
-    error, successlog, keyerror
+    getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, leaveRoom, CONFIG_CONSTANTS,log,
+    error, successlog, keyerror, setToLocalStorage, by
 }

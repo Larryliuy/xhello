@@ -2,17 +2,20 @@ import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
     getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam,
-    updateServerUserInfo, amISendPreOffer,delSendListById
+    updateServerUserInfo, amISendPreOffer, delSendListById, addToNormalQuitUsers, removeToNormalQuitUsers
 } from "../webrtc/webRtcAudio";
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
     setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo,delSendListByIdVideo
 } from "../webrtc/webRtcVideo";
-import { ajustUserOrder, updateUserInfo } from '../static/comFunctions';
+import { ajustUserOrder, updateUserInfo, by } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 import {blockIpApi, getImgApi} from "./apiInfo";
-import { updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, successlog} from "./comFunctions";
+import {
+    updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, successlog, keyerror,
+    setRoomInfoByRoomInfo
+} from "./comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -31,7 +34,7 @@ let WS = null,lockReconnect = false ,wsUrl = 'wss://www.xtell.cn:443/wss' ;
 if (window.WebSocket) {
     createWebSocket(wsUrl);
 } else {
-    alert("您的电脑不支持webSocket,请告更换版本更高的浏览器");
+    alert("您的电脑不支持webSocket,请更换版本更高的浏览器");
 }
 
 function createWebSocket(url) {
@@ -72,14 +75,14 @@ function reconnect(){
     lockReconnect = true;
     //没连接上会一直重连，设置延迟避免请求过多
     setTimeout(function () {
-        // console.log('调用重连函数');
+        console.log('%c调用重连函数','color:blue');
         createWebSocket(wsUrl);
         lockReconnect = false;
     }, 1000);
 }
 
 let heartCheck = {
-    timeout: 30000,//30s
+    timeout: 180000,//30s
     timeoutObj: null,
     serverTimeoutObj: null,
     reset: function(){
@@ -95,6 +98,7 @@ let heartCheck = {
             send({type:'msg',roomId: state.homeState.currentRoomInfo.roomId,typeString:'heartBeat',check:1});
             self.serverTimeoutObj = setTimeout(function(){//如果超过一定时间还没重置，说明后端主动断开了
                 // console.log('heartCheck.start,server close ws');
+                keyerror('server close ws');
                 WS.close();//如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
             }, self.timeout)
         }, this.timeout)
@@ -111,7 +115,7 @@ function initEventHandle(WS) {
     };
     WS.onopen = function () {
         //心跳检测重置
-        // log('webSocket连接成功');
+        log('webSocket连接成功');
         heartCheck.reset().start();
     };
     WS.onmessage = onmessage;
@@ -193,6 +197,7 @@ let sempher = 0,//表示申请连接的锁
     isPlaying = false;//表示是否正在播放视频
 function onmessage(response){
     // console.log(response);
+    // heartCheck.reset().start();//需要优化的地方，撤掉心跳消息，用这个就OK
     if(!response) return ;
     // console.log(response);
     //如果收到的数据是'a'则表示收到的是心跳消息
@@ -280,7 +285,7 @@ function onmessage(response){
                 // console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfoTmp.id);
                 //视频模式下如果我不是king（直播的人，则拒绝连接）
                 if((roomInfo.mode == 1 || roomInfo.mode == 3) && (!hasDownStream() && roomInfo.king != userInfoTmp.id)){
-                    console.error('Error: i am not king');
+                    console.log('%cError: i am not king','color:red');
                     sendFailed();
                     sempher = sempher + 1;
                     return;
@@ -291,11 +296,15 @@ function onmessage(response){
                     if(amISendPreOffer(dataJson.fromUser.id) || amISendPreOfferVideo(dataJson.fromUser.id)){
                         sendFailed();
                     }else{
-                        //先占位
-                        userInfoTmp.Children.push(dataJson.fromUser.id);//占位符这里的时间差
-                        // userInfoTmp.seq = dataJson.toUser.seq;//将我的seq设置给本地state
-                        store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
-                        sendOK();
+                        if(getPrepareConnectionState()){
+                            //先占位
+                            userInfoTmp.Children.push(dataJson.fromUser.id);//占位符这里的时间差
+                            // userInfoTmp.seq = dataJson.toUser.seq;//将我的seq设置给本地state
+                            store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                            sendOK();
+                        }else{
+                            sendFailed();
+                        }
                     }
                 }else{
                     sendFailed();
@@ -538,7 +547,7 @@ function onmessage(response){
                 let allRoomList = state.homeState.allRoomList,
                     roomInfo = state.homeState.userInfo,
                     newRoomList = dataJson.newRoomList;
-                console.log(dataJson);
+                // console.log(dataJson);
                 allRoomList = allRoomList.map(function (item) {
                     if(item.childNode.length !== 0){
                         item.childNode.map(function (cItem) {
@@ -552,15 +561,9 @@ function onmessage(response){
                 console.log(allRoomList);
                 store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
                 if(state.homeState.userInfo.id == dataJson.user.id){
-                    let setRoomMsg = {
-                        type:'update_room_info',
-                        roomId: roomInfo.roomId,		//房间唯一标识符
-                        roomName: roomInfo.roomName,
-                        user:state.homeState.userInfo,
-                        data:newRoomList
-                    };
-                    send(JSON.stringify(setRoomMsg),function(){
-                        console.log('update_room_info更新服务器changeRoomOrder信息');
+                    //实际只需要更新房间的order
+                    newRoomList.map(function (item) {
+                        setRoomInfoByRoomInfo(item);
                     });
                 }
                 return;
@@ -635,7 +638,7 @@ function onmessage(response){
                     initVariableVideo();
                     setTimeout(function () {
                         getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
-                    },2000);
+                    },2500);
                 }
                 return;
             }
@@ -707,8 +710,8 @@ function onmessage(response){
                         }
                     }
                     if(dataJson.candidate){
-                        // console.log('recive candidate and setCandidate');
-                        onCandidate(dataJson.candidate,dataJson.sessionId);
+                        console.log('recive candidate and setCandidate');
+                        // onCandidate(dataJson.candidate,dataJson.sessionId);
                         if(roomInfo.mode == 0){
                             onCandidate(dataJson.candidate,dataJson.sessionId);
                         }else if(roomInfo.mode == 1 || roomInfo.mode == 3){
@@ -919,7 +922,7 @@ function onmessage(response){
                             }
                             setTimeout(function () {
                                 getRoomInfo(currentRoomInfo.roomId);
-                            },1000);
+                            },2000);
                         }
                         //这里不能直接getRoomInfo，不然会各自连成很多小的圈子
                     }else{
@@ -927,7 +930,7 @@ function onmessage(response){
                             // console.log('timer 500:'+new Date().getTime());
                             // alert('viewer');
                             getRoomInfoVideo(currentRoomInfo.roomId)
-                        },2000);
+                        },3000);
                     }
                 }
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});
@@ -994,6 +997,7 @@ function onmessage(response){
             break;
         case 'enter_room':
             // console.log(dataJson);
+            removeToNormalQuitUsers(dataJson.user.id);
             if(response.data === '房间不存在'){
                 alert('房间不存在需要创建房间');
                 console.log('并进入房间');
@@ -1050,6 +1054,7 @@ function onmessage(response){
             //有人离开房间时需要更新AllRoomList
             delSendListById(dataJson.user.id);
             delSendListByIdVideo(dataJson.user.id);
+            addToNormalQuitUsers(dataJson.user.id);
             allRoomListTmp = state.homeState.allRoomList;
             allRoomListTmp.map(function (item) {
                 if(item.childNode){
@@ -1104,6 +1109,15 @@ function onmessage(response){
                 store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:audioInputUsers});
                 // console.log(audioInputUsers);
             }
+            // if(roomInfoTmp.mode == '0'){
+            //     onLeave(dataJson.user);
+            // }else{
+            //     onLeaveVideo(dataJson.user);
+            // }
+            //异常状态掉线捕捉
+            if(dataJson.user.status){
+                successlog(dataJson.user.name+'异常掉线,'+dataJson.user.status);
+            }
             break;
         case 'get_room_users':
             // log('收到get_room_users消息');
@@ -1111,12 +1125,15 @@ function onmessage(response){
             // console.log(dataJson.data);
             if(dataJson.data && dataJson.data[userInfo.id]){
                 userInfo = dataJson.data[userInfo.id];
+                if(Object.keys(dataJson.data).length === 1){//如果这个房间只有自己一个，那将自己的在线状态改为true
+                    userInfo.isOnline = true;
+                }
                 store.dispatch({type:CONSTANT.USERINFO,val:userInfo});//将从服务器获取的最新userInfo更新到本地
             }
             if(dataJson.data && Object.keys(dataJson.data).length > 1) {
                 // console.log(dataJson.user);R
                 for (let item in dataJson.data) {
-                    if(item != userInfo.id ){
+                    if(item != userInfo.id && !dataJson.data[item].status && dataJson.data[item].isOnline){
                         UserInfoList.push(dataJson.data[item]);
                         userIdList.push(item);
                     }else{
@@ -1142,24 +1159,7 @@ function onmessage(response){
            //更新左侧列表
             allRoomListTmp = state.homeState.allRoomList;
             // console.log(allRoomListTmp);
-            let by = function(name,minor){
-                return function(o,p){
-                    let a,b;
-                    if(o && p && typeof o === 'object' && typeof p === 'object'){
-                        a = o[name];
-                        b = p[name];
-                        if(a === b){
-                            return typeof minor === 'function' ? minor(o,p):0;
-                        }
-                        if(typeof a === typeof b){
-                            return a < b ? -1:1;
-                        }
-                        return typeof a < typeof b ? -1 : 1;
-                    }else{
-                        throw ("error");
-                    }
-                }
-            };
+
             allRoomListTmp.map(function (item) {
                 if(item.childNode && item.childNode.length !== 0){
                     item.childNode.map(function (item) {
@@ -1246,6 +1246,8 @@ function onmessage(response){
                     userInfo = state.homeState.userInfo;
                 // console.log(state.homeState.userInfo);
                 roomInfo.king = userInfo.id;
+                userInfo.isOnline = true;
+                updateUserInfo(userInfo);
                 store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
                 store.dispatch({type:CONSTANT.NUMBERONE,val:dataJson.user.id});
                 // console.log(state.homeState.currentRoomInfo.mode);
@@ -1296,7 +1298,8 @@ function onmessage(response){
                     if (item.roomId === itm.parentId) {
                         item.childNode.push(itm);
                     }
-                })
+                });
+                item.childNode.sort(by('order'));
             });
             // console.log(dataTmp);
             // console.log(ids);

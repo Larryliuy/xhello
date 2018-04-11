@@ -19,6 +19,10 @@ const rightClickHandle = (e) => {
         store.dispatch({type:CONSTANT.LOCATION,val:{x:0,y:0,display:'none',obj:0}});
     }else{
         const id = e.target.getAttribute('id') || e.target.parentNode.getAttribute('id') || '';
+        let level;
+        if(id.indexOf('u') !== -1){
+            level = e.target.getAttribute('data-level') || e.target.parentNode.getAttribute('data-level') || '';
+        }
         // console.log(id);
         if(id.indexOf('rc') !== -1) {
             store.dispatch({
@@ -28,7 +32,7 @@ const rightClickHandle = (e) => {
         }else if(id.indexOf('u') !== -1) {
             store.dispatch({
                 type: CONSTANT.LOCATION,
-                val: {x: e.clientX, y: e.clientY, display: 'block', obj: id}
+                val: {x: e.clientX, y: e.clientY, display: 'block', obj: id,level:level}
             });
         }else if(id.indexOf('r') !== -1 && id.indexOf('rc') === -1) {
             //这里为一级房间

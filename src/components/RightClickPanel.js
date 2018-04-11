@@ -49,7 +49,6 @@ class RightClickPanel extends React.Component{
         }
     }
     componentWillReceiveProps(nextProps){
-        console.log(nextProps);
         if(nextProps.listData === this.props.listData)return;
         this.setState({display:'none'});
     }
@@ -60,7 +59,7 @@ class RightClickPanel extends React.Component{
                 objId = state.homeState.location.obj,
                 Msg,
                 allRoomListTmp = state.homeState.allRoomList;
-            if(parseInt(objId.substring(1)) <= state.homeState.userInfo.id){
+            if(objId.indexOf('u') !== -1 && parseInt(state.homeState.location.level) <= state.homeState.userInfo.level){
                 message.warning('不能操作等级相同或比您高的用户');
                 return;
             }

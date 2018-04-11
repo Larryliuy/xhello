@@ -17,7 +17,7 @@ import RightClickPanelBox from './RightClickPanelBox';
 import '../static/login.scss'
 
 import { send } from "../static/webSocket";
-import { startMyCam } from '../webrtc/webRtcAudio';
+import {getPrepareConnectionState, startMyCam} from '../webrtc/webRtcAudio';
 import {startMyCamVideo} from "../webrtc/webRtcVideo";
 import {getUserInfo} from "../static/comFunctions";
 
@@ -45,7 +45,7 @@ class HomeLayout extends React.Component {
         this.state={sendData:'',sliderWidth:240};
     }
     componentDidMount(){
-        // 防止websock会空闲时断, 每5秒发送一个数据包,保持心跳
+        // 防止websock会空闲时断, 每10秒发送一个数据包,保持心跳
         setInterval(function () {
             let Msg = {
                 roomId:state.homeState.currentRoomInfo.roomId,
@@ -54,25 +54,11 @@ class HomeLayout extends React.Component {
             };
             send(JSON.stringify(Msg),function () {
             })
-        },5000);
+        },10000);
 
         //获取自己麦克音频流
-        let roomInfo = state.homeState.currentRoomInfo;
         let videoBox = document.getElementById('audioBox');
-        if(roomInfo.mode == 1){
-            console.log('直播模式:'+roomInfo.mode);
-            startMyCamVideo(videoBox);
-        }else{
-            console.log('语音模式:'+roomInfo.mode);
-            startMyCam(videoBox);
-        }
-        /*else if(roomInfo.mode == 2) {
-            // startMyCam(videoBox);
-            console.log('双人(连麦)直播模式');
-        }else{
-            console.log(roomInfo);
-            console.error('未知的房间模式:'+roomInfo.mode);
-        }*/
+        startMyCam(videoBox);
         let isChanging = false,
             _this = this,
             dragBar = document.getElementById('resizable');
@@ -98,7 +84,7 @@ class HomeLayout extends React.Component {
         dragBar.onmouseup = function(event){
             document.onmousemove = null;
         };
-        //获取用户环境信息，紧用于测试
+        //获取用户环境信息，仅用于测试
         // setTimeout(function () {
         //     getUserInfo();
         // },5000)
@@ -132,10 +118,6 @@ class HomeLayout extends React.Component {
                     </Sider>
                     <Content style={{ margin: '24px 16px 0',maxHeight: winHeight-150,overflowY:'hidden' }}>
                         <div id={'audioBox'}>
-                            {/*<video id={'myVideo'} src={''} controls autoPlay="autoplay"*/}
-                                   {/*style={{position:'relative',width:'60px',height:'40px'}}>不支持video</video>*/}
-                            {/*<video id={'theirVideo'} src={''} controls autoPlay="autoplay"*/}
-                                   {/*style={{position:'relative',width:'60px',height:'40px'}}>不支持video</video>*/}
                         </div>
                         <div className= 'content_show'>
                             {state.homeState.currentRoomInfo.mode == 0 && <MessageListBox></MessageListBox>}

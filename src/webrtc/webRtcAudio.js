@@ -3,8 +3,10 @@
  */
 
 import { send } from "../static/webSocket";
-import store, {CONSTANT, homeState} from "../reducer/reducer";
+import store, {CONSTANT} from "../reducer/reducer";
 import { CONFIG_CONSTANTS, log, successlog, keyerror } from '../static/comFunctions';
+import { iceServers } from './iceServer';
+import { message } from 'antd';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -12,27 +14,22 @@ store.subscribe(function () {
 
 let micphoneStream = null, /** 麦克风音频流*/
     micphoneSource = null,
-    webAudio = null,/**临时webAudio*/
+    webAudio = null,/**临时webAudio，用于处理audio tag音源*/
+    audioSourceNode = null,/**临时audioSourceNode，audio tag音源的wa节点*/
+    webAudioOutput = null,/**临时webAudioOutput，用于输出audio tag音源*/
     myWebAudio = new (window.AudioContext || window.webkitAudioContext)(), /**用于处理本地麦克风对应的webaudio*/
     myAnalyser = myWebAudio.createAnalyser(), /** 本地麦克风的AnalyserNode*/
     prepareState = false, /** 麦克风获取是否准备好（本地音频流是否获取到）*/
     rtcSessionList=[], /** 本地peerConnection连接对象组*/
     remoteVidoeDom = null, /** 远程video标签Dom*/
     Msg = {}, /** 发送消息*/
+    normalQuitUsers = {}, /** 发送消息*/
     myMicSource = null, /** 我的麦克风音源*/
     myVideo = null, /** 我的video标签Dom*/
     firstCandidate = 0, /** 第一候选人的seq*/
     microphoneStatus = false, /** 麦克风是否开启，true表示开着，false表示关着*/
     getRoomUserListCallback = null,/** 获取房间列表的回调函数*/
-    stun_server = {
-        urls: 'stun:turn.xtell.cn:3479'
-    },/** stun服务器*/
-    turn_server = {
-        urls: 'turn:turn.xtell.cn:3478',
-        credential: 'webrtc',
-        username: 'webrtc'
-    },/** TURN服务器*/
-    iceServers = [stun_server, turn_server],/** ice服务器*/
+    offerOptions = {offerToReceiveAudio:1,offerToReceiveVideo:0},/**createOffer的options*/
     rtcPeerConfig = {
         iceTransports: 'all',
         iceServers: iceServers
@@ -132,16 +129,19 @@ function startMyCam(videoBox){
         }, function(error){
             console.error(error);
             successlog('获取麦克风失败,添加audio tag流作为本地音频流，即我说不了话');
-            let myAudio = document.createElement('audio');
             //createMediaElementSource
-            webAudio = new (window.AudioContext || window.webkitAudioContext)();
-            let audioSourceNode = webAudio.createMediaElementSource(myAudio);
-            let webAudioOutput  = webAudio.createMediaStreamDestination();
-            audioSourceNode.connect(webAudioOutput);
+            if(!webAudio){
+                let myAudio = document.createElement('audio');
+                webAudio = new (window.AudioContext || window.webkitAudioContext)();
+                audioSourceNode = webAudio.createMediaElementSource(myAudio);
+                webAudioOutput  = webAudio.createMediaStreamDestination();
+                audioSourceNode.connect(webAudioOutput);
+            }
             micphoneStream = webAudioOutput.stream;
             prepareState = true;
         });
     }else{
+        successlog('您的浏览器不支持音视频获取');
         alert('您的浏览器不支持音视频获取');
     }
 }
@@ -222,11 +222,11 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 if(Msg.answer) delete Msg.answer;//删除回传的answer
                 Msg.candidate = event.candidate;
                 send(JSON.stringify(Msg),function () {
-                    // log("发送 candidate 给 "+Msg.toUser.name,'onicecandidate','webRtcAudio.js');
-                    // successlog('audio-给'+wbMsg.toUser.name+'发candidate');
-                    //5秒后去检查这个链接是否连接成功，没有连接成功，则清除rtcSessionList，并重新发出连接请求
-                    // checkPeerConnectionStatus(Msg.toUser.id,type);
                 })
+            }else{
+                //all the candidate have been sent
+                log("发送 candidate 给 "+Msg.toUser.name,'onicecandidate','webRtcAudio.js');
+                // checkPeerConnectionStatus(Msg.toUser.id,type);//这里
             }
         };
         newConnection.oniceconnectionstatechange = function(event) {
@@ -254,6 +254,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     // console.log(state.homeState.userInfo);
                     if(type === 'offer'){
                         userInfo.parentNode = wbMsg.toUser.id;
+                        userInfo.isOnline = true;
                     }else{
                         let exist = false;//表示是否有占位符
                         for(let i = 0; i < userInfo.Children.length; i++){
@@ -281,10 +282,31 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     break;
                 case "disconnected":
                     console.log("disconnected:"+wbMsg.toUser.name);
-                    if(objItem){
-                        objItem.ondisconnected('disconnected');
+                    // if(objItem) {
+                    //     keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
+                    //     objItem.ondisconnected('disconnected');
+                    // }
+                    // 重启ICE
+                    if(type === 'offer'){
+                        if(normalQuitUsers[wbMsg.toUser.id]){
+                            if(objItem) {
+                                keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
+                                objItem.ondisconnected('disconnected');
+                            }
+                        }else{
+                            message.warn('您的网络不稳定');
+                            keyerror('您与'+wbMsg.toUser.name+'网络连接不稳定或者连接已非正常断开,iceRestart');
+                            iceRestart(wbMsg.toUser);
+                        }
+                    }else{
+                        if(normalQuitUsers[wbMsg.toUser.id]){
+                            if(objItem) {
+                                keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
+                                objItem.ondisconnected('disconnected');
+                            }
+                        }
                     }
-                    return;
+                    break;
                 case "failed":
                     console.log("failed:"+wbMsg.toUser.name);
                     if(objItem){
@@ -296,6 +318,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     console.log("closed:"+wbMsg.toUser.name);
                     // The connection has been closed,本人关闭或被动通知后关闭会触发（即调用peerConnection.close()）,通知后台我已关闭连接
                     if(objItem){
+                        console.log(objItem);
                         objItem.ondisconnected('closed');
                     }
                     break;
@@ -318,7 +341,8 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             noMicMixer:moMicOutputStream,
             pcOutStream:null,
             ondisconnected:function (status) {
-            log('进入ondisconnected','ondisconnected','webRtcAudio.js');
+            // log('进入ondisconnected','ondisconnected','webRtcAudio.js');
+                successlog('进入ondisconnected，'+status);
             if(this.pcState === 'disconnected')return;
             let preState = this.pcState;
             let preStateTime = this.pcStateTime;
@@ -331,7 +355,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 delSendListById(wbMsg.toUser.id);
                 // }
                 let userInfo = state.homeState.userInfo;
-                if(this.type === 'answer' ){
+                if(this.type === 'answer'){
                     let _this = this;
                     console.log('seq:'+userInfo.seq);
                     userInfo.Children = userInfo.Children.filter(function (item) {
@@ -384,6 +408,40 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
 }
 
 /**
+ * ICE reStart 当当前连接不稳定的时候，需要restart ice
+ * */
+function iceRestart(toUser) {
+    console.log('进入iceRestart');
+    let roomInfo = state.homeState.currentRoomInfo,
+        offerOptionsTmp = {offerToReceiveAudio:1,offerToReceiveVideo:0};
+    let restartMsg = {
+        type:'msg',
+        typeString:'webrtc',
+        ToUserOnly:toUser.id,
+        roomId: roomInfo.roomId,		//房间唯一标识符
+        roomName: roomInfo.roomName,
+        fromUser:state.homeState.userInfo,
+        toUser:toUser,
+        sessionId:state.homeState.userInfo.id+'-'+toUser.id
+    };
+    rtcSessionList.map(function (item) {
+        if(item.toUserId === toUser.id){
+            offerOptionsTmp.iceRestart = true;
+            item.pc.createOffer(offerOptionsTmp)
+                .then(
+                    function (offer) {
+                        restartMsg.offer = offer;
+                        send(JSON.stringify(restartMsg),function () {
+                            item.pc.setLocalDescription(offer);
+                        });
+                    },
+                    onCreateOfferError
+                );
+        }
+    });
+}
+
+/**
  * 此函数用于发起offer时调用
  * @param wbMsg 用于发送消息给websocket服务器的消息信息（主要使用里面的user信息）
  * @param videoBox 用于将video或audio标签包裹的容易Dom对象
@@ -433,24 +491,27 @@ function offerPeerConnection(wbMsg,videoBox) {
         return item.sessionId != wbMsg.sessionId;
     });
     rtcSessionList.push(rtcSession);
-    xpc.pc.createOffer(function (offer) {
+    xpc.pc.createOffer(offerOptions)
+        .then(
+            onCreateOfferSuccess,
+            onCreateOfferError
+        );
+    function onCreateOfferSuccess(offer) {
         Msg = wbMsg;
         Msg.offer = offer;
         if(Msg.answer) delete Msg.answer;
         if(Msg.candidate) delete Msg.candidate;
-        // console.log(Msg);
         send(JSON.stringify(Msg),function () {
-            // log('已发送offer给'+ Msg.toUser.name,'offerPeerConnection','webRtcAudio.js');
             xpc.pc.setLocalDescription(offer);
-            // successlog('audio-给'+wbMsg.toUser.name+'发Offer');
         });
-    }, function (error) {
-        alert("An error has occurred 1.");
-    });
+    }
+}
+function onCreateOfferError(error) {
+    keyerror('create offer error,'+error.toString());
+    alert("An error has occurred 1."+error.toString());
 }
 function answerPeerConnection(wbMsg,offer,videoBox) {
     // log('进入answerPeerConnection','answerPeerConnection','webRtcAudio.js');
-    // successlog('给['+wbMsg.toUser.name+']发answer');
     let videoId = "video_" + wbMsg.toUser.id;
     let theirVideo = document.createElement('video');
     // theirVideo.src = window.URL.createObjectURL(stream);
@@ -506,6 +567,7 @@ function answerPeerConnection(wbMsg,offer,videoBox) {
         });
     }, function (error) {
         alert("An error has occurred 1.");
+        keyerror('createAnswer error,'+error.toString());
     });
 }
 
@@ -516,10 +578,10 @@ function onAnswer(answer,sessionId,toUserId) {
     rtcSessionList.map(function (item) {
         if(item.sessionId == tmpStr){
             try{
-                // console.log(answer);
                 item.pc.setRemoteDescription(new RTCSessionDescription(answer));
             }catch (e){
-                console.error(e);
+                // console.error(e);
+                keyerror('onAnswer-setRemoteDescription error,'+e.toString());
             }
         }
     });
@@ -532,9 +594,10 @@ function onCandidate(candidate,sessionId) {
     rtcSessionList.map(function (item) {
         if(item.sessionId == tmpStr){
             if(item.pc){
+                // successlog('audio-收到 '+item.toUser.name+'的candidate，并添加candidate到pc');
                 item.pc.addIceCandidate(new RTCIceCandidate(candidate));
             }else{
-                keyerror('pc不存在,toUser:'+item.toUser.name);
+                keyerror('audio-pc不存在,toUser:'+item.toUser.name);
             }
         }
     });
@@ -594,8 +657,9 @@ function mixerAudio(stream,pc,type) {
  * @param pc peerConnection对象
  * @param type offer表示调用者不是混音节点，answer表示调用者是混音节点
  */
+let mixerCount = 0;
 function mixerAudioByAppointUser(stream,pc,type,toUser) {
-    successlog('mixerAudioByAppointUser:'+toUser.name);
+    // successlog('mixerAudioByAppointUser:'+toUser.name);
     rtcSessionList.map(function (item) {
         if(item.pc == pc){
             if(type){//type是false表示不是接受到addstream时的调用
@@ -611,6 +675,7 @@ function mixerAudioByAppointUser(stream,pc,type,toUser) {
                             awTmpStream.connect(item.mixer);
                             // awTmpStream.connect(item.noMicMixer);
                             successlog('已与'+toUser.name+'完成混音');
+                            mixerCount = 0;
                         }else{
                             // log('item.wa不存在','mixerAudio','webRtcAudio.js');
                             keyerror('item.wa不存在,toUser:'+item.toUser.name);
@@ -620,7 +685,13 @@ function mixerAudioByAppointUser(stream,pc,type,toUser) {
                         // console.error('pcOutStream is not exist! and pcStatus:'+item.pcState);
                         keyerror('mixerAudioByAppointUser--pcOutStream is not exist! and pcStatus:'+item1.pcState+',toUser:'+item1.toUser.name);
                         //如果pcOutStream不存在，过1s再尝试混音
-                        mixerBysecond(stream,pc,type,item1.toUser);
+                        if(mixerCount < 10){
+                            mixerBysecond(stream,pc,type,item1.toUser);
+                            mixerCount++;
+                        }else{
+                            item1.ondisconnected();
+                            keyerror('mixerAudioByAppointUser大于10次，断开与他的连接:'+item1.pcState+',toUser:'+item1.toUser.name);
+                        }
                     }
                 }/*else{
                     keyerror('mixerAudioByAppointUser--未找到指定用户的连接：'+toUser.name);
@@ -734,16 +805,16 @@ function onLeave(userInfo) {
 }
 
 /**
- * 用于检测pc是否连接成功,成功不坐任何事，失败直接kill
+ * 用于检测pc是否连接成功,成功不做任何事，失败直接kill
  * */
 function checkPeerConnectionStatus(toUserId,type) {
     //3秒后如果还是在连接中，则answer清除rtsSession,offer清除并重新连接
     setTimeout(function () {
         rtcSessionList.map(function (item) {
             // console.log(item);
-            if(item.toUserId == toUserId || item.fromUserId == toUserId){
-                if(item.state === 'connecting'){
-                    successlog('发送candidate3秒后仍未连接成功,checkPeerConnectionStatus');
+            if(item.toUserId == toUserId){
+                if(item.pcState === 'connecting'){
+                    successlog('发送candidate5秒后仍未连接成功,checkPeerConnectionStatus');
                     removeInstance(item);
                     delRtcSession(toUserId);
                     //是否需要重新连接
@@ -755,14 +826,14 @@ function checkPeerConnectionStatus(toUserId,type) {
                 }
             }
         });
-    },3000)
+    },10000)
 }
 
 /**
  * 根据toUserId删除RTCSession
  * */
 function delRtcSession(toUserId) {
-    console.error("toUserId:"+toUserId);
+    console.log("%ctoUserId:"+toUserId,'color:red');
     rtcSessionList = rtcSessionList.filter(function (item) {
         return item.toUserId != toUserId;
     });
@@ -869,6 +940,7 @@ function initVariableAudio() {
     remoteVidoeDom = null;
     Msg = {};
     sendList={};
+    normalQuitUsers={};
     // myMicSource = null;
     myVideo = null;
     firstCandidate = 0;
@@ -877,6 +949,9 @@ function initVariableAudio() {
     // store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:{}});
+    let userTmp = state.homeState.userInfo;
+    userTmp.isOnline = false;
+    store.dispatch({type:CONSTANT.USERINFO,val:userTmp});
     // clearInterval(intval);
 }
 
@@ -911,11 +986,16 @@ function startOnline() {
     // console.log(state.homeState.userInfoList);
     // console.log(objUser);
     if(!objUser.minSeqUser){
-        console.error('目标用户不存在');
+        console.log('%c目标用户不存在','color:red');
         //目标用户不存在,继续用户用户列表并返回
         if(count<10){
-            getRoomUserList(startOnline);
-            count++;
+            setTimeout(function () {
+                getRoomUserList(startOnline);
+                count++;
+            },1000);
+
+        }else{
+            count = 0;
         }
         return;
     }
@@ -937,13 +1017,15 @@ function startOnline() {
     //如果没有音轨，则继续去获取
     if(!micphoneStream || (micphoneStream && micphoneStream.getAudioTracks().length === 0)){
         successlog('audio-未获取音频流，需要重新去获取再入网');
-        // if(count < 20){
-        startMyCam(document.getElementById('audioBox'));
-        setTimeout(function () {
-            getRoomUserList(startOnline);
-        },1000);
-            // count++;
-        // }
+        if(count < 10){
+            startMyCam(document.getElementById('audioBox'));
+            setTimeout(function () {
+                getRoomUserList(startOnline);
+            },1000);
+            count++;
+        }else{
+            alert('没有获取到您的麦克风，请检查您的设备状况');
+        }
         return;
     }
     count = 0;
@@ -986,6 +1068,21 @@ function amISendPreOffer(userId) {
 function delSendListById(userId) {
     if(sendList[userId]){
         delete sendList[userId];
+    }
+}
+
+/**
+ * 添加到正常退出名单
+ * */
+function addToNormalQuitUsers(userId) {
+    normalQuitUsers[userId] = true;
+}
+/**
+ * 添加到正常退出名单
+ * */
+function removeToNormalQuitUsers(userId) {
+    if(normalQuitUsers[userId]){
+        delete normalQuitUsers[userId];
     }
 }
 
@@ -1033,5 +1130,7 @@ export {
     initVariableAudio,
     updateServerUserInfo,
     amISendPreOffer,
-    delSendListById
+    delSendListById,
+    addToNormalQuitUsers,
+    removeToNormalQuitUsers
 };

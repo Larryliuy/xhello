@@ -6,7 +6,7 @@ import cookieUtil from '../libs/cookieUtil';
 import '../static/login.scss'
 import { loginApi, redirect_uri, getUserInfoApi } from "../static/apiInfo";
 import store,{CONSTANT} from "../reducer/reducer";
-import { GetQueryString } from '../static/comFunctions';
+import {CONFIG_CONSTANTS, GetQueryString} from '../static/comFunctions';
 // document.domain = domian;
 const iconStyle = {
     width: '20px',
@@ -58,7 +58,16 @@ class Login extends React.Component {
                     let datatmp = JSON.parse(data);
                     if(datatmp.status === 'ok'){
                         message.success('登录成功');
-                        _this.props.login(true,{name:userName,level:datatmp.data.Type,id:datatmp.data.Id,sex:datatmp.data.Sex,limit:datatmp.data.Limit});
+                        _this.props.login(true,{
+                            name:userName,
+                            level:datatmp.data.Type,
+                            id:datatmp.data.Id,
+                            sex:datatmp.data.Sex,
+                            limit:datatmp.data.Limit,
+                            maxChildren:CONFIG_CONSTANTS.MAXCHILDREN,
+                            Children:[],
+                            isOnline:false
+                        });
                     }else {
                         message.error('用户名与密码不匹配');
                         location.replace("#/home");
@@ -93,7 +102,16 @@ class Login extends React.Component {
                             message.success('登录成功!');
                             if(data.data.ret == 0){
                                 let timestamps = new Date().getTime();
-                                _this.props.login(true,{id:timestamps,name:data.data.nickname,sex:data.data.gender === '男'?1:2,level:7,limit:0,avatar:data.data.figureurl_2,maxChildren:1,Children:[]});
+                                _this.props.login(true,{
+                                    id:timestamps,
+                                    name:data.data.nickname,
+                                    sex:data.data.gender === '男'?1:2,
+                                    level:7,limit:0,
+                                    avatar:data.data.figureurl_2,
+                                    maxChildren:CONFIG_CONSTANTS.MAXCHILDREN,
+                                    Children:[],
+                                    isOnline:false
+                                });
                             }
                         }else{
                             message.error('登录失败');
@@ -127,7 +145,17 @@ class Login extends React.Component {
               .then(data=>{
                   if(data.status === 'ok'){
                       message.success('登录成功');
-                      _this.props.login(true,{name:userName,level:data.data.Type,id:data.data.Id,sex:data.data.Sex,limit:data.data.Limit,fileId:data.data.AvatarFileId});
+                      _this.props.login(true,{
+                          name:userName,
+                          level:data.data.Type,
+                          id:data.data.Id,
+                          sex:data.data.Sex,
+                          limit:data.data.Limit,
+                          fileId:data.data.AvatarFileId,
+                          maxChildren:CONFIG_CONSTANTS.MAXCHILDREN,
+                          Children:[],
+                          isOnline:false
+                      });
                   }else {
                       message.error('用户名与密码不匹配');
                   }
