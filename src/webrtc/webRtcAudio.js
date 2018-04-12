@@ -7,6 +7,7 @@ import store, {CONSTANT} from "../reducer/reducer";
 import { CONFIG_CONSTANTS, log, successlog, keyerror } from '../static/comFunctions';
 import { iceServers } from './iceServer';
 import { message } from 'antd';
+import {emptyNormalQuitUsers, getNormalQuitUsers} from "./webRtcBase";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -23,7 +24,6 @@ let micphoneStream = null, /** 麦克风音频流*/
     rtcSessionList=[], /** 本地peerConnection连接对象组*/
     remoteVidoeDom = null, /** 远程video标签Dom*/
     Msg = {}, /** 发送消息*/
-    normalQuitUsers = {}, /** 发送消息*/
     myMicSource = null, /** 我的麦克风音源*/
     myVideo = null, /** 我的video标签Dom*/
     firstCandidate = 0, /** 第一候选人的seq*/
@@ -282,13 +282,9 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     break;
                 case "disconnected":
                     console.log("disconnected:"+wbMsg.toUser.name);
-                    // if(objItem) {
-                    //     keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
-                    //     objItem.ondisconnected('disconnected');
-                    // }
                     // 重启ICE
                     if(type === 'offer'){
-                        if(normalQuitUsers[wbMsg.toUser.id]){
+                        if(getNormalQuitUsers()[wbMsg.toUser.id]){
                             if(objItem) {
                                 keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
                                 objItem.ondisconnected('disconnected');
@@ -299,7 +295,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                             iceRestart(wbMsg.toUser);
                         }
                     }else{
-                        if(normalQuitUsers[wbMsg.toUser.id]){
+                        if(getNormalQuitUsers()[wbMsg.toUser.id]){
                             if(objItem) {
                                 keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
                                 objItem.ondisconnected('disconnected');
@@ -506,9 +502,12 @@ function offerPeerConnection(wbMsg,videoBox) {
         });
     }
 }
+/**
+ * createOffer异常处理函数
+ * */
 function onCreateOfferError(error) {
-    keyerror('create offer error,'+error.toString());
-    alert("An error has occurred 1."+error.toString());
+    keyerror('audio-create offer error,'+error.toString());
+    alert("audio-An error has occurred 1."+error.toString());
 }
 function answerPeerConnection(wbMsg,offer,videoBox) {
     // log('进入answerPeerConnection','answerPeerConnection','webRtcAudio.js');
@@ -940,12 +939,12 @@ function initVariableAudio() {
     remoteVidoeDom = null;
     Msg = {};
     sendList={};
-    normalQuitUsers={};
     // myMicSource = null;
     myVideo = null;
     firstCandidate = 0;
     microphoneStatus = false;
     getRoomUserListCallback = null;
+    emptyNormalQuitUsers();
     // store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:{}});
@@ -1071,20 +1070,6 @@ function delSendListById(userId) {
     }
 }
 
-/**
- * 添加到正常退出名单
- * */
-function addToNormalQuitUsers(userId) {
-    normalQuitUsers[userId] = true;
-}
-/**
- * 添加到正常退出名单
- * */
-function removeToNormalQuitUsers(userId) {
-    if(normalQuitUsers[userId]){
-        delete normalQuitUsers[userId];
-    }
-}
 
 /**
  * 初始化用户信息函数
@@ -1130,7 +1115,5 @@ export {
     initVariableAudio,
     updateServerUserInfo,
     amISendPreOffer,
-    delSendListById,
-    addToNormalQuitUsers,
-    removeToNormalQuitUsers
+    delSendListById
 };

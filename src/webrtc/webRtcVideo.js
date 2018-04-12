@@ -7,6 +7,8 @@ import store, {CONSTANT} from "../reducer/reducer";
 import {getRoomInfo, startMyCam, getPrepareConnectionState} from "./webRtcAudio";
 import {CONFIG_CONSTANTS, successlog, log, keyerror} from '../static/comFunctions';
 import { iceServers } from './iceServer';
+import {message} from "antd/lib/index";
+import {emptyNormalQuitUsers, getNormalQuitUsers} from "./webRtcBase";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -338,8 +340,15 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                 case "disconnected":
                     // console.log("disconnected");
                     if(type==='offer'){
-                        if(objItem){
-                            objItem.ondisconnected('disconnected');
+                        if(getNormalQuitUsers()[wbMsg.toUser.id]){
+                            if(objItem) {
+                                keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
+                                objItem.ondisconnected('disconnected');
+                            }
+                        }else{
+                            message.warn('您的网络不稳定');
+                            keyerror('您与'+wbMsg.toUser.name+'网络连接不稳定或者连接已非正常断开,iceRestart');
+                            iceRestartVideo(wbMsg.toUser);
                         }
                     }
                     return;
@@ -439,6 +448,41 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
 
 }
 
+
+/**
+ * ICE reStart 当当前连接不稳定的时候，需要restart ice
+ * */
+function iceRestartVideo(toUser) {
+    console.log('进入iceRestartVideo');
+    let roomInfo = state.homeState.currentRoomInfo,
+        offerOptionsTmp = {offerToReceiveAudio:1,offerToReceiveVideo:1};
+    let restartMsg = {
+        type:'msg',
+        typeString:'webrtc',
+        ToUserOnly:toUser.id,
+        roomId: roomInfo.roomId,		//房间唯一标识符
+        roomName: roomInfo.roomName,
+        fromUser:state.homeState.userInfo,
+        toUser:toUser,
+        sessionId:state.homeState.userInfo.id+'-'+toUser.id
+    };
+    rtcSessionList.map(function (item) {
+        if(item.toUserId === toUser.id){
+            offerOptionsTmp.iceRestart = true;
+            item.pc.createOffer(offerOptionsTmp)
+                .then(
+                    function (offer) {
+                        restartMsg.offer = offer;
+                        send(JSON.stringify(restartMsg),function () {
+                            item.pc.setLocalDescription(offer);
+                        });
+                    },
+                    onCreateOfferError
+                );
+        }
+    });
+}
+
 /**
  * 此函数用于发起offer时调用
  * @param wbMsg 用于发送消息给websocket服务器的消息信息（主要使用里面的user信息）
@@ -476,20 +520,28 @@ function offerPeerConnectionVideo(wbMsg,videoTag,isKing) {
         return item.sessionId != wbMsg.sessionId;
     });
     rtcSessionList.push(rtcSession);
-    xpc.pc.createOffer(function (offer) {
+    xpc.pc.createOffer(
+        onCreateOfferSuccess,
+        onCreateOfferError
+    );
+    function onCreateOfferSuccess(offer) {
         Msg = wbMsg;
         Msg.offer = offer;
         if(Msg.answer) delete Msg.answer;
         if(Msg.candidate) delete Msg.candidate;
-        // console.log(Msg);
         send(JSON.stringify(Msg),function () {
-            // log('已发送offer给'+ Msg.toUser.id,'offerPeerConnectionVideo','webRtcVideo.js');
             successlog('video-已发送offer给'+ Msg.toUser.name);
             xpc.pc.setLocalDescription(offer);
         });
-    }, function (error) {
-        alert("An error has occurred 1.");
-    });
+    }
+}
+
+/**
+ * createOffer异常处理函数
+ * */
+function onCreateOfferError(error) {
+    keyerror('video-create offer error,'+error.toString());
+    alert("video-An error has occurred 1."+error.toString());
 }
 function answerPeerConnectionVideo(wbMsg,offer,videoId,isKing) {
     // log('进入answerPeerConnection','answerPeerConnectionVideo','webRtcVideo.js');
@@ -864,6 +916,7 @@ function initVariableVideo() {
     firstCandidate = 0;
     microphoneStatus = false;
     callbackVideo = null;
+    emptyNormalQuitUsers();
     store.dispatch({type:CONSTANT.ISANSWER,val:false});
     let userTmp = state.homeState.userInfo;
     userTmp.isOnline = false;

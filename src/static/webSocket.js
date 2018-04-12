@@ -2,7 +2,7 @@ import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
     getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam,
-    updateServerUserInfo, amISendPreOffer, delSendListById, addToNormalQuitUsers, removeToNormalQuitUsers
+    updateServerUserInfo, amISendPreOffer, delSendListById
 } from "../webrtc/webRtcAudio";
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
@@ -16,6 +16,7 @@ import {
     updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, successlog, keyerror,
     setRoomInfoByRoomInfo
 } from "./comFunctions";
+import {addToNormalQuitUsers, removeToNormalQuitUsers} from "../webrtc/webRtcBase";
 
 let state = store.getState();
 store.subscribe(function () {
