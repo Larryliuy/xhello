@@ -1158,11 +1158,14 @@ function onmessage(response){
                     setGetRoomUserListCallback(null);
                     callbackTmp();
                 }
+                //更新当前房间的人数
+                let roomInfoTmp = state.homeState.currentRoomInfo;
+                roomInfoTmp.totalClients = Object.keys(dataJson.data).length;
+                store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfoTmp});
             }
            //更新左侧列表
             allRoomListTmp = state.homeState.allRoomList;
             // console.log(allRoomListTmp);
-
             allRoomListTmp.map(function (item) {
                 if(item.childNode && item.childNode.length !== 0){
                     item.childNode.map(function (item) {
