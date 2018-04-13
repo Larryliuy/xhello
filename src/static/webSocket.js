@@ -608,7 +608,9 @@ function onmessage(response){
                 onLeaveVideo(state.homeState.userInfo);//在ondisconnect里面会调用
                 initVariableVideo();
                 let myVideoTag = document.getElementById('secondVideo');
-                startMyCamVideo(myVideoTag,true);
+                if(!getPrepareConnectionStateVideo()){
+                    startMyCamVideo(myVideoTag,true);
+                }
                 let user = dataJson.user;
                 user.Children = user.Children.filter(function (item) {
                     return item !== user.id;
@@ -627,7 +629,7 @@ function onmessage(response){
                 console.log(Msg);
                 setTimeout(function () {
                     offerPeerConnectionVideo(Msg,'firstVideo',true);
-                },1000);
+                },2000);
                 return;
             }
             //视频重连

@@ -42,6 +42,7 @@ class CreateRoom extends React.Component{
             })
         }
         console.log(roomType+';'+parentId+';'+order);
+        //在这里请求https，创建房间，将返回的房间ID传给websocket
         createMsg = {
             type:'create_room',
             parentId:parentId,

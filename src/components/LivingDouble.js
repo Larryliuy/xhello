@@ -2,7 +2,7 @@ import React,{ Component } from 'react';
 import { Button, message } from 'antd';
 import store from "../reducer/reducer";
 import { send } from "../static/webSocket";
-import { closeVideoMode, onLeaveVideo, refreshVideo } from "../webrtc/webRtcVideo";
+import {closeVideoMode, onLeaveVideo, refreshVideo, startMyCamVideo} from "../webrtc/webRtcVideo";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState()
@@ -12,6 +12,8 @@ class LivingDouble extends React.Component{
     componentDidMount(){
     }
     onApplyToBebarley(){
+        let myVideoTag = document.getElementById('secondVideo');
+        // startMyCamVideo(myVideoTag,true);
         let roomInfo = state.homeState.currentRoomInfo,
             userInfo = state.homeState.userInfo;
         console.log(roomInfo);

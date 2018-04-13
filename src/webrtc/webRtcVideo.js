@@ -170,6 +170,8 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                        let firstVideo = document.getElementById('firstVideo');
                         firstVideo.style.width = '45%';
                         firstVideo.style.height = '80%';
+                        firstVideo.style.maxWidth = '';
+                        firstVideo.style.maxHeight = '';
                     }
                 }else {
                     log('触发onaddstream,我是offer,观众,播放','onaddstream','webRtcVideo.js');

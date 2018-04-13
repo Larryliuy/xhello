@@ -141,7 +141,7 @@ function startMyCam(videoBox){
             prepareState = true;
         });
     }else{
-        successlog('您的浏览器不支持音视频获取');
+        successlog('您的浏览器不支持音视频获取,hasUserMedia:false');
         alert('您的浏览器不支持音视频获取');
     }
 }
@@ -217,7 +217,6 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             //	console.log("yourConnection.onicecandidate!");
             if (event.candidate) {
                 let Msg = wbMsg;
-                // console.log(Msg);
                 if(Msg.offer) delete Msg.offer;//删除回传的offer
                 if(Msg.answer) delete Msg.answer;//删除回传的answer
                 Msg.candidate = event.candidate;

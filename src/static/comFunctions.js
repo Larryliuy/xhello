@@ -221,7 +221,7 @@ function getUserIconSrc(sex,level) {
  * */
 
 /**
- * 创建房间
+ * 创建房间websocket
  * */
 
 function createRoom(roomInfo) {
@@ -229,21 +229,34 @@ function createRoom(roomInfo) {
     createMsg.type = 'create_room';
     // createMsg.roomId = data.data;
     //这里请求创建房间
-    console.log(createMsg.roomId);
-    send(JSON.stringify(createMsg),function () {
-        //创建完成后获取最新的房间列表
-        let getRoomsMsg = {
-            type:'get_rooms',
-            user:state.homeState.userInfo,
-            data:''
-        };
-        send(JSON.stringify(getRoomsMsg),function () {
-            setTimeout(function () {
-                updateAllRoomListUserInfoByRoomId(state.homeState.userInfo,state.homeState.currentRoomInfo.roomId);
-            },500);
-        });
-    });
+    let args = '?action=add&table=room&roomName='+roomInfo.roomName+'&parentId='+roomInfo.parentId+'&creatorId='+roomInfo.userId+'&creatorName='+roomInfo.userName+
+        '&password='+roomInfo.password+'&order='+roomInfo.order+'&color='+roomInfo.color;
+    fetch(generalApi+args)
+        .then(res=>res.json())
+        .then(data=>{
+            console.log(data);
+            if(data.status === 'ok'){
+                createMsg.roomId = data.data;
+                console.log(createMsg.roomId);
+                send(JSON.stringify(createMsg),function () {
+                    //创建完成后获取最新的房间列表
+                    let getRoomsMsg = {
+                        type:'get_rooms',
+                        user:state.homeState.userInfo,
+                        data:''
+                    };
+                    send(JSON.stringify(getRoomsMsg),function () {
+                        setTimeout(function () {
+                            updateAllRoomListUserInfoByRoomId(state.homeState.userInfo,state.homeState.currentRoomInfo.roomId);
+                        },500);
+                    });
+                });
+            }
+        })
+        .catch(e=>console.error(e));
 }
+
+
 
 /**
  * 根据房间ID更新房间信息
@@ -312,7 +325,7 @@ function setRoomInfoByRoomInfo(roomInfo) {
  * http 根据roomId删除房间
  * */
 function deleteRoomById(roomId) {
-    let args = '?action=del&table=room&cond=id='+roomId;
+    let args = '?action=del&table=room&cond=id=%22'+roomId+'%22';
     fetch(generalApi+args)
         .then(res=>res.json())
         .then(data=>{
