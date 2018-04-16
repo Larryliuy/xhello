@@ -43,6 +43,7 @@ class UEditorBox extends React.Component {
     limitTextOrImg(limit,type){
         //type=1表示用户限制，type=2表示房间限制
         switch(limit){
+            case '13':
             case '1':
                 let value = this.state.value;
                 // console.log(value);
@@ -80,6 +81,7 @@ class UEditorBox extends React.Component {
                 }
                 // return true;
                 break;
+            case '23':
             case '2':
                 if(this.state.value.match(/\<img(\s|\S)+?\>/g)){
                     if(type === 1){
@@ -92,17 +94,8 @@ class UEditorBox extends React.Component {
                     return true;
                 }
                 break;
-            case '12':
-                if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img>') !== -1){
-                    if(type === 1){
-                        message.warning('您已被禁止发送文字和图片');
-                    }else {
-                        message.warning('此房间已被禁止发送文字和图片');
-                    }
-                    return false;
-                }
-                break;
             case '123':
+            case '12':
                 if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img') !== -1){
                     if(type === 1){
                         message.warning('您已被禁止发送文字和图片');
@@ -114,7 +107,6 @@ class UEditorBox extends React.Component {
                 break;
             default:
                 return true;
-                break;
         }
     }
     sendClickhandle(){
@@ -123,6 +115,8 @@ class UEditorBox extends React.Component {
         // WS.emit('message',message);
         // console.log('ueditor:'+state.homeState.currentRoomInfo.id);
         // console.log(state.homeState.currentRoomInfo.limited);
+        // console.log(this.state.value);
+        // console.log(state.homeState.userInfo.limit);
         if(!this.limitTextOrImg(state.homeState.userInfo.limit.toString(),1))return;
         if(state.homeState.currentRoomInfo.limited){
             if(!this.limitTextOrImg(state.homeState.currentRoomInfo.limited.toString(),2))return;
@@ -135,7 +129,6 @@ class UEditorBox extends React.Component {
             this.state.value);
         msg.timeStamp = new Date().getTime();
         send(JSON.stringify(msg),function () {
-
         });
         this.setState({value:''});
         this.state.textareaDom.innerHTML = '';
@@ -144,7 +137,7 @@ class UEditorBox extends React.Component {
         if(!this.state.value || this.state.value.indexOf('<p><br></p>') !== -1) {
             e.target.innerHTML = '';
             return false;
-        };
+        }
         //ctrl+enter发送，enter发送需要做字符串处理
         if(e.keyCode === 13 && !e.ctrlKey){
             if(!this.limitTextOrImg(state.homeState.userInfo.limit.toString(),1))return;

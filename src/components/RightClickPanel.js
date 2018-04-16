@@ -5,7 +5,7 @@ import CreateRoom from './CreateRoom';
 import SetRoom from './SetRoom';
 import SortRoom from './SortRoom';
 import { getSendData, send } from '../static/webSocket.js';
-import { deleteRoomById } from '../static/comFunctions';
+import { deleteRoomById, limitFetch } from '../static/comFunctions';
 import store, {CONSTANT} from "../reducer/reducer";
 import {generalApi, blockUserApi} from "../static/apiInfo";
 let state = store.getState();
@@ -79,42 +79,6 @@ class RightClickPanel extends React.Component{
                 });
                 // console.log(allRoomList);
                 store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
-            }
-            function limitFetch(args) {
-                fetch(generalApi,{
-                    method:'POST',
-                    // credentials: "include",
-                    headers:{
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body:args//JSON.stringify(args)
-                }).then((response) => {/*console.log(response);*/return response.text()})
-                    .then(data=>{
-                        console.log(data);
-                        let datatmp;
-                        try {
-                            datatmp = JSON.parse(data);
-                            //JSON.parse没问题的情况
-                            console.log(datatmp);
-                            if(datatmp.status === 'ok'){
-                                message.success('设置成功');
-                            }else {
-                                message.error('设置失败');
-                            }
-                        }catch (e){
-                            //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
-                            datatmp = JSON.parse(data.substring(data.indexOf('{')));
-                            console.log(datatmp);
-                            if(datatmp.status === 'ok'){
-                                message.success('设置成功');
-                            }else {
-                                message.error('设置失败');
-                            }
-                        }
-
-                    }).catch(err=>{
-                    console.log(err);
-                });
             }
             let args ='';
             // console.log(text);
@@ -206,9 +170,7 @@ class RightClickPanel extends React.Component{
                         limit:2
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=2';
-                        limitFetch(args);
+                        message.success('设置成功');
                     });
                     break;
                 case '禁止此人语音':
@@ -221,9 +183,7 @@ class RightClickPanel extends React.Component{
                         limit:3
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=3';
-                        limitFetch(args);
+                        message.success('设置成功');
                     });
 
                     break;
@@ -237,9 +197,7 @@ class RightClickPanel extends React.Component{
                         limit:1
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=1';
-                        limitFetch(args);
+                        message.success('设置成功');
                     });
 
                     break;
@@ -253,9 +211,7 @@ class RightClickPanel extends React.Component{
                         limit:0
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Limit=0';
-                        limitFetch(args);
+                        message.success('设置成功');
                     });
 
                     break;
@@ -370,9 +326,7 @@ class RightClickPanel extends React.Component{
                         limit:2
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=2';
-                        limitFetch(args);
+                        message.success('设置成功');
                     });
                     break;
                 case '禁止语音':
@@ -385,9 +339,7 @@ class RightClickPanel extends React.Component{
                         limit:3
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=3';
-                        limitFetch(args);
+                        message.success('设置成功');
                     });
                     break;
                 case '禁止文字':
@@ -401,10 +353,7 @@ class RightClickPanel extends React.Component{
                         limit:1
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=1';
-                        limitFetch(args);
-                        console.log(args)
+                        message.success('设置成功');
                     });
                     break;
                 case '取消禁止':
@@ -418,15 +367,13 @@ class RightClickPanel extends React.Component{
                         limit:0
                     };
                     send(JSON.stringify(Msg),function(){
-                        //http请求修改数据
-                        let args = 'action=update&table=room&cond=id='+(parseInt(objId) || objId.substring(2))+'&limited=0';
-                        limitFetch(args);
-                        console.log(args)
+                        message.success('设置成功');
                     });
                     break;
                 case '创建同级别房间':
                     // alert(text);
                     _this.setState({createRoom:true});
+                    _this.setState({roomType:1});
                     break;
                 case '创建子房间':
                     // alert(text);
@@ -460,31 +407,7 @@ class RightClickPanel extends React.Component{
                         cancelText: '取消',
                         onOk() {
                             console.log('OK');
-                            let deleteMsg = {
-                                type:'delete_room',
-                                roomId:objId,
-                                user:state.homeState.userInfo
-                            };
-                            send(JSON.stringify(deleteMsg),function () {
-                                deleteRoomById(objId);
-                                //删除完成后获取最新的房间列表
-                                let getRoomsMsg = {
-                                    type:'get_rooms',
-                                    user:state.homeState.userInfo,
-                                    data:''
-                                };
-                                send(JSON.stringify(getRoomsMsg),function () {
-                                    let enterMsg = getSendData(
-                                        'enter_room',
-                                        state.homeState.currentRoomInfo.roomId,
-                                        state.homeState.currentRoomInfo.roomName,
-                                        state.homeState.userInfo);
-                                    // WS.send(JSON.stringify(enterMsg));
-                                    send(JSON.stringify(enterMsg),function(){
-
-                                    });
-                                });
-                            });
+                            deleteRoomById(objId);
                         },
                         onCancel() {
                             console.log('Cancel');

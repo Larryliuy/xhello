@@ -9,12 +9,12 @@ import {
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
     setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo,delSendListByIdVideo
 } from "../webrtc/webRtcVideo";
-import { ajustUserOrder, updateUserInfo, by } from '../static/comFunctions';
+import { ajustUserOrder, updateUserInfo, by, upDateRoomListByDelRoomId, getNewLimit } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
 import {blockIpApi, getImgApi} from "./apiInfo";
 import {
     updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, successlog, keyerror,
-    setRoomInfoByRoomInfo
+    setRoomInfoByRoomInfo, limitFetch
 } from "./comFunctions";
 import {addToNormalQuitUsers, removeToNormalQuitUsers} from "../webrtc/webRtcBase";
 
@@ -792,8 +792,12 @@ function onmessage(response){
                 if(dataJson.objUserId == state.homeState.userInfo.id){
                     //设置state.homeState.userInfo
                     let userInfoTmp = state.homeState.userInfo;
-                    userInfoTmp.limit = dataJson.limit;
+                    userInfoTmp.limit = getNewLimit(userInfoTmp.limit,dataJson.limit);
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfoTmp});
+                    updateUserInfo(userInfoTmp);
+                    //http请求修改数据
+                    let args = 'action=update&table=xuser&cond=id='+dataJson.objUserId+'&Limit='+userInfoTmp.limit;
+                    limitFetch(args);
                 }
                 return;
             }
@@ -806,9 +810,12 @@ function onmessage(response){
                     //设置state.homeState.userInfo
                     let currentRoomInfoTmp = state.homeState.currentRoomInfo;
                     console.log(currentRoomInfoTmp);
-                    currentRoomInfoTmp.limited = dataJson.limit;
+                    currentRoomInfoTmp.limited = getNewLimit(currentRoomInfoTmp.limited,dataJson.limit);
                     store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfoTmp});
                     //可能需要更新allRoomList中的user
+                    setRoomInfo(currentRoomInfoTmp);
+                    let args = 'action=update&table=room&cond=id='+dataJson.objRoomId+'&limited='+currentRoomInfoTmp.limited;
+                    limitFetch(args);
                 }
                 return;
             }
@@ -1129,6 +1136,7 @@ function onmessage(response){
             if(dataJson.data && dataJson.data[userInfo.id]){
                 userInfo = dataJson.data[userInfo.id];
                 if(Object.keys(dataJson.data).length === 1){//如果这个房间只有自己一个，那将自己的在线状态改为true
+
                     userInfo.isOnline = true;
                 }
                 store.dispatch({type:CONSTANT.USERINFO,val:userInfo});//将从服务器获取的最新userInfo更新到本地
@@ -1325,9 +1333,11 @@ function onmessage(response){
             // console.log(dataTmp);
             break;
         case 'create_room':
+            console.log(dataJson);
             break;
         case 'delete_room':
-            // console.log(dataJson);
+            console.log(dataJson);
+            upDateRoomListByDelRoomId(dataJson.roomId);
             // console.log(dataJson.data);
             //更新allRoomList
             break;
@@ -1342,7 +1352,8 @@ function onmessage(response){
  * 根据用户信息和房间ID更新room-list列表
  * */
 function updateAllRoomListUserInfoByRoomId(userInfo,roomId) {
-    console.log('updateAllRoomListUserInfoByRoomId');
+    console.log('updateAllRoomListUserInfoByRoomId，'+roomId);
+    if(!roomId)return;
     let allRoomListTmp = state.homeState.allRoomList;
     // console.log(dataJson);
     allRoomListTmp.map(function (item) {

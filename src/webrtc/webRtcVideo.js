@@ -859,6 +859,9 @@ function delSendListByIdVideo(userId) {
     }
 }
 
+/**
+ * 替换服务器roomInfo信息
+ * */
 function setRoomInfo(roomInfo) {
     let setRoomMsg = {
         type:'set_room_info',

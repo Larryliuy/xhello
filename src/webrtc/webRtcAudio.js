@@ -947,8 +947,13 @@ function initVariableAudio() {
     // store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:{}});
-    let userTmp = state.homeState.userInfo;
-    userTmp.isOnline = false;
+    let userTmp = state.homeState.userInfo,
+        roomInfo = state.homeState.currentRoomInfo;
+    if(roomInfo && roomInfo.childNode instanceof Array && roomInfo.childNode.length === 1){
+        userTmp.isOnline = true;
+    }else{
+        userTmp.isOnline = false;
+    }
     store.dispatch({type:CONSTANT.USERINFO,val:userTmp});
     // clearInterval(intval);
 }

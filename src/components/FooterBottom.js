@@ -242,6 +242,9 @@ class FooterBottom extends React.Component{
         if(roomInfo.mode != '0'){
             result = true;
         }
+        if(userInfo.limit.toString().indexOf('3') !== -1 || (roomInfo && roomInfo.limited && roomInfo.limited.toString().indexOf('3') !== -1)){
+            result = true;
+        }
         return result;
     }
     playMusic(){

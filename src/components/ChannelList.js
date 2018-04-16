@@ -26,7 +26,6 @@ class ChannelList extends React.Component{
             clickRoomInfo:{id:0,title:'',}};
     }
     componentDidMount(){
-        //数据从父组件来
         let _this = this;
         //暂时使用定时器解决，后续方案需使用redux-saga解决
         setTimeout(function () {
@@ -93,13 +92,15 @@ class ChannelList extends React.Component{
         // console.log(leaveMsg);
         send(JSON.stringify(leaveMsg),function(){
             store.dispatch({type:CONSTANT.NUMBERONE,val:0});
-            if(getPrepareConnectionState()){
-                onLeave(state.homeState.userInfo);
-                initVariableAudio();
-            }
-            if(getPrepareConnectionStateVideo()){
-                onLeaveVideo(state.homeState.userInfo);
-            }
+            setTimeout(function () {
+                if(getPrepareConnectionState()){
+                    onLeave(state.homeState.userInfo);
+                    initVariableAudio();
+                }
+                if(getPrepareConnectionStateVideo()){
+                    onLeaveVideo(state.homeState.userInfo);
+                }
+            },200);
         });
         //离开后标记离开的房间为最后一次房间
         store.dispatch({type:CONSTANT.LASTROOMINFO,val:state.homeState.currentRoomInfo});

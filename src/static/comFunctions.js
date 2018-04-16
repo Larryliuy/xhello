@@ -228,35 +228,44 @@ function createRoom(roomInfo) {
     let createMsg = roomInfo;
     createMsg.type = 'create_room';
     // createMsg.roomId = data.data;
+    send(JSON.stringify(createMsg),function () {
+        //创建完成后获取最新的房间列表
+        refreshRoomList();
+    });
     //这里请求创建房间
-    let args = '?action=add&table=room&roomName='+roomInfo.roomName+'&parentId='+roomInfo.parentId+'&creatorId='+roomInfo.userId+'&creatorName='+roomInfo.userName+
-        '&password='+roomInfo.password+'&order='+roomInfo.order+'&color='+roomInfo.color;
-    fetch(generalApi+args)
-        .then(res=>res.json())
-        .then(data=>{
-            console.log(data);
-            if(data.status === 'ok'){
-                createMsg.roomId = data.data;
-                console.log(createMsg.roomId);
-                send(JSON.stringify(createMsg),function () {
-                    //创建完成后获取最新的房间列表
-                    let getRoomsMsg = {
-                        type:'get_rooms',
-                        user:state.homeState.userInfo,
-                        data:''
-                    };
-                    send(JSON.stringify(getRoomsMsg),function () {
-                        setTimeout(function () {
-                            updateAllRoomListUserInfoByRoomId(state.homeState.userInfo,state.homeState.currentRoomInfo.roomId);
-                        },500);
-                    });
-                });
-            }
-        })
-        .catch(e=>console.error(e));
+    // let args = '?action=add&table=room&roomName='+roomInfo.roomName+'&parentId='+roomInfo.parentId+'&creatorId='+roomInfo.userId+'&creatorName='+roomInfo.userName+
+    //     '&password='+roomInfo.password+'&order='+roomInfo.order+'&color='+roomInfo.color;
+    // fetch(generalApi+args)
+    //     .then(res=>res.json())
+    //     .then(data=>{
+    //         console.log(data);
+    //         if(data.status === 'ok'){
+    //             createMsg.roomId = data.data;
+    //             console.log(createMsg);
+    //             send(JSON.stringify(createMsg),function () {
+    //                 //创建完成后获取最新的房间列表
+    //                 refreshRoomList();
+    //             });
+    //         }
+    //     })
+    //     .catch(e=>console.error(e));
 }
 
-
+/**
+ * 刷新房间列表
+ * */
+function refreshRoomList() {
+    let getRoomsMsg = {
+        type:'get_rooms',
+        user:state.homeState.userInfo,
+        data:''
+    };
+    send(JSON.stringify(getRoomsMsg),function () {
+        setTimeout(function () {
+            updateAllRoomListUserInfoByRoomId(state.homeState.userInfo,state.homeState.currentRoomInfo.roomId);
+        },1000);
+    });
+}
 
 /**
  * 根据房间ID更新房间信息
@@ -267,15 +276,22 @@ function updateRoomInfoById(roomId,roomName,roomColor,roomPassword) {
     // console.log(dataJson);
     let objRoomInfo = null;
     allRoomListTmp.map(function (item) {
-        if(item.childNode.length !== 0){
-            item.childNode.map(function (item) {
-                if(item.roomId == roomId){
-                    item.roomName = roomName;
-                    item.color = roomColor;
-                    item.password = roomPassword;
-                    objRoomInfo = item;
-                }
-            });
+        if(item.roomId === roomId){
+            item.roomName = roomName;
+            item.color = roomColor;
+            item.password = roomPassword;
+            objRoomInfo = item;
+        }else{
+            if(item.childNode.length !== 0){
+                item.childNode.map(function (item) {
+                    if(item.roomId == roomId){
+                        item.roomName = roomName;
+                        item.color = roomColor;
+                        item.password = roomPassword;
+                        objRoomInfo = item;
+                    }
+                });
+            }
         }
     });
     let setRoomMsg = {
@@ -325,18 +341,68 @@ function setRoomInfoByRoomInfo(roomInfo) {
  * http 根据roomId删除房间
  * */
 function deleteRoomById(roomId) {
-    let args = '?action=del&table=room&cond=id=%22'+roomId+'%22';
-    fetch(generalApi+args)
-        .then(res=>res.json())
-        .then(data=>{
-            console.log(data);
-            if(data.status === 'ok'){
-                message.success('删除成功');
-            }else{
-                message.error('删除失败：'+data.msg);
+    let updateRoomMsg = {
+        type:'delete_room',
+        roomId: roomId,		//房间唯一标识符
+        data:''
+    };
+    send(JSON.stringify(updateRoomMsg),function () {
+        console.log('delete_room,'+roomId);
+        let getRoomsMsg = {
+            type:'get_rooms',
+            user:state.homeState.userInfo,
+            data:''
+        };
+        send(JSON.stringify(getRoomsMsg),function () {
+            // let enterMsg = getSendData(
+            //     'enter_room',
+            //     state.homeState.currentRoomInfo.roomId,
+            //     state.homeState.currentRoomInfo.roomName,
+            //     state.homeState.userInfo);
+            // // WS.send(JSON.stringify(enterMsg));
+            // send(JSON.stringify(enterMsg),function(){
+            // });
+        });
+    })
+    //let args = '?action=del&table=room&cond=id=%22'+roomId+'%22';
+    // fetch(generalApi+args)
+    //     .then(res=>res.json())
+    //     .then(data=>{
+    //         console.log(data);
+    //         if(data.status === 'ok'){
+    //             message.success('删除成功');
+    //             let updateRoomMsg = {
+    //                 type:'delete_room',
+    //                 roomId: roomId,		//房间唯一标识符
+    //                 data:''
+    //             };
+    //             send(JSON.stringify(updateRoomMsg),function () {
+    //                 console.log('delete_room,'+roomId);
+    //             })
+    //         }else{
+    //             message.error('删除失败：'+data.msg);
+    //         }
+    //     })
+    //     .catch(e=>console.error(e));
+}
+/**
+ * 根据删除房间的ID更新roomList
+ * */
+
+function upDateRoomListByDelRoomId(roomId) {
+    let roomList = state.homeState.allRoomList;
+    if(roomList.length !== 0){
+    roomList = roomList.filter(function (room) {
+            if(room.childNode.length !== 0){
+                room.childNode = room.childNode.filter(function (cRoom) {
+                    return roomId != cRoom.roomId;
+                })
             }
+            return roomId != room.roomId;
         })
-        .catch(e=>console.error(e));
+    }
+    store.dispatch({type:CONSTANT.ALLROOMLIST,val:roomList});
+
 }
 
 /**
@@ -464,9 +530,10 @@ function sendCheerAudio(type) {
 }
 
 /**
- * 将新的allRoomList做比较
+ * 将新的allRoomList做比较,//这里可以做一个优化，将删除的房间也可以更新掉
  * */
 function getNewAllRoomList(newRoomList) {
+    console.log(newRoomList);
     let oldAllRoomList = state.homeState.allRoomList,
         newAllRoomList = state.homeState.allRoomList;
     newRoomList.map(function (item) {
@@ -579,11 +646,103 @@ let by = function(name,minor){
 };
 
 
+/**
+ * 根据用户原来的Limit和新限制limit生成新的limit
+ * */
+function getNewLimit(oldLimit,addLimit) {
+    let result = oldLimit,
+        oLimit = oldLimit.toString(),
+        aLimit = addLimit.toString();
+    switch (oLimit){
+        case '0':
+            result = aLimit;
+            break;
+        case '1':
+            result = aLimit !== '1'?'1'+aLimit:aLimit;
+            break;
+        case '2':
+            if(aLimit !== '2'){
+                result = aLimit === '1'?aLimit + oLimit:oLimit+aLimit;
+            }else{
+                result = aLimit;
+            }
+            break;
+        case '3':
+            if(aLimit !== '3'){
+                result = aLimit + '3';
+            }else{
+                result = aLimit;
+            }
+            break;
+        case '12':
+            if(aLimit !== '3'){
+                result = oLimit;
+            }else{
+                result = oLimit+aLimit;
+            }
+            break;
+        case '13':
+            if(aLimit !== '2'){
+                result = oLimit;
+            }else{
+                result = '1' + aLimit + '3';
+            }
+            break;
+        case '23':
+            if(aLimit !== '1'){
+                result = oLimit;
+            }else{
+                result = aLimit + oLimit;
+            }
+            break;
+        case '123':
+            result = oLimit;
+            break;
+        default:
+            result = '0';
+    }
+    return aLimit === '0'?addLimit:result;
+}
 
+/**
+ * 限制用户请求https函数
+ * */
+function limitFetch(args) {
+    fetch(generalApi,{
+        method:'POST',
+        // credentials: "include",
+        headers:{
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body:args//JSON.stringify(args)
+    }).then((response) => {/*console.log(response);*/return response.text()})
+        .then(data=>{
+            console.log(data);
+            let datatmp;
+            try {
+                datatmp = JSON.parse(data);
+                //JSON.parse没问题的情况
+                console.log(datatmp);
+                if(datatmp.status === 'ok'){
+                    //message.success('设置成功');
+                }else {
+                    //message.error('设置失败');
+                }
+            }catch (e){
+                //JSON.parse有问题的情况,手动截取返回信息中JSON字符串
+                datatmp = JSON.parse(data.substring(data.indexOf('{')));
+                console.log(datatmp);
+                if(datatmp.status === 'ok'){
+                    //message.success('设置成功');
+                }else {
+                    //message.error('设置失败');
+                }
+            }
 
-
-
-
+        }).catch(err=>{
+        console.log(err);
+    });
+}
 
 
 
@@ -783,6 +942,7 @@ export {
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
     getRoomUsersCount,getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
-    getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, leaveRoom, CONFIG_CONSTANTS,log,
-    error, successlog, keyerror, setToLocalStorage, by
+    getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, leaveRoom,
+    CONFIG_CONSTANTS,log, error, successlog, keyerror, setToLocalStorage, by,
+    upDateRoomListByDelRoomId, getNewLimit, limitFetch
 }

@@ -25,6 +25,7 @@ const clickChildRoomData = [
 const clickRoomData = [
     {title:'创建同级别房间'},
     {title:'创建子房间'},
+    {title:'房间设置'},
     {title:'删除房间'},
     {title:'子房间排序'}
 ];
