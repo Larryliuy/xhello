@@ -6,6 +6,7 @@ import store, {CONSTANT} from "../reducer/reducer";
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
 import {send} from "../static/webSocket";
 import { sendCheerAudio } from "../static/comFunctions";
+import {setRoomInfo} from "../webrtc/webRtcVideo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -263,7 +264,8 @@ class FooterBottom extends React.Component{
     }
     planeOkHandle(){
         console.log('play music');
-        let musicSrc = this.state.musicAddress;
+        let musicSrc = this.state.musicAddress,
+            roomInfo = state.homeState.currentRoomInfo;
         console.log(musicSrc);
         if(this.checkFileType(musicSrc)){
             let videoTag = document.getElementById('play-audio');
@@ -274,23 +276,27 @@ class FooterBottom extends React.Component{
             let msg = {
                 type:'msg',
                 typeString:'playMusic',
-                roomId:state.homeState.currentRoomInfo.roomId,
+                roomId:roomInfo.roomId,
                 user:state.homeState.userInfo,
                 musicSrc:musicSrc
             };
             send(JSON.stringify(msg),function () {
                 console.log('send play music msg');
+                roomInfo.musicSrc = musicSrc;
+                setRoomInfo(roomInfo);
             })
         }else{
             message.error('请输入有效音频连接,音频格式 .mp3 .m4a ogg 等')
         }
     }
     checkFileType(musicSrc){
+        let result = false;
         if(musicSrc.indexOf('.mp3') || musicSrc.indexOf('.m4a')|| musicSrc.indexOf('.ogg')){
-            return true;
+            result =  true;
         }else{
-            return false;
+            result = false;
         }
+        return result;
 
     }
     getContent(){

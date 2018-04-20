@@ -59,7 +59,6 @@ class MicroPhone extends React.Component {
         console.log('onClick');
         if(state.homeState.microphoneMode != 3)return;//如果不是麦序模式，则直接返回
         let text = e.target.innerText;
-        const powerArr = ['放麦','离麦','禁麦'];
         const tips = (text) =>{
             Modal.info({
                 title:'系统提示',
@@ -77,8 +76,8 @@ class MicroPhone extends React.Component {
             roomMicrophoneUser = state.homeState.roomMicrophoneUser;
         console.log(text);
         switch (text){
-            case '放麦':
-                if(text === '放麦') {
+            case '上麦':
+                if(text === '上麦') {
                     // console.log(roomMicrophoneUser);
                     // console.log(roomInfo);
                     roomMicrophoneUser.map(function (item) {
@@ -238,7 +237,7 @@ class MicroPhone extends React.Component {
                     <Option value="主席模式">主席模式</Option>
                     <Option value="麦序模式">麦序模式</Option>
                 </Select>
-                <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>放麦</span> |</span>
+                <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>上麦</span> |</span>
                 <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>禁麦</span> |</span>
                 <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>离麦</span></span>
             </div>

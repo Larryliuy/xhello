@@ -7,6 +7,7 @@ import store, {CONSTANT} from "../reducer/reducer";
 import { message } from 'antd';
 import {send, updateAllRoomListUserInfoByRoomId} from "./webSocket";
 import {setRoomInfo} from "../webrtc/webRtcVideo";
+import {closeMicrophone, microphoneStatus} from "../webrtc/webRtcAudio";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -348,21 +349,21 @@ function deleteRoomById(roomId) {
     };
     send(JSON.stringify(updateRoomMsg),function () {
         console.log('delete_room,'+roomId);
-        let getRoomsMsg = {
-            type:'get_rooms',
-            user:state.homeState.userInfo,
-            data:''
-        };
-        send(JSON.stringify(getRoomsMsg),function () {
-            // let enterMsg = getSendData(
-            //     'enter_room',
-            //     state.homeState.currentRoomInfo.roomId,
-            //     state.homeState.currentRoomInfo.roomName,
-            //     state.homeState.userInfo);
-            // // WS.send(JSON.stringify(enterMsg));
-            // send(JSON.stringify(enterMsg),function(){
-            // });
-        });
+        // let getRoomsMsg = {
+        //     type:'get_rooms',
+        //     user:state.homeState.userInfo,
+        //     data:''
+        // };
+        // send(JSON.stringify(getRoomsMsg),function () {
+        //     // let enterMsg = getSendData(
+        //     //     'enter_room',
+        //     //     state.homeState.currentRoomInfo.roomId,
+        //     //     state.homeState.currentRoomInfo.roomName,
+        //     //     state.homeState.userInfo);
+        //     // // WS.send(JSON.stringify(enterMsg));
+        //     // send(JSON.stringify(enterMsg),function(){
+        //     // });
+        // });
     })
     //let args = '?action=del&table=room&cond=id=%22'+roomId+'%22';
     // fetch(generalApi+args)
@@ -417,6 +418,7 @@ function updateAllRoomListTimer() {
     };
     timer = setInterval(function () {
         console.log('timer update');
+        // console.log(state.homeState.userInfo);
         send(JSON.stringify(getRoomsMsg),function () {
             // console.log('get_rooms');
         });
@@ -429,6 +431,34 @@ function updateAllRoomListTimer() {
 
 function removeTimer() {
     clearInterval(timer);
+}
+/**
+ * 根据房间ID与房间总人数更新房间总人数
+ * */
+function updateTotalClientsByRoomid(roomId,totalClients) {
+    console.log(roomId,totalClients);
+    let allRoomList = state.homeState.allRoomList;
+    if(!allRoomList || allRoomList.length === 0){
+        // setTimeout(function () {
+        //     updateTotalClientsByRoomid(roomId,totalClients);
+        // },500);
+        return;
+    }
+    allRoomList.map(function (item) {
+        if(roomId == item.roomId){
+            item.totalClients = totalClients;
+        }else{
+            if(item.childNode && item.childNode.length !== 0){
+                item.childNode.map(function (cItem) {
+                    if(roomId == cItem.roomId){
+                        cItem.totalClients = totalClients;
+                    }
+                })
+            }
+        }
+    });
+    // console.log(allRoomList);
+    store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
 }
 
 /**
@@ -454,6 +484,19 @@ function getUserListforAllRoomList(roomList) {
 }
 
 /**
+ * 根据Id获取房间用户
+ * */
+function getRoomUsers(roomId){
+    // console.log(rooms);
+    let msg = {
+        type:'get_room_users',
+        roomId:roomId
+    };
+    send(JSON.stringify(msg),function () {
+    })
+}
+
+/**
  * 房间列表获取所有房间的用户总数
  * */
 function getRoomUsersCount(rooms){
@@ -461,9 +504,7 @@ function getRoomUsersCount(rooms){
     let count = 0;
     if(rooms && rooms.length !== 0){
         rooms.map(function (item) {
-            if(item.childNode.length !== 0){
-                count += item.childNode.length;
-            }
+            count += item.totalClients;
         })
     }
     return count;
@@ -533,7 +574,7 @@ function sendCheerAudio(type) {
  * 将新的allRoomList做比较,//这里可以做一个优化，将删除的房间也可以更新掉
  * */
 function getNewAllRoomList(newRoomList) {
-    console.log(newRoomList);
+    // console.log(newRoomList);
     let oldAllRoomList = state.homeState.allRoomList,
         newAllRoomList = state.homeState.allRoomList;
     newRoomList.map(function (item) {
@@ -613,6 +654,19 @@ function enterRoomDelay(roomId) {
         });
     },500);
 
+}
+
+/**
+ * 进入房间
+ * */
+function enterRoom(roomId) {
+    let msg = {
+        type:'enter_room',
+        roomId:roomId,
+        user:state.homeState.userInfo
+    };
+    send(JSON.stringify(msg),function () {
+    });
 }
 
 /**
@@ -745,8 +799,51 @@ function limitFetch(args) {
 }
 
 
-
-
+/**
+ * 清空麦序列表函数
+ */
+function clearOnMicrophoneUsers() {//清空麦序列表函数
+    let onMicrophoneUsers = state.homeState.roomMicrophoneUser,
+        userInfo = state.homeState.userInfo;
+    if(onMicrophoneUsers.length !== 0){
+        if(onMicrophoneUsers[0].id === userInfo.id){//如果我是第一位并且我是开麦的，则关闭麦
+            if(microphoneStatus && userInfo.level > 3){
+                closeMicrophone();
+            }
+        }
+        store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:[]});
+        //更新服务器的onMicrophoneUser
+        let roomInfo = state.homeState.currentRoomInfo;
+        roomInfo.onMicrophoneUsers = [];
+        let setRoomMsg = {
+            type:'set_room_info',
+            roomId: roomInfo.roomId,		//房间唯一标识符
+            roomName: roomInfo.roomName,
+            user:state.homeState.userInfo,
+            data:roomInfo
+        };
+        send(JSON.stringify(setRoomMsg),function(){
+            console.log('更新(清空)服务器onMicrophoneUsers信息');
+        });
+    }
+}
+/**
+ * 发送请求失败的消息给toUser
+ * */
+function sendSesult(userInfo,result) {
+    let preAnswerMsg = {
+        type:'msg',
+        typeString:'preAnswer',
+        ToUserOnly:userInfo.id,
+        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomName: state.homeState.currentRoomInfo.roomName,
+        fromUser:state.homeState.userInfo,
+        status:result?'ok':'failed'
+    };
+    send(JSON.stringify(preAnswerMsg),function () {
+        log('发送连接申请的回复结果给 '+userInfo.name+',结果：'+result,'onmessage-preOffer','websocket.js');
+    });
+}
 
 /**
  * 用户情况抓取，比如浏览器代理，是否只是webSocket，webRTC，webAudio等,用户测试
@@ -941,8 +1038,9 @@ export {
     randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
-    getRoomUsersCount,getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
+    getRoomUsersCount, getRoomUsers, getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
     getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, leaveRoom,
     CONFIG_CONSTANTS,log, error, successlog, keyerror, setToLocalStorage, by,
-    upDateRoomListByDelRoomId, getNewLimit, limitFetch
+    upDateRoomListByDelRoomId, getNewLimit, limitFetch, enterRoom, clearOnMicrophoneUsers,
+    sendSesult, updateTotalClientsByRoomid
 }

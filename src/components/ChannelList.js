@@ -2,8 +2,8 @@ import React,{ Component } from 'react';
 import { Icon, Modal } from 'antd';
 import VerifyPassword from './VerifyPassword';
 import store,{ CONSTANT } from '../reducer/reducer';
-import WS,{ getSendData, send } from '../static/webSocket.js';
-import { getUserIconSrc, getRoomUsersCount,getSingleRoomUserCounts } from '../static/comFunctions';
+import WS,{ getSendData, send, resetIsplaying } from '../static/webSocket.js';
+import {getUserIconSrc, getRoomUsersCount, getSingleRoomUserCounts, getRoomUsers} from '../static/comFunctions';
 import '../static/login.scss';
 import { onLeave, getRoomInfo, getPrepareConnectionState, initVariableAudio } from "../webrtc/webRtcAudio";
 import { onLeaveVideo, getPrepareConnectionStateVideo} from "../webrtc/webRtcVideo";
@@ -36,12 +36,6 @@ class ChannelList extends React.Component{
     initInline(){
         const datas = state.homeState.allRoomList,_this=this;
         if(datas.length !== 0){
-            // console.log(datas);
-            // if(datas.length === 0)return;
-            //更新当前房间信息
-            /*console.log(state.homeState.userInfo);
-            console.log(datas);
-            console.log(state.homeState.currentRoomInfo);*/
             tRoomStatus['r'+datas[0].roomId] = true;
             tRoomStatus['rc'+datas[0].childNode[0].roomId] = true;
             let firstRoom = datas[0].childNode[0];
@@ -55,7 +49,6 @@ class ChannelList extends React.Component{
                         firstRoom.roomName,
                         state.homeState.userInfo,
                         data);
-                // console.log(enterMsg);
                 send(JSON.stringify(enterMsg),function(){
                     // getRoomUserList(startOnline);
                     getRoomInfo(firstRoom.roomId);
@@ -91,6 +84,7 @@ class ChannelList extends React.Component{
                 data);
         // console.log(leaveMsg);
         send(JSON.stringify(leaveMsg),function(){
+            resetIsplaying();
             store.dispatch({type:CONSTANT.NUMBERONE,val:0});
             setTimeout(function () {
                 if(getPrepareConnectionState()){
@@ -179,17 +173,22 @@ class ChannelList extends React.Component{
     };*/
     clickOpenHandle  = (e) => {
         const roomId = e.target.parentNode.parentNode.getAttribute('id');
-        // console.log(roomId);
         let tRoomState = state.homeState.roomStatus;
         if(state.homeState.roomStatus[roomId]){
             tRoomState[roomId] = false;
         }else{
+            try{
+                if(roomId.indexOf('rc') !== -1){
+                    console.log(roomId.substring(2));
+                    getRoomUsers(roomId.substring(2));
+                }
+            }catch (e){
+                console.error(e);
+            }
             tRoomState[roomId] = true;
         }
         // this.setState({roomStatus:tRoomState});
         store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
-            //打开本地房间列表
-        // console.log(this.state.roomStatus);
     };
     setRoomPassword(value){
         this.setState({inputPassword:value});
@@ -207,7 +206,7 @@ class ChannelList extends React.Component{
         }
     }
     handleCancel(){
-        this.setState({passwordModal:false})
+        this.setState({passwordModal:false});
     }
     render(){
         const { roomStatus } = state.homeState;
@@ -223,14 +222,14 @@ class ChannelList extends React.Component{
                 {state.homeState.allRoomList && state.homeState.allRoomList.map(function (item) {
                     return <li id={'r'+item.roomId} key={'r'+item.roomId}>
                         <span onClick={clickOpenHandle}><Icon type={roomStatus['r'+item.roomId] ?"minus" : "plus"} /> </span>
-                        <span id={item.roomId+'r'}>{item.roomName}</span><span className={'room-online-count'}>{" ("+getRoomUsersCount(item.childNode)+")"}</span>
+                        <span id={item.roomId+'r'} style={{color:item.color}}>{item.roomName}</span><span className={'room-online-count'}>{" ("+getRoomUsersCount(item.childNode)+")"}</span>
                         {roomStatus['r'+item.roomId] && item.childNode &&
                         <ul style={{paddingLeft:'10px'}}>
                             {item.childNode.map(function (item) {
                                 // console.log(item)
                                 return <li id={'rc'+item.roomId} key={'rc'+item.roomId}>
                                     <span onClick={clickOpenHandle}><Icon type={roomStatus['rc'+item.roomId] ?"minus" : "plus"} /></span>
-                                    <span id={item.roomId+'rc'}>{item.roomName}</span><span className={'room-online-count'}>{" ("+getSingleRoomUserCounts(item)+")"}</span>
+                                    <span id={item.roomId+'rc'} style={{color:item.color}}>{item.roomName}</span><span className={'room-online-count'}>{" ("+item.totalClients+")"}</span>
                                     {roomStatus['rc'+item.roomId] && item.childNode &&
                                     <ul style={{paddingLeft:'15px'}}>
                                         {item.childNode.map(function (item) {

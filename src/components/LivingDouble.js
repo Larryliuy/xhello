@@ -32,7 +32,7 @@ class LivingDouble extends React.Component{
 
     }
     onAgreeToBebarley(e){
-        // onLeaveVideo(state.homeState.userInfo);//ondisconnect里面有调用此方法
+        onLeaveVideo(state.homeState.userInfo);//ondisconnect里面有调用此方法
         console.log(e.target.style.zIndex);
         if(!e.target.style.zIndex){console.error('用户ID未获取到:'+e.target.style.zIndex);return;}
         let msg = {
@@ -42,10 +42,12 @@ class LivingDouble extends React.Component{
             roomId:state.homeState.currentRoomInfo.roomId,
             user:state.homeState.userInfo
         };
-        send(JSON.stringify(msg),function () {
-            message.info('同意agreeToBebarley已发出');
-            e.target.style.visibility = 'hidden';
-        });
+        e.target.style.visibility = 'hidden';
+        setTimeout(function () {
+            send(JSON.stringify(msg),function () {
+                message.info('同意agreeToBebarley已发出');
+            });
+        },500)
     }
     render(){
         return (

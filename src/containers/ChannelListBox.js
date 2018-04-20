@@ -67,7 +67,7 @@ class ChannelListBox extends  React.Component{
         send(JSON.stringify(getRoomsMsg),function () {
             console.log('send get_rooms');
         });
-        updateAllRoomListTimer();
+        //updateAllRoomListTimer();
     }
     componentWillUnmount(){
         removeTimer();

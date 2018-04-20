@@ -72,10 +72,18 @@ class HeaderTop extends React.Component{
                     message.error('已开启单人直播！');
                     return;
                 }
+                if(roomInfo.mode === 3){
+                    message.error('已开启双人直播！请先关闭直播');
+                    return;
+                }
                 //初始化视频模式webRtcVideo下的变量以及各种对象
                 roomInfo.mode = 1;
                 break;
             case '开启双人直播':
+                if(roomInfo.mode === 1){
+                    message.error('已开启单人直播！请先关闭单人直播');
+                    return;
+                }
                 if(roomInfo.mode === 3){
                     message.error('已开启双人直播！');
                     return;

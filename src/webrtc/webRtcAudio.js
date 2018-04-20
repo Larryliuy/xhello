@@ -67,36 +67,39 @@ let msg = {
         type:'msg',
         typeString:'audioSourceInput'
     };
+let msgFlag = false; //是否可以发送关麦后没有音源的的通知消息
 function sourceConnectAnalyser(stream) {//观察者模式
     micphoneSource = myWebAudio.createMediaStreamSource(stream);
     micphoneSource.connect(myAnalyser);//连接到本地webAudio的AnalyserNode
     myAnalyser.fftSize = 2048;
     intval = setInterval(function () {
         // console.log(getVoiceSize(myAnalyser),state.homeState.microphoneOpen,state.homeState.microphoneInput);
-        msg.roomId = state.homeState.currentRoomInfo.roomId;
-        msg.user = state.homeState.userInfo;
-        if(getVoiceSize(myAnalyser)>100 && state.homeState.microphoneOpen){
-            // if(!state.homeState.microphoneInput){
-                // console.log('有音源输入');
-                store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:true});
+        if(state.homeState.microphoneOpen) {
+            msgFlag = true;
+            msg.roomId = state.homeState.currentRoomInfo.roomId;
+            msg.user = state.homeState.userInfo;
+            if (getVoiceSize(myAnalyser) > 100) {
+                store.dispatch({type: CONSTANT.MICROPHONEINPUT, val: true});
                 msg.inputSource = true;
-                send(JSON.stringify(msg),function () {
+                send(JSON.stringify(msg), function () {
                     // console.log('发送audioSourceInput消息：true');
                 })
-            // }
-        }else {
-            // console.log('没有音源输入');
-            // if(!state.homeState.microphoneInput) {
-            store.dispatch({type: CONSTANT.MICROPHONEINPUT, val: false});
-            msg.inputSource = false;
-            send(JSON.stringify(msg),function () {
-                // console.log('发送audioSourceInput消息：false');
-            })
-            // }
+            } else {
+                store.dispatch({type: CONSTANT.MICROPHONEINPUT, val: false});
+                msg.inputSource = false;
+                send(JSON.stringify(msg), function () {
+                })
+            }
+        }else{
+            if(msgFlag){
+                msg.inputSource = false;
+                send(JSON.stringify(msg), function () {
+                    msgFlag = false;
+                })
+            }
         }
     },1000);
 }
-
 
 /**
  * 获取本地音频流
@@ -228,6 +231,12 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 // checkPeerConnectionStatus(Msg.toUser.id,type);//这里
             }
         };
+        newConnection.onsignalingstatechange = function (e) {
+            console.log('%c signalingState:'+newConnection.signalingState,'color:red');
+        };
+        newConnection.onicegatheringstatechange = function (e) {
+            console.log('%c iceGatheringsState:'+newConnection.iceGatheringState,'color:red');
+        };
         newConnection.oniceconnectionstatechange = function(event) {
             // console.log(type);
             let userInfo = state.homeState.userInfo, updateUserMsg;
@@ -299,12 +308,16 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                                 keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
                                 objItem.ondisconnected('disconnected');
                             }
+                        }else{
+                            console.log('%c'+wbMsg.toUser.name+ '非正常掉线,pcState:');
+                            console.log(objItem);
                         }
                     }
                     break;
                 case "failed":
                     console.log("failed:"+wbMsg.toUser.name);
                     if(objItem){
+                        console.log(objItem.pcState);
                         objItem.ondisconnected('failed');
                     }
                     // One or more transports has terminated unexpectedly or in an error
@@ -313,8 +326,14 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     console.log("closed:"+wbMsg.toUser.name);
                     // The connection has been closed,本人关闭或被动通知后关闭会触发（即调用peerConnection.close()）,通知后台我已关闭连接
                     if(objItem){
-                        console.log(objItem);
-                        objItem.ondisconnected('closed');
+                        if(type === 'offer'){
+                            objItem.ondisconnected('closed');
+                        }else{
+                            if(objItem.pcState !== 'connecting'){
+                                objItem.ondisconnected('closed');
+                            }
+                        }
+
                     }
                     break;
                 default:
@@ -949,7 +968,8 @@ function initVariableAudio() {
     store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:{}});
     let userTmp = state.homeState.userInfo,
         roomInfo = state.homeState.currentRoomInfo;
-    if(roomInfo && roomInfo.childNode instanceof Array && roomInfo.childNode.length === 1){
+    console.log(roomInfo);
+    if(roomInfo && roomInfo.totalClients == 1){
         userTmp.isOnline = true;
     }else{
         userTmp.isOnline = false;

@@ -8,7 +8,7 @@ import {getRoomInfo, startMyCam, getPrepareConnectionState} from "./webRtcAudio"
 import {CONFIG_CONSTANTS, successlog, log, keyerror} from '../static/comFunctions';
 import { iceServers } from './iceServer';
 import {message} from "antd/lib/index";
-import {emptyNormalQuitUsers, getNormalQuitUsers} from "./webRtcBase";
+import {addToNormalQuitUsers, emptyNormalQuitUsers, getNormalQuitUsers, removeToNormalQuitUsers} from "./webRtcBase";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -215,7 +215,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     // audioTagTmp.src = URL.createObjectURL(barleyAudioTrack);
                     // document.body.appendChild(audioTagTmp);
                     //**********
-                    console.log('%c'+barleyAudioTrack,'color:red');
+                    console.log('%c获取downStream','color:red');
                     console.log(downStream);
                 }else{
                     console.log('触发onaddstream,接受到观众Stream，不播放');
@@ -274,6 +274,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     // console.log(state.homeState.userInfo);
                     successlog('video- 与 '+ wbMsg.toUser.name + ' 连接成功');
                     delSendListByIdVideo(wbMsg.toUser.id);
+                    // removeToNormalQuitUsers(wbMsg.toUser.id);
                     if(type === 'offer'){
                         userInfo.parentNode = wbMsg.toUser.id;
                         userInfo.isOnline = true;
@@ -352,6 +353,16 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                             keyerror('您与'+wbMsg.toUser.name+'网络连接不稳定或者连接已非正常断开,iceRestart');
                             iceRestartVideo(wbMsg.toUser);
                         }
+                    }else{
+                        if(getNormalQuitUsers()[wbMsg.toUser.id]){
+                            if(objItem) {
+                                keyerror('您与'+wbMsg.toUser.name+'进入disconnected状态,收到了他的onLeave消息');
+                                objItem.ondisconnected('disconnected');
+                            }
+                        }else{
+                            console.log('%c'+wbMsg.toUser.name+ '非正常掉线,pcState:');
+                            console.log(objItem);
+                        }
                     }
                     return;
                 case "failed":
@@ -385,8 +396,8 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
             myMicStream:localStream,
             reciveStream:null,
             pcOutStream:null,
-            ondisconnected:function (type) {
-                log('video-进入ondisconnected,status:'+type,'ondisconnected','webRtcVideo.js');
+            ondisconnected:function (status) {
+                log('video-进入ondisconnected,status:'+status,'ondisconnected','webRtcVideo.js');
                 if(this.pcState === 'disconnected')return;
                 this.pcStateTime = new Date().getTime()/1000;
                 this.pcState = 'disconnected';
@@ -394,7 +405,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                 onLeaveVideo(this.toUser);
                 delSendListByIdVideo(this.toUser.id);
                 let userInfo = state.homeState.userInfo;
-                if(type === 'answer'){
+                if(this.type === 'answer'){
                     console.log('子流ondisconnected');
                     firstCandidate = 0;
                     let _this = this;
@@ -413,7 +424,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     firstCandidate = 0;
                     // console.log(downStream);
                     // console.log(state.homeState.currentRoomInfo.king);
-                    if(isKing || state.homeState.currentRoomInfo.king === userInfo.parentNode || state.homeState.numberOne === 0){
+                    if(this.isKing || state.homeState.currentRoomInfo.king === userInfo.parentNode || state.homeState.numberOne === 0){
                         console.log('king已断开');
                         //king断开，secondKing也需要置空
                         let roomInfo = state.homeState.currentRoomInfo;
@@ -423,7 +434,8 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         return;
                     }
                     if(downStream && downStream.active){
-                        downStream = null;
+                        console.log('%c置空downStream','color:red');
+                        downStream = null; //在这里被置空了
                         userInfo.parentNode = '';
                         getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
                     }else{
@@ -532,7 +544,7 @@ function offerPeerConnectionVideo(wbMsg,videoTag,isKing) {
         if(Msg.answer) delete Msg.answer;
         if(Msg.candidate) delete Msg.candidate;
         send(JSON.stringify(Msg),function () {
-            successlog('video-已发送offer给'+ Msg.toUser.name);
+            // successlog('video-已发送offer给'+ Msg.toUser.name);
             xpc.pc.setLocalDescription(offer);
         });
     }
@@ -610,7 +622,7 @@ function onAnswerVideo(answer,sessionId,toUserId) {
 }
 
 function onCandidateVideo(candidate,sessionId) {
-    log('进入onCandidateVideo','onCandidateVideo','webRtcVideo.js');
+    // log('进入onCandidateVideo','onCandidateVideo','webRtcVideo.js');
     let tmpStr = sessionId.split('-')[1]+'-'+sessionId.split('-')[0];
     rtcSessionList.map(function (item) {
         if(item.sessionId == tmpStr){
@@ -846,7 +858,7 @@ function startOnlineVideo() {
  * 设置收到申请的列表
  * */
 function amISendPreOfferVideo(userId) {
-    // successlog('video-我是否已经发送preOffer给'+userId+'?:'+sendList[userId]);
+    successlog('video-我是否已经发送preOffer给'+userId+'?:'+sendList[userId]);
     return sendList[userId];
 }
 
@@ -910,6 +922,7 @@ function hasSecondking() {
  * */
 function initVariableVideo() {
     localStream = null;
+    downStream = null;
     prepareState = false;
     rtcSessionList=[];
     remoteVidoeDom = null;
@@ -917,7 +930,6 @@ function initVariableVideo() {
     sendList={};
     secondKing ='';
     barleyAudioTrack=null;
-    downStream = null;
     firstCandidate = 0;
     microphoneStatus = false;
     callbackVideo = null;
