@@ -27,7 +27,7 @@ class VideoOnDemand extends React.Component{
             type:'msg',
             typeString:'vodSrc',
             roomId:state.homeState.currentRoomInfo.roomId,
-            roomName:state.homeState.currentRoomInfo.roomName,
+            // roomName:state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
             // vodSrc:this.state.vodSrc
         };
@@ -64,7 +64,7 @@ class VideoOnDemand extends React.Component{
             let setRoomMsg = {
                 type:'set_room_info',
                 roomId:state.homeState.currentRoomInfo.roomId,
-                roomName:state.homeState.currentRoomInfo.roomName,
+                // roomName:state.homeState.currentRoomInfo.roomName,
                 user:state.homeState.userInfo,
                 data:roomInfo
             };

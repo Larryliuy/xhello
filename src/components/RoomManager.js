@@ -3,10 +3,9 @@ import { Modal,Row, Col, Select, Table, Button, List } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
 import {send} from "../static/webSocket";
-import { getUserIconSrc } from "../static/comFunctions";
+import { getUserIconSrc, setRoomInfo } from "../static/comFunctions";
 import {message} from "antd/lib/index";
 import store, {CONSTANT} from "../reducer/reducer";
-import {setRoomInfo} from "../webrtc/webRtcVideo";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -228,7 +227,7 @@ class RoomManager extends React.Component{
             type:'msg',
             typeString:'uPower',
             roomId:objRoomInfo.roomId,
-            roomName:objRoomInfo.roomName,
+            // roomName:objRoomInfo.roomName,
             objUserId:id,
             level:7
         };

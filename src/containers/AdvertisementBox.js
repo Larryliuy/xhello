@@ -3,7 +3,7 @@ import UploadAvatar from '../components/UploadAvatar';
 import store, {CONSTANT} from "../reducer/reducer";
 import {message} from "antd/lib/index";
 import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
-import { setRoomInfo } from "../webrtc/webRtcVideo";
+import { setRoomInfo } from "../static/comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {

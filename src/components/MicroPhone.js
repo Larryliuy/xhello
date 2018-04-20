@@ -23,7 +23,7 @@ class MicroPhone extends React.Component {
             type:'msg',
             typeString:'microphoneMode',
             roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-            roomName: state.homeState.currentRoomInfo.roomName,
+            // roomName: state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo
         };
         console.log(e);
@@ -44,7 +44,7 @@ class MicroPhone extends React.Component {
                 let setRoomMsg = {
                     type:'set_room_info',
                     roomId: roomInfo.roomId,		//房间唯一标识符
-                    roomName: roomInfo.roomName,
+                    // roomName: roomInfo.roomName,
                     user:state.homeState.userInfo,
                     data:roomInfo
                 };
@@ -133,7 +133,7 @@ class MicroPhone extends React.Component {
         let setRoomMsg = {
             type:'set_room_info',
             roomId: roomInfo.roomId,		//房间唯一标识符
-            roomName: roomInfo.roomName,
+            // roomName: roomInfo.roomName,
             user:state.homeState.userInfo,
             data:roomInfo
         };
@@ -144,7 +144,7 @@ class MicroPhone extends React.Component {
             type:'msg',
             typeString:text,
             roomId: roomInfo.roomId,		//房间唯一标识符
-            roomName: roomInfo.roomName,
+            // roomName: roomInfo.roomName,
             user:state.homeState.userInfo
         };
         // console.log(micrpMsg);
@@ -184,7 +184,7 @@ class MicroPhone extends React.Component {
             type:'msg',
             typeString:'changeMicOrder',
             roomId:state.homeState.currentRoomInfo.roomId,
-            roomName:state.homeState.currentRoomInfo.roomName,
+            // roomName:state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
             orderInfo:orderInfo
         };
@@ -209,7 +209,7 @@ class MicroPhone extends React.Component {
             type:'msg',
             typeString:'changeMicOrder',
             roomId:state.homeState.currentRoomInfo.roomId,
-            roomName:state.homeState.currentRoomInfo.roomName,
+            // roomName:state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
             orderInfo:orderInfo
         };

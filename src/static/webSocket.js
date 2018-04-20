@@ -2,21 +2,21 @@ import {
     answerPeerConnection, getPrepareConnectionState, microphoneStatus, offerPeerConnection, onAnswer,
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
     getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam,
-    updateServerUserInfo, amISendPreOffer, delSendListById
+    initServerUserInfo, amISendPreOffer, delSendListById
 } from "../webrtc/webRtcAudio";
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
-    setRoomInfo, initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo,delSendListByIdVideo
+    initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo,delSendListByIdVideo
 } from "../webrtc/webRtcVideo";
-import { ajustUserOrder, updateUserInfo, by, upDateRoomListByDelRoomId, getNewLimit, clearOnMicrophoneUsers, sendSesult } from '../static/comFunctions';
 import store,{CONSTANT} from "../reducer/reducer";
-import {blockIpApi, getImgApi} from "./apiInfo";
+import { blockIpApi } from "./apiInfo";
 import {
     updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, successlog, keyerror,
-    setRoomInfoByRoomInfo, limitFetch, enterRoom, updateTotalClientsByRoomid
+    setRoomInfoByRoomInfo, limitFetch, enterRoom, updateTotalClientsByRoomid, ajustUserOrder, updateUserInfo,
+    by, upDateRoomListByDelRoomId, getNewLimit, clearOnMicrophoneUsers, sendSesult, setRoomInfo
 } from "./comFunctions";
-import {addToNormalQuitUsers, removeToNormalQuitUsers} from "../webrtc/webRtcBase";
+import { addToNormalQuitUsers, removeToNormalQuitUsers } from "../webrtc/webRtcBase";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -324,7 +324,7 @@ function onmessage(response){
                             typeString:'webrtc',
                             ToUserOnly:dataJson.fromUser.id,
                             roomId: roomInfo.roomId,		//房间唯一标识符
-                            roomName: roomInfo.roomName,
+                            // roomName: roomInfo.roomName,
                             fromUser:state.homeState.userInfo,
                             toUser:dataJson.fromUser,
                             sessionId:state.homeState.userInfo.id+'-'+dataJson.fromUser.id
@@ -446,7 +446,7 @@ function onmessage(response){
                         let setRoomMsg = {
                             type:'set_room_info',
                             roomId: roomInfo.roomId,		//房间唯一标识符
-                            roomName: roomInfo.roomName,
+                            // roomName: roomInfo.roomName,
                             user:state.homeState.userInfo,
                             data:roomInfo
                         };
@@ -524,7 +524,7 @@ function onmessage(response){
                         typeString:'webrtc',
                         ToUserOnly:dataJson.user.id,
                         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                        roomName: state.homeState.currentRoomInfo.roomName,
+                        // roomName: state.homeState.currentRoomInfo.roomName,
                         fromUser:state.homeState.userInfo,
                         toUser:user,
                         secondKing:true,
@@ -580,7 +580,7 @@ function onmessage(response){
                         let Msg = {
                             type:'leave_room',
                             roomId:state.homeState.currentRoomInfo.roomId,
-                            roomName:state.homeState.currentRoomInfo.roomName,
+                            // roomName:state.homeState.currentRoomInfo.roomName,
                             user:userInfo
                         };
                         send(JSON.stringify(Msg),function(){
@@ -595,7 +595,7 @@ function onmessage(response){
                             Msg = {
                                 type:'enter_room',
                                 roomId:dataJson.objRoomInfo.roomId,
-                                roomName:dataJson.objRoomInfo.roomName,
+                                // roomName:dataJson.objRoomInfo.roomName,
                                 user:userInfo
                             };
                             send(JSON.stringify(Msg),function(){
@@ -717,7 +717,7 @@ function onmessage(response){
                     onLeave(state.homeState.userInfo);
                     onLeaveVideo(state.homeState.userInfo);
                     //初始化服务器userInfo
-                    updateServerUserInfo();
+                    initServerUserInfo();
                     //初始化原有模式的变量
                     if (currentRoomInfo.mode == '0' && (dataJson.mode == '1' || dataJson.mode == '3')) {
                         if (getPrepareConnectionState()) {
@@ -842,7 +842,7 @@ function onmessage(response){
                                     type:'msg',
                                     typeString:'webrtc',
                                     roomId: roomInfo.roomId,		//房间唯一标识符
-                                    roomName: roomInfo.roomName,
+                                    // roomName: roomInfo.roomName,
                                     fromUser:state.homeState.userInfo,
                                     toUser:dataJson.fromUser,
                                     sessionId:state.homeState.userInfo.id+'-'+dataJson.fromUser.id,

@@ -1,8 +1,9 @@
 import React,{ Component } from 'react';
 import { Button, Popover, Input } from 'antd';
-import {closeVideoMode, refreshVideo, setRoomInfo} from "../webrtc/webRtcVideo";
+import {closeVideoMode, refreshVideo} from "../webrtc/webRtcVideo";
 import store, {CONSTANT} from "../reducer/reducer";
 import {send} from "../static/webSocket";
+import {setRoomInfo} from "../static/comFunctions";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState()

@@ -108,7 +108,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'moveToRoom',
                         roomId:objRoomInfo.roomId,
-                        roomName:objRoomInfo.roomName,
+                        // roomName:objRoomInfo.roomName,
                         user:objUserInfo,
                         objRoomInfo:state.homeState.currentRoomInfo
                     };
@@ -165,7 +165,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         limit:2
                     };
@@ -178,7 +178,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         limit:3
                     };
@@ -192,7 +192,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         limit:1
                     };
@@ -206,7 +206,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         limit:0
                     };
@@ -220,7 +220,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uPower',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         level:3
                     };
@@ -237,7 +237,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uPower',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         level:4
                     };
@@ -254,7 +254,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uPower',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         level:2
                     };
@@ -271,7 +271,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uPower',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         level:5
                     };
@@ -287,7 +287,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uPower',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         level:6
                     };
@@ -304,7 +304,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'uPower',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objUserId:objId.substring(1),
                         level:7
                     };
@@ -321,7 +321,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'rLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objRoomId:parseInt(objId) || objId.substring(2),//这里只有子房间才有效
                         limit:2
                     };
@@ -334,7 +334,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'rLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objRoomId:parseInt(objId) || objId.substring(2),
                         limit:3
                     };
@@ -348,7 +348,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'rLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objRoomId:parseInt(objId) || objId.substring(2),
                         limit:1
                     };
@@ -362,7 +362,7 @@ class RightClickPanel extends React.Component{
                         type:'msg',
                         typeString:'rLimit',
                         roomId:state.homeState.currentRoomInfo.roomId,
-                        roomName:state.homeState.currentRoomInfo.roomName,
+                        // roomName:state.homeState.currentRoomInfo.roomName,
                         objRoomId:parseInt(objId) || objId.substring(2),
                         limit:0
                     };

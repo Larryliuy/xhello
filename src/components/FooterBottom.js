@@ -5,8 +5,7 @@ import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
 import {send} from "../static/webSocket";
-import { sendCheerAudio } from "../static/comFunctions";
-import {setRoomInfo} from "../webrtc/webRtcVideo";
+import { sendCheerAudio, setRoomInfo } from "../static/comFunctions";
 
 let state = store.getState();
 store.subscribe(function () {

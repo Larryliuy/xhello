@@ -4,9 +4,7 @@
 
 import { generalApi, getImgApi } from "./apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
-import { message } from 'antd';
 import {send, updateAllRoomListUserInfoByRoomId} from "./webSocket";
-import {setRoomInfo} from "../webrtc/webRtcVideo";
 import {closeMicrophone, microphoneStatus} from "../webrtc/webRtcAudio";
 let state = store.getState();
 store.subscribe(function () {
@@ -316,11 +314,10 @@ function updateUserInfo(userInfo) {
     let updateUserMsg = {
         type:'update_user',
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
+        // roomName: state.homeState.currentRoomInfo.roomName,
         user:userInfo
     };
     send(JSON.stringify(updateUserMsg),function () {
-
     })
 }
 /**
@@ -330,12 +327,27 @@ function setRoomInfoByRoomInfo(roomInfo) {
     let updateRoomMsg = {
         type:'set_room_info',
         roomId: roomInfo.roomId,		//房间唯一标识符
-        roomName: roomInfo.roomName,
+        // roomName: roomInfo.roomName,
         data:roomInfo
     };
     send(JSON.stringify(updateRoomMsg),function () {
         console.log('set_room_info,'+roomInfo.roomName+',order:'+roomInfo.order);
     })
+}
+/**
+ * 替换服务器roomInfo信息
+ * */
+function setRoomInfo(roomInfo) {
+    let setRoomMsg = {
+        type:'set_room_info',
+        roomId:state.homeState.currentRoomInfo.roomId,
+        // roomName:state.homeState.currentRoomInfo.roomName,
+        // user:state.homeState.userInfo,
+        data:roomInfo
+    };
+    send(JSON.stringify(setRoomMsg),function () {
+        console.log('发送set roomInfo消息服务器:');
+    });
 }
 
 /**
@@ -818,7 +830,7 @@ function clearOnMicrophoneUsers() {//清空麦序列表函数
         let setRoomMsg = {
             type:'set_room_info',
             roomId: roomInfo.roomId,		//房间唯一标识符
-            roomName: roomInfo.roomName,
+            // roomName: roomInfo.roomName,
             user:state.homeState.userInfo,
             data:roomInfo
         };
@@ -836,7 +848,7 @@ function sendSesult(userInfo,result) {
         typeString:'preAnswer',
         ToUserOnly:userInfo.id,
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
+        // roomName: state.homeState.currentRoomInfo.roomName,
         fromUser:state.homeState.userInfo,
         status:result?'ok':'failed'
     };
@@ -1039,7 +1051,7 @@ export {
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
     getRoomUsersCount, getRoomUsers, getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
-    getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, leaveRoom,
+    getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, setRoomInfo, leaveRoom,
     CONFIG_CONSTANTS,log, error, successlog, keyerror, setToLocalStorage, by,
     upDateRoomListByDelRoomId, getNewLimit, limitFetch, enterRoom, clearOnMicrophoneUsers,
     sendSesult, updateTotalClientsByRoomid

@@ -109,7 +109,7 @@ class SortRoom extends React.Component{
             type:'msg',
             typeString:'changeRoomOrder',
             roomId:roomInfo.roomId,
-            roomName:roomInfo.roomName,
+            // roomName:roomInfo.roomName,
             user:state.homeState.userInfo,
             orderInfo:orderInfo,
             newRoomList:newRoomList
@@ -135,7 +135,7 @@ class SortRoom extends React.Component{
             type:'msg',
             typeString:'changeRoomOrder',
             roomId:roomInfo.roomId,
-            roomName:roomInfo.roomName,
+            // roomName:roomInfo.roomName,
             user:state.homeState.userInfo,
             orderInfo:orderInfo,
             newRoomList:newRoomList

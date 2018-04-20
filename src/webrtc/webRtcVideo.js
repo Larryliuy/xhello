@@ -5,10 +5,10 @@
 import { send } from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
 import {getRoomInfo, startMyCam, getPrepareConnectionState} from "./webRtcAudio";
-import {CONFIG_CONSTANTS, successlog, log, keyerror} from '../static/comFunctions';
+import {CONFIG_CONSTANTS, successlog, log, keyerror, updateUserInfo, setRoomInfo} from '../static/comFunctions';
 import { iceServers } from './iceServer';
 import {message} from "antd/lib/index";
-import {addToNormalQuitUsers, emptyNormalQuitUsers, getNormalQuitUsers, removeToNormalQuitUsers} from "./webRtcBase";
+import { emptyNormalQuitUsers, getNormalQuitUsers } from "./webRtcBase";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -300,12 +300,12 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         }
                         store.dispatch({type:CONSTANT.ISANSWER,val:true});
                     }
-                    updateUserMsg = {
-                        type:'update_user',
-                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                        roomName: state.homeState.currentRoomInfo.roomName,
-                        user:userInfo
-                    };
+                    // updateUserMsg = {
+                    //     type:'update_user',
+                    //     roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                    //     // roomName: state.homeState.currentRoomInfo.roomName,
+                    //     user:userInfo
+                    // };
                     // console.log(updateUserMsg);
                     if(!userInfo.seq){
                         console.log(userInfo);
@@ -326,7 +326,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                             type:'msg',
                             typeString:'reconnectVideo',
                             roomId: roomInfo.roomId,		//房间唯一标识符
-                            roomName: roomInfo.roomName,
+                            // roomName: roomInfo.roomName,
                             user:userInfo
                         };
                         // setTimeout(function () {
@@ -336,9 +336,10 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         // },1000);
                     }
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-                    send(JSON.stringify(updateUserMsg),function () {
-                        log('发送update_user消息到服务器','oniceconnectionstatechange-connected','webRtcVideo.js');
-                    });
+                    // send(JSON.stringify(updateUserMsg),function () {
+                    //     log('发送update_user消息到服务器','oniceconnectionstatechange-connected','webRtcVideo.js');
+                    // });
+                    updateUserInfo(userInfo);
                     break;
                 case "disconnected":
                     // console.log("disconnected");
@@ -443,17 +444,18 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         //改变视频界面提示没有视频
                     }
                 }
-                let updateUserMsg = {
-                    type:'update_user',
-                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                    roomName: state.homeState.currentRoomInfo.roomName,
-                    user:userInfo
-                };
+                // let updateUserMsg = {
+                //     type:'update_user',
+                //     roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                //     // roomName: state.homeState.currentRoomInfo.roomName,
+                //     user:userInfo
+                // };
                 if(!userInfo.seq)return;
                 store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-                send(JSON.stringify(updateUserMsg),function () {
-                    log('把 '+ wbMsg.toUser.id +' 的断线消息发送到服务器','ondisconnected','webRtcVideo.js');
-                });
+                // send(JSON.stringify(updateUserMsg),function () {
+                //     log('把 '+ wbMsg.toUser.id +' 的断线消息发送到服务器','ondisconnected','webRtcVideo.js');
+                // });
+                updateUserInfo(userInfo);
             }
             };
     }else{
@@ -475,7 +477,7 @@ function iceRestartVideo(toUser) {
         typeString:'webrtc',
         ToUserOnly:toUser.id,
         roomId: roomInfo.roomId,		//房间唯一标识符
-        roomName: roomInfo.roomName,
+        // roomName: roomInfo.roomName,
         fromUser:state.homeState.userInfo,
         toUser:toUser,
         sessionId:state.homeState.userInfo.id+'-'+toUser.id
@@ -766,7 +768,7 @@ function getRoomUserListVideo(callback) {
         let getUsersInfo = {
             type:'get_room_users',
             roomId:state.homeState.currentRoomInfo.roomId,
-            roomName:state.homeState.currentRoomInfo.roomName,
+            // roomName:state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
         };
         send(JSON.stringify(getUsersInfo),function(){
@@ -782,7 +784,7 @@ function applyToBeFirstVideo(){
     let beFirstMsg = {
         type:'declare_king',
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
+        // roomName: state.homeState.currentRoomInfo.roomName,
         user:state.homeState.userInfo
     };
     send(JSON.stringify(beFirstMsg),function () {
@@ -820,12 +822,10 @@ function startOnlineVideo() {
     console.log(objUser);
     if(!objUser.minSeqUser){
         console.error('目标用户不存在');
-        //目标用户不存在继续获取房间用户信息
-        // getRoomUserListVideo(startOnlineVideo);
-        // if(isContinueCounts<10){
-        //     getRoomUserListVideo(startOnlineVideo);
-        //     isContinueCounts++;
-        // }
+        firstCandidate = 0;
+        setTimeout(function () {
+            getRoomUserListVideo(startOnlineVideo);
+        },2000);
         return;
     }
     sendList[objUser.minSeqUser.id] = true;//表示已经发送preOffer了
@@ -834,7 +834,7 @@ function startOnlineVideo() {
         typeString:'preOffer',
         ToUserOnly:objUser.minSeqUser.id,
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
+        // roomName: state.homeState.currentRoomInfo.roomName,
         fromUser: state.homeState.userInfo,
         toUser:objUser.minSeqUser
     };
@@ -869,22 +869,6 @@ function delSendListByIdVideo(userId) {
     if(sendList[userId]){
         delete sendList[userId];
     }
-}
-
-/**
- * 替换服务器roomInfo信息
- * */
-function setRoomInfo(roomInfo) {
-    let setRoomMsg = {
-        type:'set_room_info',
-        roomId:state.homeState.currentRoomInfo.roomId,
-        roomName:state.homeState.currentRoomInfo.roomName,
-        user:state.homeState.userInfo,
-        data:roomInfo
-    };
-    send(JSON.stringify(setRoomMsg),function () {
-        console.log('发送set roomInfo消息服务器:');
-    });
 }
 
 /**
@@ -986,7 +970,7 @@ function closeVideoMode() {
         type:'msg',
         typeString:'changeRoomMode',
         roomId:roomInfoTmp.roomId,
-        roomName:roomInfoTmp.roomName,
+        // roomName:roomInfoTmp.roomName,
         user:state.homeState.userInfo,
         mode:0
     };
@@ -996,7 +980,7 @@ function closeVideoMode() {
         let setRoomMsg = {
             type:'set_room_info',
             roomId: roomInfoTmp.roomId,		//房间唯一标识符
-            roomName: roomInfoTmp.roomName,
+            // roomName: roomInfoTmp.roomName,
             user:state.homeState.userInfo,
             data:roomInfoTmp
         };
@@ -1050,7 +1034,6 @@ export {
     callbackVideo,
     getRoomInfoVideo,
     microphoneStatus,
-    setRoomInfo,
     closeVideoMode,
     refreshVideo,
     initVariableVideo,

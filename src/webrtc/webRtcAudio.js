@@ -4,7 +4,7 @@
 
 import { send } from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
-import { CONFIG_CONSTANTS, log, successlog, keyerror } from '../static/comFunctions';
+import {CONFIG_CONSTANTS, log, successlog, keyerror, updateUserInfo} from '../static/comFunctions';
 import { iceServers } from './iceServer';
 import { message } from 'antd';
 import {emptyNormalQuitUsers, getNormalQuitUsers} from "./webRtcBase";
@@ -275,18 +275,19 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                             userInfo.Children.push(wbMsg.toUser.id);
                         }
                     }
-                    updateUserMsg = {
-                        type:'update_user',
-                        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                        roomName: state.homeState.currentRoomInfo.roomName,
-                        user:userInfo
-                    };
+                    // updateUserMsg = {
+                    //     type:'update_user',
+                    //     roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                    //     // roomName: state.homeState.currentRoomInfo.roomName,
+                    //     user:userInfo
+                    // };
                     // console.log(updateUserMsg);
                     if(!userInfo.seq)return;
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-                    send(JSON.stringify(updateUserMsg),function () {
-                        log('发送update_user消息到服务器','oniceconnectionstatechange-connected','webRtcAudio.js');
-                    });
+                    // send(JSON.stringify(updateUserMsg),function () {
+                    //     log('发送update_user消息到服务器','oniceconnectionstatechange-connected','webRtcAudio.js');
+                    // });
+                    updateUserInfo(userInfo);
                     break;
                 case "disconnected":
                     console.log("disconnected:"+wbMsg.toUser.name);
@@ -383,19 +384,19 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     firstCandidate = 0;
                     getRoomInfo(state.homeState.currentRoomInfo.roomId);
                 }
-                let updateUserMsg = {
-                    type:'update_user',
-                    roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-                    roomName: state.homeState.currentRoomInfo.roomName,
-                    user:userInfo
-                };
+                // let updateUserMsg = {
+                //     type:'update_user',
+                //     roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+                //     // roomName: state.homeState.currentRoomInfo.roomName,
+                //     user:userInfo
+                // };
                 // console.log(updateUserMsg);
                 if(!userInfo.seq)return;
-                send(JSON.stringify(updateUserMsg),function () {
-                    log('把 '+ wbMsg.toUser.name +' 的断线消息发送到服务器','ondisconnected','webRtcAudio.js');
-                    console.log(state.homeState.roomMicrophoneUser);
-                });
-
+                // send(JSON.stringify(updateUserMsg),function () {
+                //     log('把 '+ wbMsg.toUser.name +' 的断线消息发送到服务器','ondisconnected','webRtcAudio.js');
+                //     console.log(state.homeState.roomMicrophoneUser);
+                // });
+                updateUserInfo(userInfo);
             },
             onclosemicrophone:function () {
                 log('进入onclosemicrophone','onclosemicrophone','webRtcAudio.js');
@@ -433,7 +434,7 @@ function iceRestart(toUser) {
         typeString:'webrtc',
         ToUserOnly:toUser.id,
         roomId: roomInfo.roomId,		//房间唯一标识符
-        roomName: roomInfo.roomName,
+        // roomName: roomInfo.roomName,
         fromUser:state.homeState.userInfo,
         toUser:toUser,
         sessionId:state.homeState.userInfo.id+'-'+toUser.id
@@ -920,7 +921,7 @@ function getRoomUserList(callback) {
         let getUsersInfo = {
             type:'get_room_users',
             roomId:state.homeState.currentRoomInfo.roomId,
-            roomName:state.homeState.currentRoomInfo.roomName,
+            // roomName:state.homeState.currentRoomInfo.roomName,
             user:state.homeState.userInfo,
         };
         send(JSON.stringify(getUsersInfo),function(){
@@ -937,7 +938,7 @@ function applyToBeFirst(){
     let beFirstMsg = {
         type:'declare_king',
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
+        // roomName: state.homeState.currentRoomInfo.roomName,
         user:state.homeState.userInfo
     };
     send(JSON.stringify(beFirstMsg),function () {
@@ -1058,7 +1059,7 @@ function startOnline() {
         typeString:'preOffer',
         ToUserOnly:objUser.minSeqUser.id,
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
+        // roomName: state.homeState.currentRoomInfo.roomName,
         fromUser: userInfo,
         toUser:objUser.minSeqUser
     };
@@ -1098,23 +1099,24 @@ function delSendListById(userId) {
 /**
  * 初始化用户信息函数
  * */
-function updateServerUserInfo() {
+function initServerUserInfo() {
     let userInfo = state.homeState.userInfo;
     userInfo.Children = [];
     userInfo.maxChildren = CONFIG_CONSTANTS.MAXCHILDREN;
-    console.log(userInfo);
-    let updateUserMsg = {
-        type:'update_user',
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        roomName: state.homeState.currentRoomInfo.roomName,
-        user:userInfo
-    };
+    // console.log(userInfo);
+    // let updateUserMsg = {
+    //     type:'update_user',
+    //     roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+    //     // roomName: state.homeState.currentRoomInfo.roomName,
+    //     user:userInfo
+    // };
     // console.log(updateUserMsg);
     if(!userInfo.seq)return;
     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-    send(JSON.stringify(updateUserMsg),function () {
-        log('发送update_user消息到服务器','updateServerUserInfo','webRtcAudio.js');
-    });
+    // send(JSON.stringify(updateUserMsg),function () {
+    //     log('发送update_user消息到服务器','initServerUserInfo','webRtcAudio.js');
+    // });
+    updateUserInfo(userInfo);
 }
 
 //播放音乐,混入自己的mixOutputStream
@@ -1137,7 +1139,7 @@ export {
     openMicrophone,
     microphoneStatus,
     initVariableAudio,
-    updateServerUserInfo,
+    initServerUserInfo,
     amISendPreOffer,
     delSendListById
 };
