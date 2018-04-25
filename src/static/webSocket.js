@@ -453,6 +453,7 @@ function onmessage(response){
                         if(state.homeState.userInfo.id == dataJson.user.id){
                             // let roomInfo = state.homeState.currentRoomInfo;
                             roomInfo.onMicrophoneUsers = newMicUsers;
+                            roomInfo.microphoneMode = 3;
                             let setRoomMsg = {
                                 type:'set_room_info',
                                 roomId: roomInfo.roomId,		//房间唯一标识符
