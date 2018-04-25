@@ -1,6 +1,7 @@
 import React,{ Component } from 'react';
 import { message ,Input, Button, Slider, Popover } from 'antd';
 import UploadAvatar from './UploadAvatar';
+import TestDoc from './TestDoc';
 import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
 import store, {CONSTANT} from "../reducer/reducer";
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
@@ -370,6 +371,7 @@ class FooterBottom extends React.Component{
                 <audio id={'applause-audio'}></audio>
                 <video id={'play-audio'}></video>
             </div>
+           <TestDoc></TestDoc>
         </div>)
     }
 }

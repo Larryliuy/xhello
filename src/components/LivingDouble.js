@@ -29,7 +29,6 @@ class LivingDouble extends React.Component{
                 message.info('申请已发出');
             });
         }
-
     }
     onAgreeToBebarley(e){
         onLeaveVideo(state.homeState.userInfo);//ondisconnect里面有调用此方法
@@ -58,7 +57,7 @@ class LivingDouble extends React.Component{
                     <canvas id={'liveCanvas'}></canvas>
                     <audio id={'myAudio'}></audio>
                 </div>
-                {state.homeState.userInfo.id != state.homeState.currentRoomInfo.king && state.homeState.currentRoomInfo.secondKing !== state.homeState.userInfo.id &&
+                {state.homeState.userInfo.id != state.homeState.currentRoomInfo.king &&
                 <Button className={'apply-tobe-barley-btn'} onClick={()=>this.onApplyToBebarley()}>申请连麦</Button>}
                 {state.homeState.userInfo.id == state.homeState.currentRoomInfo.king ?
                     <div className={'closeVideoMode'}>

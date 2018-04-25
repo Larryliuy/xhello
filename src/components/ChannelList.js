@@ -173,6 +173,7 @@ class ChannelList extends React.Component{
     };*/
     clickOpenHandle  = (e) => {
         const roomId = e.target.parentNode.parentNode.getAttribute('id');
+        if(!roomId){console.log(roomId);return;}
         let tRoomState = state.homeState.roomStatus;
         if(state.homeState.roomStatus[roomId]){
             tRoomState[roomId] = false;

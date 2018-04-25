@@ -62,7 +62,7 @@ function ajustUserOrder(onMicusers,orderInfo) {
     console.log(onMicusersTpm);
     console.log(onMicusersTpm[0]);
     if(orderInfo.type === 'up'){
-        for(let i = 0,len = onMicusers.length; i < len; i++){
+        for(let i = 1,len = onMicusers.length; i < len; i++){
             if(onMicusersTpm[i].id == orderInfo.userId){
                 console.log('index:'+i);
                 userTpm = onMicusersTpm[i];
@@ -72,7 +72,7 @@ function ajustUserOrder(onMicusers,orderInfo) {
             }
         }
     }else if(orderInfo.type === 'down'){
-        for(let i = 0,len = onMicusers.length; i < len; i++){
+        for(let i = 0,len = onMicusers.length-1; i < len; i++){
             if(onMicusersTpm[i].id == orderInfo.userId){
                 console.log('index:'+i);
                 userTpm = onMicusersTpm[i];
@@ -296,7 +296,7 @@ function updateRoomInfoById(roomId,roomName,roomColor,roomPassword) {
     let setRoomMsg = {
         type:'set_room_info',
         roomId:roomId,
-        user:state.homeState.userInfo,
+        //user:state.homeState.userInfo,
         data:objRoomInfo
     };
     console.log(objRoomInfo);
@@ -471,6 +471,11 @@ function updateTotalClientsByRoomid(roomId,totalClients) {
     });
     // console.log(allRoomList);
     store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
+    let roomInfo = state.homeState.currentRoomInfo;
+    if(roomId == roomInfo.roomId){
+        roomInfo.totalClients = totalClients;
+    }
+    store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
 }
 
 /**
@@ -506,6 +511,16 @@ function getRoomUsers(roomId){
     };
     send(JSON.stringify(msg),function () {
     })
+}
+
+/**
+ * 根据Id获取房间用户 ，延时10s
+ * */
+function delayGetRoomUsers(roomId){
+    console.log('delayGetRoomUsers');
+    setTimeout(function () {
+        getRoomUsers(roomId);
+    },12000);
 }
 
 /**
@@ -831,7 +846,7 @@ function clearOnMicrophoneUsers() {//清空麦序列表函数
             type:'set_room_info',
             roomId: roomInfo.roomId,		//房间唯一标识符
             // roomName: roomInfo.roomName,
-            user:state.homeState.userInfo,
+            //user:state.homeState.userInfo,
             data:roomInfo
         };
         send(JSON.stringify(setRoomMsg),function(){
@@ -976,6 +991,10 @@ function sendToServer(info) {
 }
 
 /**
+ * 打印关键信息函数
+ * */
+let keyInfos = [];
+/**
  * 打印函数，本地打印并发送到服务器
  * @param message 表示打印的消息
  * @param file 代码所在文件名
@@ -985,6 +1004,7 @@ function log(msg,funName,file) {
     // console.log(msg);
     // console.log('%c'+msg+'==='+state.homeState.userInfo.name+'==='+funName+'==='+file,'color:blue');
     console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:blue');
+    keyInfos.push(msg);
     let logInfo = {};
     logInfo.userName = state.homeState.userInfo.name;
     logInfo.message = msg;
@@ -994,10 +1014,7 @@ function log(msg,funName,file) {
     logInfos[logCount] = logInfo;
     logCount++;
 }
-/**
- * 打印关键信息函数
- * */
-let keyInfos = [];
+
 function successlog(msg) {
     let info = {};
     info.name = state.homeState.userInfo.name;
@@ -1015,14 +1032,18 @@ function keylog(msg) {
     sendToServer(info);
 }
 function setToLocalStorage() {
-    window.localStorage.setItem(state.homeState.userInfo.name,keyInfos);
+    let logs = ' ';
+    keyInfos.map(function (item) {
+        logs += item + ' \n ';
+    });
+    window.localStorage.setItem(state.homeState.userInfo.name,logs);
 }
 /**
  * 每隔5s，丢一下数据到localStorage
  * */
 setInterval(function () {
     setToLocalStorage();
-},5000);
+},3000);
 
 function error(msg,funName,file) {
     // console.error(state.homeState.userInfo.name+'==='+msg+'===caller:'+funName+'===file:'+file);
@@ -1044,13 +1065,14 @@ function keyerror(msg) {
     info.name = state.homeState.userInfo.name;
     info.msg = msg;
     console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
+    keyInfos.push(msg);
     sendToServer(info);
 }
 export {
     randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
     deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
-    getRoomUsersCount, getRoomUsers, getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
+    getRoomUsersCount, getRoomUsers, delayGetRoomUsers, getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
     getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, setRoomInfo, leaveRoom,
     CONFIG_CONSTANTS,log, error, successlog, keyerror, setToLocalStorage, by,
     upDateRoomListByDelRoomId, getNewLimit, limitFetch, enterRoom, clearOnMicrophoneUsers,

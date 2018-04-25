@@ -7,16 +7,20 @@ import {
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
-    initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo,delSendListByIdVideo
+    initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo, delSendListByIdVideo,
+    startMyCamVideoWithCallback
 } from "../webrtc/webRtcVideo";
 import store,{CONSTANT} from "../reducer/reducer";
 import { blockIpApi } from "./apiInfo";
 import {
-    updataFirstUserAvatar, getUserListforAllRoomList, getNewAllRoomList, log, successlog, keyerror,
+    updataFirstUserAvatar, getNewAllRoomList, log, successlog, keyerror,
     setRoomInfoByRoomInfo, limitFetch, enterRoom, updateTotalClientsByRoomid, ajustUserOrder, updateUserInfo,
-    by, upDateRoomListByDelRoomId, getNewLimit, clearOnMicrophoneUsers, sendSesult, setRoomInfo
+    by, upDateRoomListByDelRoomId, getNewLimit, clearOnMicrophoneUsers, sendSesult, setRoomInfo, delayGetRoomUsers
 } from "./comFunctions";
-import { addToNormalQuitUsers, removeToNormalQuitUsers } from "../webrtc/webRtcBase";
+import {
+    addToNormalQuitUsers, addUnexpectedUsers, removeToNormalQuitUsers,
+    removeUnexpectedUsers
+} from "../webrtc/webRtcBase";
 
 let state = store.getState();
 store.subscribe(function () {
@@ -261,6 +265,10 @@ function onmessage(response){
         userInfo = state.homeState.userInfo || {};
     switch(dataJson.type){
         case 'msg':
+            if(dataJson.data === '消息成功发出') {
+                console.log(dataJson);
+                break;//如果是发送给自己的消息则直接过滤
+            }
             switch(dataJson.typeString){
                 case 'preOffer':
                     log('从'+dataJson.fromUser.name+'收到准备连接申请','onmessage-preOffer','websocket.js');
@@ -278,10 +286,11 @@ function onmessage(response){
                     //如果房间模式时1或3，并且downStream不存在则失败
                     // let roomInfo = state.homeState.currentRoomInfo;
                     // console.error('sempher:'+sempher);
-                    // console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfoTmp.id);
+                    // console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfo.id);
                     //视频模式下如果我不是king（直播的人，则拒绝连接）
                     if((roomInfo.mode == 1 || roomInfo.mode == 3) && (!hasDownStream() && roomInfo.king != userInfo.id)){
-                        console.log('%cError: i am not king','color:red');
+                        keyerror('%c'+dataJson.fromUser.name+'申请连我失败failed:roomMode,'+roomInfo.mode+',hasDownStream:'+hasDownStream(),'color:red');
+                        // console.log(roomInfo.mode,hasDownStream(),roomInfo.king,userInfo.id);
                         sendSesult(dataJson.fromUser,false);
                         sempher = sempher + 1;
                         return;
@@ -438,46 +447,51 @@ function onmessage(response){
                     break;
                 case 'changeMicOrder':
                     let micUsers = state.homeState.roomMicrophoneUser,newMicUsers;
-                    newMicUsers = ajustUserOrder(micUsers,dataJson.orderInfo);
-                    store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:newMicUsers});
-                    if(state.homeState.userInfo.id == dataJson.user.id){
-                        // let roomInfo = state.homeState.currentRoomInfo;
-                        roomInfo.onMicrophoneUsers = newMicUsers;
-                        let setRoomMsg = {
-                            type:'set_room_info',
-                            roomId: roomInfo.roomId,		//房间唯一标识符
-                            // roomName: roomInfo.roomName,
-                            user:state.homeState.userInfo,
-                            data:roomInfo
-                        };
-                        send(JSON.stringify(setRoomMsg),function(){
-                            console.log('更新服务器onMicrophoneUsers信息');
-                        });
+                    if(dataJson.data !== '消息成功发出'){
+                        newMicUsers = ajustUserOrder(micUsers,dataJson.orderInfo);
+                        store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:newMicUsers});
+                        if(state.homeState.userInfo.id == dataJson.user.id){
+                            // let roomInfo = state.homeState.currentRoomInfo;
+                            roomInfo.onMicrophoneUsers = newMicUsers;
+                            let setRoomMsg = {
+                                type:'set_room_info',
+                                roomId: roomInfo.roomId,		//房间唯一标识符
+                                // roomName: roomInfo.roomName,
+                                user:state.homeState.userInfo,
+                                data:roomInfo
+                            };
+                            send(JSON.stringify(setRoomMsg),function(){
+                                console.log('更新服务器onMicrophoneUsers信息');
+                            });
+                        }
                     }
                     break;
                 case 'changeRoomOrder':
                     console.log('收到changeRoomOrder消息');
+                    console.log(dataJson);
                     let allRoomList = state.homeState.allRoomList,
                         // roomInfo = state.homeState.userInfo,
                         newRoomList = dataJson.newRoomList;
                     // console.log(dataJson);
-                    allRoomList = allRoomList.map(function (item) {
-                        if(item.childNode.length !== 0){
-                            item.childNode.map(function (cItem) {
-                                if(cItem.roomId == dataJson.orderInfo.roomId){
-                                    item.childNode = newRoomList;
-                                }
+                    if(dataJson.data !== '消息成功发出') {
+                        allRoomList = allRoomList.map(function (item) {
+                            if (item.childNode.length !== 0) {
+                                item.childNode.map(function (cItem) {
+                                    if (cItem.roomId == dataJson.orderInfo.roomId) {
+                                        item.childNode = newRoomList;
+                                    }
+                                });
+                            }
+                            return item;
+                        });
+                        console.log(allRoomList);
+                        store.dispatch({type: CONSTANT.ALLROOMLIST, val: allRoomList});
+                        if (state.homeState.userInfo.id == dataJson.user.id) {
+                            //实际只需要更新房间的order
+                            newRoomList.map(function (item) {
+                                setRoomInfoByRoomInfo(item);
                             });
                         }
-                        return item;
-                    });
-                    console.log(allRoomList);
-                    store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
-                    if(state.homeState.userInfo.id == dataJson.user.id){
-                        //实际只需要更新房间的order
-                        newRoomList.map(function (item) {
-                            setRoomInfoByRoomInfo(item);
-                        });
                     }
                     break;
                 case 'audioSourceInput':
@@ -497,7 +511,7 @@ function onmessage(response){
                     }
                     break;
                 case 'applyToBebarley':
-                    console.log('收到连麦者申请:'+dataJson.user.id);
+                    successlog('收到连麦申请:'+dataJson.user.id);
                     // let roomInfo = state.homeState.currentRoomInfo;
                     if(!roomInfo.secondKing && dataJson.user.id !== state.homeState.userInfo.id){
                         console.log('连麦者不存在，可同意连麦');
@@ -508,13 +522,13 @@ function onmessage(response){
                     }
                     break;
                 case 'agreeToBebarley':
-                    console.log('收到同意连麦的消息');
+                    successlog('收到同意连麦的消息');
                     onLeaveVideo(state.homeState.userInfo);//在ondisconnect里面会调用
                     initVariableVideo();
                     let myVideoTag = document.getElementById('secondVideo');
-                    if(!getPrepareConnectionStateVideo()){
-                        startMyCamVideo(myVideoTag,true);
-                    }
+                    // if(!getPrepareConnectionStateVideo()){
+                    //     startMyCamVideo(myVideoTag,true);
+                    // }
                     let user = dataJson.user;
                     user.Children = user.Children.filter(function (item) {
                         return item !== user.id;
@@ -531,9 +545,10 @@ function onmessage(response){
                         sessionId:state.homeState.userInfo.id+'-'+dataJson.user.id
                     };
                     console.log(Msg);
-                    setTimeout(function () {
-                        offerPeerConnectionVideo(Msg,'firstVideo',true);
-                    },2000);
+                    startMyCamVideoWithCallback(myVideoTag,true,Msg);
+                    // setTimeout(function () {
+                    //     offerPeerConnectionVideo(Msg,'firstVideo',true);
+                    // },2000);
                     break;
                 case 'reconnectVideo':
                     // let userInfo = state.homeState.userInfo;
@@ -541,6 +556,8 @@ function onmessage(response){
                         // addToNormalQuitUsers(dataJson.user.id);
                         onLeaveVideo(userInfo);
                         initVariableVideo();
+                        userInfo.isOnline = false;
+                        updateUserInfo(userInfo);
                         console.log(dataJson.user.parentNode,userInfo.parentNode);
                         // if(dataJson.user.parentNode !== userInfo.parentNode){
                         setTimeout(function () {
@@ -916,6 +933,7 @@ function onmessage(response){
         case 'enter_room':
             // console.log(dataJson);
             removeToNormalQuitUsers(dataJson.user.id);
+            removeUnexpectedUsers(dataJson.user.id);
             if(response.data === '房间不存在'){
                 alert('房间不存在需要创建房间');
                 console.log('并进入房间');
@@ -1045,6 +1063,7 @@ function onmessage(response){
                 userInfo = dataJson.data[userInfo.id];
                 if(Object.keys(dataJson.data).length === 1){//如果这个房间只有自己一个，那将自己的在线状态改为true
                     userInfo.isOnline = true;
+                    //clearOnMicrophoneUsers();
                 }
                 if(userInfo.status){//如果我的状态是异常状态，则删除我的异常状态
                     delete userInfo.status;
@@ -1168,6 +1187,10 @@ function onmessage(response){
                 // alert('applyToBeFirst:'+roomInfo.king);
                 log('没有king，我要申请成为新的king','onmessage-get_room_info','websocket.js');
                 applyToBeFirst();
+                //如果房间总人数为1，并且麦序列表长度不为0，则清空麦序列表。用于解决最后在线的人异常掉线后，程序没有做清除处理
+                if(roomInfoTmp.totalClients === 1 && roomInfoTmp.onMicrophoneUsers.length !== 0){
+                    clearOnMicrophoneUsers();
+                }
             }
             break;
         case 'declare_king':
@@ -1247,8 +1270,9 @@ function onmessage(response){
             //     val:dataTmp[0].childNode[0]});
             // store.dispatch({type:CONSTANT.LASTROOMINFO,
             //     val:dataTmp[0].childNode[0]});
-            getUserListforAllRoomList(dataTmp);
+            //getUserListforAllRoomList(dataTmp);
             // console.log(dataTmp);
+            //if(roomInfo.)
             break;
         case 'set_room_info':
             console.log(dataJson);
@@ -1273,6 +1297,14 @@ function onmessage(response){
                     console.log(dataJson);
                 }else if(dataJson.data === '异常掉线'){
                     console.log(dataJson);
+                    if(roomInfo.roomId === dataJson.roomId){
+                        addUnexpectedUsers(dataJson.userId);
+                        delayGetRoomUsers(dataJson.roomId);
+                    }
+                    if(userInfo.id === dataJson.userId){
+                        console.log('%c收到自己掉线的消息，需要重新进入房间','color:purple');
+                        enterRoom(roomInfo.roomId);
+                    }
                 }else{
                     console.error(dataJson);
                 }

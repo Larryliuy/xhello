@@ -39,17 +39,17 @@ class MicroPhone extends React.Component {
         send(JSON.stringify(Msg),function () {
             // console.log('microphoneMode changed and send to others');
             let roomInfo = state.homeState.currentRoomInfo;
-            if(roomInfo.microphoneMode !==  Msg.microphoneMode){
+            if(roomInfo.microphoneMode !=  Msg.microphoneMode){
                 roomInfo.microphoneMode =  Msg.microphoneMode;
                 let setRoomMsg = {
                     type:'set_room_info',
                     roomId: roomInfo.roomId,		//房间唯一标识符
                     // roomName: roomInfo.roomName,
-                    user:state.homeState.userInfo,
+                    // user:state.homeState.userInfo,
                     data:roomInfo
                 };
                 send(JSON.stringify(setRoomMsg),function(){
-                    console.log('更新服务器microphoneMode信息');
+                    console.log('更新服务器microphoneMode信息:'+Msg.microphoneMode);
                 });
             }
         });
@@ -245,7 +245,7 @@ class MicroPhone extends React.Component {
                 <List
                     size='small'
                     dataSource={state.homeState.roomMicrophoneUser}
-                    renderItem={item => (<List.Item>
+                    renderItem={item => (item && <List.Item>
                         <span className={'microphone-user-span'}>
                             <span><Icon className='list-icon' type="user" />{item.name}</span>
                             <span>

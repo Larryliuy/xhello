@@ -46,10 +46,11 @@ class UploadAvatar extends React.Component{
         }else if(window.URL){
             //File API
             // alert(files[0].name + "," + files[0].size + " bytes");
-            img.src = window.URL.createObjectURL(files[0]); //创建一个object URL，并不是你的本地路径
+            // img.src = window.URL.createObjectURL(files[0]); //创建一个object URL，并不是你的本地路径
+            img.srcObject = files[0]; //创建一个object URL，并不是你的本地路径
             // img.width = 200;
             img.onload = function(e) {
-                window.URL.revokeObjectURL(this.src); //图片加载后，释放object URL
+                window.URL.revokeObjectURL(this.srcObject); //图片加载后，释放object URL
             };
             fileList.removeChild(fileList.querySelector('img'));
             fileList.appendChild(img);

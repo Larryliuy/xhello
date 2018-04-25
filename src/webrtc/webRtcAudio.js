@@ -7,7 +7,7 @@ import store, {CONSTANT} from "../reducer/reducer";
 import {CONFIG_CONSTANTS, log, successlog, keyerror, updateUserInfo} from '../static/comFunctions';
 import { iceServers } from './iceServer';
 import { message } from 'antd';
-import {emptyNormalQuitUsers, getNormalQuitUsers} from "./webRtcBase";
+import {emptyNormalQuitUsers, emptyUnexpectedUsers, getNormalQuitUsers} from "./webRtcBase";
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -105,7 +105,9 @@ function sourceConnectAnalyser(stream) {//观察者模式
  * 获取本地音频流
  * @param videoBox 用于将video或audio标签包裹的容易Dom对象
  */
+let videoBoxTag;
 function startMyCam(videoBox){
+    videoBoxTag = videoBox;
     if (hasUserMedia()) {
         navigator.getUserMedia({ video: false, audio: true }, function(myStream) {
             micphoneStream = myStream;
@@ -117,7 +119,8 @@ function startMyCam(videoBox){
             // store.dispatch({type:CONSTANT.MYAUDIOTRACK,val:micphoneStream.getAudioTracks()});
             // console.log(micphoneStream);
             myVideo = document.createElement('video');
-            myVideo.src = window.URL.createObjectURL(micphoneStream);
+            // myVideo.src = window.URL.createObjectURL(micphoneStream);
+            myVideo.srcObject = micphoneStream;
             myVideo.addEventListener('canplay', function(){
                 myVideo.muted = true;		//mute local video to avoid echo by myself.
             });
@@ -211,7 +214,8 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
         newConnection.addStream(mixedOutput.stream);
         newConnection.onaddstream = function (e) {
             remoteVidoeDom = document.querySelector('#'+remoteVidoeId);
-            remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
+            // remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
+            remoteVidoeDom.srcObject = e.stream;
             log('触发onaddstream','onaddstream','webRtcAudio.js');
             mixerAudio(e.stream,newConnection,true);
         };
@@ -227,7 +231,8 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 })
             }else{
                 //all the candidate have been sent
-                log("发送 candidate 给 "+Msg.toUser.name,'onicecandidate','webRtcAudio.js');
+                // log("发送 candidate 给 "+Msg.toUser.name,'onicecandidate','webRtcAudio.js');
+                successlog("audio-发送 candidate 给 "+Msg.toUser.name);
                 // checkPeerConnectionStatus(Msg.toUser.id,type);//这里
             }
         };
@@ -334,7 +339,6 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                                 objItem.ondisconnected('closed');
                             }
                         }
-
                     }
                     break;
                 default:
@@ -497,8 +501,9 @@ function offerPeerConnection(wbMsg,videoBox) {
         pcOutStream:xpc.pcOutStream
     };
     // let isExiat = false;//标记rtcSession是否存在
+    let tmpStr = wbMsg.sessionId.split('-')[1]+'-'+wbMsg.sessionId.split('-')[0];
     rtcSessionList = rtcSessionList.filter(function (item) {
-        if(item.sessionId == wbMsg.sessionId){
+        if(item.sessionId == wbMsg.sessionId || (item.sessionId == tmpStr && item.pcState === 'connected')){
             // isExiat = true;
             successlog('audio-offerPeerconnecttion-removeInstance:',item.pc);
             removeInstance(item);
@@ -562,8 +567,9 @@ function answerPeerConnection(wbMsg,offer,videoBox) {
         toUser:xpc.toUser,
         pcOutStream:xpc.pcOutStream
     };
+    let tmpStr = wbMsg.sessionId.split('-')[1]+'-'+wbMsg.sessionId.split('-')[0];
     rtcSessionList = rtcSessionList.filter(function (item) {
-        if(item.sessionId == wbMsg.sessionId){
+        if(item.sessionId == wbMsg.sessionId || (item.sessionId == tmpStr && (item.pcState === 'connected' || item.pcState === 'connecting'))){
             // isExiat = true;
             removeInstance(item);
         }
@@ -571,7 +577,12 @@ function answerPeerConnection(wbMsg,offer,videoBox) {
     });
     rtcSessionList.push(rtcSession);
     // console.log(pcMeshChain);
-    xpc.pc.setRemoteDescription(new RTCSessionDescription(offer));
+    try{
+        xpc.pc.setRemoteDescription(new RTCSessionDescription(offer));
+    }catch (e){
+        console.error(e);
+    }
+
     xpc.pc.createAnswer(function (answer) {
         Msg = wbMsg;
         Msg.answer = answer;
@@ -964,6 +975,7 @@ function initVariableAudio() {
     microphoneStatus = false;
     getRoomUserListCallback = null;
     emptyNormalQuitUsers();
+    emptyUnexpectedUsers();
     // store.dispatch({type:CONSTANT.MICROPHONEINPUT,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEOPEN,val:false});
     store.dispatch({type:CONSTANT.MICROPHONEINPUTUSERS,val:{}});
@@ -977,6 +989,17 @@ function initVariableAudio() {
     }
     store.dispatch({type:CONSTANT.USERINFO,val:userTmp});
     // clearInterval(intval);
+    //清除audioBox里面的tag
+    delVideoBoxChildren();
+}
+/**
+ * 删除videobox里面的video标签
+ * */
+function delVideoBoxChildren() {
+    let children = videoBoxTag.childNodes;
+    for(let i = 0; i < children.length; i++) {
+        videoBoxTag.removeChild(children[i]);
+      }
 }
 
 /**
@@ -1114,7 +1137,7 @@ function initServerUserInfo() {
     if(!userInfo.seq)return;
     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
     // send(JSON.stringify(updateUserMsg),function () {
-    //     log('发送update_user消息到服务器','initServerUserInfo','webRtcAudio.js');
+    //     log('发送update_user消息到服务器','updateServerUserInfo','webRtcAudio.js');
     // });
     updateUserInfo(userInfo);
 }
