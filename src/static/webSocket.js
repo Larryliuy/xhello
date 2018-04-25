@@ -450,7 +450,7 @@ function onmessage(response){
                     if(dataJson.data !== '消息成功发出'){
                         newMicUsers = ajustUserOrder(micUsers,dataJson.orderInfo);
                         store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:newMicUsers});
-                        if(state.homeState.userInfo.id == dataJson.user.id){
+                        if(userInfo.id == dataJson.user.id){
                             // let roomInfo = state.homeState.currentRoomInfo;
                             roomInfo.onMicrophoneUsers = newMicUsers;
                             roomInfo.microphoneMode = 3;
@@ -464,6 +464,24 @@ function onmessage(response){
                             send(JSON.stringify(setRoomMsg),function(){
                                 console.log('更新服务器onMicrophoneUsers信息');
                             });
+                        }else{
+                            console.log(newMicUsers[0]);
+                            console.log(microphoneStatus);
+                            console.log(userInfo.id);
+                            if(newMicUsers && newMicUsers[0].id === userInfo.id){
+                                if(!microphoneStatus){//如果不希望调整麦序时第一位自动开麦，则注释这里即可
+                                    openMicrophone();
+                                }
+                            }else{
+                                if(userInfo.level > 4 && microphoneStatus){
+                                    closeMicrophone();
+                                }
+                            }
+                            if(userInfo.limit && userInfo.limit.toString().indexOf('3') !== -1){
+                                if(microphoneStatus){
+                                    closeMicrophone();
+                                }
+                            }
                         }
                     }
                     break;
