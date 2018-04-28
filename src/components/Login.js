@@ -195,6 +195,7 @@ class Login extends React.Component {
     {
         console.log(user);
     }
+    onChangeCheckBox(e){}
     render(){
         if(!this.state.loginComponent)return (<div style={{textAlign:'center'}}><p>正在验证中...,请稍候</p></div>);
         return (<Form onSubmit={this.handleSubmit} className="login-form">

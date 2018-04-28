@@ -10,7 +10,7 @@ const getUserInfoApi = '../../server/app/api/ApiGetqqUserInfo.php';
 const generalApi = '../../server/app/api/ApiGeneral.php';
 const redirect_uri = encodeURIComponent('https://a701.xtell.cn/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/index.php');
 const homePage = location.href.substring(0,location.href.indexOf('index.php')+9)+'#/';
-const domian = 'xtell.cn';
+const domian = 'xhello.cn';
 // function getGeneralArgs(action,table,cond) {
 //     return '?action='+action+'&table='+table+'&cond='+cond;
 // }

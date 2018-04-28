@@ -595,7 +595,7 @@ function UnexpectedHandleForDisconnected(toUser,objItem) {
             objItem && objItem.ondisconnected('disconnected');
         }else{
             keyerror('您与'+toUser.name+'网络连接不稳定或者连接已非正常断开,iceRestart');
-            iceRestartVideo(toUser);
+            // iceRestartVideo(toUser);
         }
     },300);
 
@@ -1094,6 +1094,7 @@ function closeVideoMode() {
         send(JSON.stringify(setRoomMsg),function () {
             console.log('发送改变房间模式消息给服务器');
             // getRoomInfoVideo(roomInfoTmp.roomId);
+            message.success('关闭成功，如需再次开启直播，请等待10~20秒',10);
         })
     })
 }

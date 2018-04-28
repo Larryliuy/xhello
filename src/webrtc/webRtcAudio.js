@@ -500,16 +500,25 @@ function offerPeerConnection(wbMsg,videoBox) {
         toUser:xpc.toUser,
         pcOutStream:xpc.pcOutStream
     };
-    // let isExiat = false;//标记rtcSession是否存在
+    let isExist = false;//标记rtcSession是否存在
     let tmpStr = wbMsg.sessionId.split('-')[1]+'-'+wbMsg.sessionId.split('-')[0];
     rtcSessionList = rtcSessionList.filter(function (item) {
-        if(item.sessionId == wbMsg.sessionId || (item.sessionId == tmpStr && item.pcState === 'connected')){
+        if(item.sessionId == wbMsg.sessionId){
             // isExiat = true;
             successlog('audio-offerPeerconnecttion-removeInstance:',item.pc);
             removeInstance(item);
         }
+        if(item.sessionId == tmpStr && item.pcState === 'connected'){//如果对方已经跟我连接了，则需要再去入网
+            console.log(state.homeState.userInfo);
+            isExist = true;
+            getRoomUserList(startOnline);
+
+        }
         return item.sessionId != wbMsg.sessionId;
     });
+    if(isExist){
+        return;
+    }
     rtcSessionList.push(rtcSession);
     xpc.pc.createOffer(offerOptions)
         .then(
@@ -908,11 +917,12 @@ function setGetRoomUserListCallback(callback) {
  * nextCandidate下次开始搜索的seq
  */
 function getCandidate(UserList,min) {
+    console.log(UserList);
     let minSeq = 100000000;
     let minSeqUser = null;
     UserList.map(function (item) {
         if(item.Children.length < item.maxChildren){
-            // console.log(item.seq+','+minSeq);
+            console.log(item.seq+','+minSeq);
             if(item.seq > min && item.seq < minSeq && state.homeState.userInfo.id != item.id){
                 minSeq = item.seq;
                 minSeqUser = item;
@@ -987,6 +997,7 @@ function initVariableAudio() {
     }else{
         userTmp.isOnline = false;
     }
+    userTmp.parentNode = '';
     store.dispatch({type:CONSTANT.USERINFO,val:userTmp});
     // clearInterval(intval);
     //清除audioBox里面的tag
@@ -1031,16 +1042,16 @@ function startOnline() {
     // console.log('firstCandidate:'+firstCandidate);
     let objUser = getCandidate(state.homeState.userInfoList,firstCandidate);
     // console.log(state.homeState.userInfoList);
-    // console.log(objUser);
+    console.log(objUser);
     if(!objUser.minSeqUser){
         console.log('%c目标用户不存在','color:red');
         //目标用户不存在,继续用户用户列表并返回
         if(count<10){
+            firstCandidate = 0;
             setTimeout(function () {
                 getRoomUserList(startOnline);
                 count++;
-            },1000);
-
+            },2000);
         }else{
             count = 0;
         }
@@ -1048,12 +1059,25 @@ function startOnline() {
     }
     //如果此人正在跟我连，则直接返回
     if(userInfo.Children.length !== 0){
+        console.log(userInfo.Children);
         let isExist = false;
         userInfo.Children.map(function (item) {
             if(item === objUser.minSeqUser.id){
                 isExist = true;
             }
         });
+        for(let i = 0; i < userInfo.Children.length ;i++){
+            if(userInfo.Children[i] === objUser.minSeqUser.id){
+                isExist = true;
+            }
+        }
+        if(!isExist){
+            for(let i = 0; i < userInfo.Children.length ;i++){
+                if(userInfo.Children[i] === objUser.minSeqUser.id){
+                    isExist = true;
+                }
+            }
+        }
         if(isExist){
             console.error('对方正在跟我连接，不用去申请连他');
             firstCandidate = objUser.nextCandidate;
@@ -1126,6 +1150,8 @@ function initServerUserInfo() {
     let userInfo = state.homeState.userInfo;
     userInfo.Children = [];
     userInfo.maxChildren = CONFIG_CONSTANTS.MAXCHILDREN;
+    userInfo.isOnline = false;
+    userInfo.parentNode = '';
     // console.log(userInfo);
     // let updateUserMsg = {
     //     type:'update_user',

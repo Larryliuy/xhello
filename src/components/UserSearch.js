@@ -37,7 +37,6 @@ class UserSearch extends React.Component{
                         return ;
                     }
                 })
-
             }
         });
         store.dispatch({type:CONSTANT.SEARCHKEYWORD,val:e.target.value});
@@ -56,15 +55,16 @@ class UserSearch extends React.Component{
             selfDom.scrollIntoView();
             selfDom.style.color = 'green';
         },200)
-
     }
     render(){
         return (
             <div>
+                <input type="text" style={{position:'absolute',width:'1px',height:'1px',top:'-1px',left:'-1px'}} placeholder={"请输入用户名"}/>
+                <input type="password" style={{position:'absolute',width:'1px',height:'1px',top:'-1px',left:'-1px'}} placeholder={"以上两个input只是解决Google浏览器自动填充问题"}/>
                 <Input style={{marginLeft:'-10px',width:'180px'}}
-                        placeholder="请输入用户名"
-                        prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                        onChange={value => this.changeSearchHandle(value)}
+                       placeholder="请输入用户名"
+                       prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                       onChange={value => this.changeSearchHandle(value)}
             />
                 <span onClick={this.clickLocationHandle} style={{overflowX: 'hidden'}}><Icon className='icon-location' type="environment-o" /></span>
                 <SearchResult data={state.homeState.resultData}></SearchResult>

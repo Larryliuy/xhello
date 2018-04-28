@@ -979,8 +979,17 @@ function getBrowserInfo(){
  * 将log信息存到后台
  * */
 function sendToServer(info) {
-    let addArgs = '?action=add&table=userTestInfo&userName='+info.name+'&userLog='+info.msg;
-    fetch(generalApi+addArgs)
+    // let addArgs ={action:'add',table:'userTestInfo',userName:info.name,userLog:info.msg};//;
+    let addArgs ='action=add&table=userTestInfo&userName='+info.name+'&userLog='+info.msg;//;
+    fetch(generalApi,{
+        method:'POST',
+        headers:{
+            // 'Content-Type':'multipart/form-data',
+            // 'Content-Type':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+        },
+        body:addArgs//JSON.stringify(addArgs),
+    })
         .then(res=>res.json())
         .then(data=>{
             if(data.status === 'ok'){
@@ -993,7 +1002,7 @@ function sendToServer(info) {
 /**
  * 打印关键信息函数
  * */
-let keyInfos = [];
+let keyInfos = [],keyInfosCopy=[];
 /**
  * 打印函数，本地打印并发送到服务器
  * @param message 表示打印的消息
@@ -1005,6 +1014,7 @@ function log(msg,funName,file) {
     // console.log('%c'+msg+'==='+state.homeState.userInfo.name+'==='+funName+'==='+file,'color:blue');
     console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:blue');
     keyInfos.push(msg);
+    keyInfosCopy.push(msg);
     let logInfo = {};
     logInfo.userName = state.homeState.userInfo.name;
     logInfo.message = msg;
@@ -1021,7 +1031,8 @@ function successlog(msg) {
     info.msg = msg;
     console.log('%c'+info.name+'==='+msg,'color:green');
     keyInfos.push(msg);
-    sendToServer(info);
+    keyInfosCopy.push(msg);
+    // sendToServer(info);
 }
 function keylog(msg) {
     let info = {};
@@ -1029,22 +1040,41 @@ function keylog(msg) {
     info.msg = msg;
     console.log('%c'+info.name+'==='+msg,'color:#df402a');
     keyInfos.push(msg);
+    keyInfosCopy.push(msg);
     sendToServer(info);
 }
 function setToLocalStorage() {
-    let logs = ' ';
-    keyInfos.map(function (item) {
-        logs += item + ' \n ';
+    let logs = ' ',UserName = state.homeState.userInfo.name;
+    keyInfos.map(function (item,index) {
+        logs += index+':'+item + ' \n ';
     });
-    window.localStorage.setItem(state.homeState.userInfo.name,logs);
+    if(keyInfos.length>100){
+        sendToServer({name:UserName,msg:logs});
+        keyInfos = [];
+    }
+    logs = ' ';
+    keyInfosCopy.map(function (item,index) {
+        logs += index+':'+item + ' \n ';
+    });
+    window.localStorage.setItem(UserName,logs);
 }
 /**
  * 每隔5s，丢一下数据到localStorage
  * */
 setInterval(function () {
     setToLocalStorage();
-},3000);
+},5000);
 
+/**
+ * 不满足100条的，点测试工具中的下载按钮的时候POST到后台
+ * */
+function remaininglogsSendToserver() {
+    let logs = ' ',UserName = state.homeState.userInfo.name;
+    keyInfos.map(function (item,index) {
+        logs += index+':'+item + ' \n ';
+    });
+    sendToServer({name:UserName,msg:logs});
+}
 function error(msg,funName,file) {
     // console.error(state.homeState.userInfo.name+'==='+msg+'===caller:'+funName+'===file:'+file);
     console.error('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
@@ -1066,15 +1096,16 @@ function keyerror(msg) {
     info.msg = msg;
     console.log('%c'+state.homeState.userInfo.name+'==='+msg,'color:red');
     keyInfos.push(msg);
-    sendToServer(info);
+    keyInfosCopy.push(msg);
+    // sendToServer(info);
 }
 export {
     randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
-    deleteRoomById, updateAllRoomListTimer, getUserListforAllRoomList, removeTimer,
+    deleteRoomById, updateAllRoomListTimer, removeTimer,
     getRoomUsersCount, getRoomUsers, delayGetRoomUsers, getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
     getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, setRoomInfo, leaveRoom,
     CONFIG_CONSTANTS,log, error, successlog, keyerror, setToLocalStorage, by,
     upDateRoomListByDelRoomId, getNewLimit, limitFetch, enterRoom, clearOnMicrophoneUsers,
-    sendSesult, updateTotalClientsByRoomid
+    sendSesult, updateTotalClientsByRoomid, remaininglogsSendToserver
 }

@@ -231,7 +231,11 @@ function onmessage(response){
     if(JSON.parse(response.data).type){
         console.log(JSON.parse(response.data).type,response.data.length);
     }else{
-        console.log(JSON.parse(response.data),response.data.length);
+        let data = JSON.parse(response.data);
+        // console.log(JSON.parse(response.data),response.data.length);
+        if(data.totalSent){
+            window.localStorage.setItem('serverData',JSON.stringify(data));
+        }
     }
     if(response.check){
         heartCheck.reset().start();
@@ -289,14 +293,15 @@ function onmessage(response){
                     // console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfo.id);
                     //视频模式下如果我不是king（直播的人，则拒绝连接）
                     if((roomInfo.mode == 1 || roomInfo.mode == 3) && (!hasDownStream() && roomInfo.king != userInfo.id)){
+                        sempher = sempher + 1;
                         keyerror('%c'+dataJson.fromUser.name+'申请连我失败failed:roomMode,'+roomInfo.mode+',hasDownStream:'+hasDownStream(),'color:red');
                         // console.log(roomInfo.mode,hasDownStream(),roomInfo.king,userInfo.id);
                         sendSesult(dataJson.fromUser,false);
-                        sempher = sempher + 1;
                         return;
                     }
                     if(userInfo.Children.length < userInfo.maxChildren){
-                        if(amISendPreOffer(dataJson.fromUser.id) || amISendPreOfferVideo(dataJson.fromUser.id)){
+                        if(amISendPreOffer(dataJson.fromUser.id) || amISendPreOfferVideo(dataJson.fromUser.id) || userInfo.parentNode == dataJson.fromUser.id){
+                            console.log(userInfo.parentNode,dataJson.fromUser.id);
                             sendSesult(dataJson.fromUser,false);
                         }else{
                             if(getPrepareConnectionState()){
@@ -575,8 +580,7 @@ function onmessage(response){
                         // addToNormalQuitUsers(dataJson.user.id);
                         onLeaveVideo(userInfo);
                         initVariableVideo();
-                        userInfo.isOnline = false;
-                        updateUserInfo(userInfo);
+                        initServerUserInfo();
                         console.log(dataJson.user.parentNode,userInfo.parentNode);
                         // if(dataJson.user.parentNode !== userInfo.parentNode){
                         setTimeout(function () {
@@ -778,8 +782,8 @@ function onmessage(response){
                             currentRoomInfo.player = dataJson.player;
                             getRoomInfoVideo(currentRoomInfo.roomId);
                         }else if(dataJson.mode == 0){
-                            successlog('audio模式，我是king，我要获取micStream');
                             if(!getPrepareConnectionState()){
+                                successlog('audio模式，我是king，我要获取micStream');
                                 startMyCam(document.getElementById('audioBox'));
                             }
                         }
@@ -1075,9 +1079,15 @@ function onmessage(response){
             }
             break;
         case 'get_room_users':
+            if(dataJson.action === 'getMesh'){
+                console.log('getMesh');
+                window.localStorage.setItem('users',JSON.stringify(dataJson.data));
+                window.localStorage.setItem('king',roomInfo.king);
+                return;
+            }
             // log('收到get_room_users消息');
             let UserInfoList = [], userIdList = [];
-            // console.log(dataJson.data);
+            console.log(dataJson.data);
             if(dataJson.data && dataJson.data[userInfo.id]){
                 userInfo = dataJson.data[userInfo.id];
                 if(Object.keys(dataJson.data).length === 1){//如果这个房间只有自己一个，那将自己的在线状态改为true
@@ -1091,9 +1101,10 @@ function onmessage(response){
                 store.dispatch({type:CONSTANT.USERINFO,val:userInfo});//将从服务器获取的最新userInfo更新到本地
             }
             if(dataJson.data && Object.keys(dataJson.data).length > 1) {
-                // console.log(dataJson.user);R
+                // console.log(dataJson.user);
                 for (let item in dataJson.data) {
-                    if(item != userInfo.id && !dataJson.data[item].status && dataJson.data[item].isOnline){
+                    // console.log('userStatus:'+dataJson.data[item].status);
+                    if(item != userInfo.id && !dataJson.data[item].status && dataJson.data[item].isOnline){//status是服务器发给前端的，代表异常状态的用户Unexpected close
                         UserInfoList.push(dataJson.data[item]);
                         userIdList.push(item);
                     }else{
@@ -1304,6 +1315,10 @@ function onmessage(response){
             upDateRoomListByDelRoomId(dataJson.roomId);
             // console.log(dataJson.data);
             //更新allRoomList
+            break;
+        case 'get_count':
+            // console.log(dataJson);
+            window.localStorage.setItem('serverData',JSON.stringify(dataJson));
             break;
         default:
             if(dataJson.result === 'ok'){
