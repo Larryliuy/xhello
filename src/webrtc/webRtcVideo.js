@@ -4,7 +4,7 @@
 
 import { send } from "../static/webSocket";
 import store, {CONSTANT} from "../reducer/reducer";
-import {getRoomInfo, startMyCam, getPrepareConnectionState} from "./webRtcAudio";
+import {getRoomInfo, startMyCam, getPrepareConnectionState, initServerUserInfo} from "./webRtcAudio";
 import {CONFIG_CONSTANTS, successlog, log, keyerror, updateUserInfo, setRoomInfo} from '../static/comFunctions';
 import { iceServers } from './iceServer';
 import {message} from "antd/lib/index";
@@ -226,6 +226,14 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     log('触发onaddstream,我是offer,观众,播放','onaddstream','webRtcVideo.js');
                     //video播放
                     console.log(e.stream.getAudioTracks());
+                    if(e.stream.getAudioTracks().length > 0){
+                        successlog('我已获取主播音频流');
+                        window.localStorage.setItem('audio','ok');
+                    }
+                    if(e.stream.getVideoTracks().length > 0){
+                        successlog('我已获取主播视频流');
+                        window.localStorage.setItem('video','ok');
+                    }
                     remoteVidoeDom = document.querySelector('#'+vidoeId);
                     // remoteVidoeDom.src = window.URL.createObjectURL(e.stream);
                     try{
@@ -1029,6 +1037,8 @@ function initVariableVideo() {
     let userTmp = state.homeState.userInfo;
     userTmp.isOnline = false;
     store.dispatch({type:CONSTANT.USERINFO,val:userTmp});
+    window.localStorage.setItem('audio','');
+    window.localStorage.setItem('video','');
 }
 
 /**
@@ -1079,6 +1089,7 @@ function closeVideoMode() {
         roomId:roomInfoTmp.roomId,
         // roomName:roomInfoTmp.roomName,
         user:state.homeState.userInfo,
+        action:'closeVideo',
         mode:0
     };
     send(JSON.stringify(sendMsg),function () {

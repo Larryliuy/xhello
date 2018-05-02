@@ -48,6 +48,8 @@ class LoginBox extends React.Component {
         location.replace("#/home");
     }
     componentDidMount(){
+        window.localStorage.setItem('audio','');
+        window.localStorage.setItem('video','');
     }
     render(){
         // console.log(this.props.match);

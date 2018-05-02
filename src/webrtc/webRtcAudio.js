@@ -1002,6 +1002,8 @@ function initVariableAudio() {
     // clearInterval(intval);
     //清除audioBox里面的tag
     delVideoBoxChildren();
+    window.localStorage.setItem('audio','');
+    window.localStorage.setItem('video','');
 }
 /**
  * 删除videobox里面的video标签
@@ -1152,19 +1154,9 @@ function initServerUserInfo() {
     userInfo.maxChildren = CONFIG_CONSTANTS.MAXCHILDREN;
     userInfo.isOnline = false;
     userInfo.parentNode = '';
-    // console.log(userInfo);
-    // let updateUserMsg = {
-    //     type:'update_user',
-    //     roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-    //     // roomName: state.homeState.currentRoomInfo.roomName,
-    //     user:userInfo
-    // };
-    // console.log(updateUserMsg);
+
     if(!userInfo.seq)return;
     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
-    // send(JSON.stringify(updateUserMsg),function () {
-    //     log('发送update_user消息到服务器','updateServerUserInfo','webRtcAudio.js');
-    // });
     updateUserInfo(userInfo);
 }
 

@@ -797,7 +797,7 @@ function onmessage(response){
                                 }
                                 setTimeout(function () {
                                     getRoomInfo(currentRoomInfo.roomId);
-                                },2000);
+                                },Math.ceil(Math.random() * 2000)+2000);
                             }
                             //这里不能直接getRoomInfo，不然会各自连成很多小的圈子
                         }else{
@@ -805,7 +805,7 @@ function onmessage(response){
                                 // console.log('timer 500:'+new Date().getTime());
                                 // alert('viewer');
                                 getRoomInfoVideo(currentRoomInfo.roomId)
-                            },3000);
+                            },Math.ceil(Math.random() * 2000)+3000);
                         }
                     }
                     store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:currentRoomInfo});

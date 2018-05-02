@@ -1,6 +1,6 @@
 import React,{ Component } from 'react'
 import store from "../reducer/reducer";
-import { Button, Popover } from 'antd';
+import { Button, Popover, message } from 'antd';
 import {send} from "../static/webSocket";
 import {remaininglogsSendToserver} from "../static/comFunctions";
 let state = store.getState();
@@ -60,6 +60,21 @@ class TestDoc extends Component{
     testBtnClick(){
         this.setState({popVisible:!this.state.popVisible});
     }
+    testMasterAV(){
+        if(window.localStorage.getItem('audio') === 'ok'){
+            if(window.localStorage.getItem('video') === 'ok'){
+                message.success('音频流（声音）与视频流（画面）均已获取到',10);
+            }else{
+                message.error('音频流（声音）已获取到，视频流（画面）未获取到',10);
+            }
+        }else{
+            if(window.localStorage.getItem('video') === 'ok'){
+                message.error('音频流（声音）未获取到，视频流（画面）已获取到',10);
+            }else{
+                message.error('音频流（声音）与视频流（画面）均未获取到',10);
+            }
+        }
+    }
     getContent(){
         return  (<div style={{width:'150px'}}>
             <a id={'test-doc'} onClick={testClick}><Button style={{zIndex:1000}}>下载测试数据</Button></a>
@@ -69,6 +84,8 @@ class TestDoc extends Component{
             <a href={'./testTools/facetracking/facetRacking.html'} target={'_blank'}><Button style={{zIndex:1000}}>检测摄像头</Button></a>
             <br/>
             <a href={'./testTools/audioTest.html'} target={'_blank'}><Button style={{zIndex:1000}}>检测麦克风</Button></a>
+            <br/>
+            <a href={'javascript:void(0)'}><Button style={{zIndex:1000}} onClick={()=>this.testMasterAV()}>检测直播音视频</Button></a>
             <br/>
             <a href={'./testTools/serverData.html'} target={'_blank'}><Button style={{zIndex:1000}} onClick={()=>this.serverDataClick()}>服务器通讯量</Button></a>
         </div>);
