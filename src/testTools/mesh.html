@@ -1,0 +1,130 @@
+<?php
+
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--<meta name="viewport" content="width=device-width maximum-scale=1.0 minimum-scale=1.0 user-scalable=0"/>-->
+    <title>MESH</title>
+    <link rel="stylesheet" href="../style.css">
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <link rel="icon" href="/images/favicon.ico" mce_href="/images/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.ico" mce_href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<canvas id="main"></canvas>
+<script>
+    var bodyW = document.body.clientWidth;
+    var bodyH = document.body.clientHeight;
+    var canvas = document.getElementById('main');
+    var ctx = canvas.getContext('2d');
+    var users = JSON.parse(window.localStorage.getItem('users'));
+    // var users = {
+    //     1:{Children:['2','3','4']},
+    //     2:{Children:['5','6','7']},
+    //     3:{Children:['8','9','10']},
+    //     4:{Children:['11','12','13']},
+    //     5:{Children:[]},
+    //     6:{Children:['14']},
+    //     7:{Children:['15','24','25']},
+    //     8:{Children:['26','27']},
+    //     9:{Children:[]},
+    //     10:{Children:['17']},
+    //     11:{Children:[]},
+    //     12:{Children:[]},
+    //     13:{Children:[]},
+    //     14:{Children:['20','19']},
+    //     15:{Children:['16','18']},
+    //     16:{Children:['21','22']},
+    //     17:{Children:[]},
+    //     18:{Children:[]},
+    //     19:{Children:[]},
+    //     20:{Children:[]},
+    //     21:{Children:['233']},
+    //     233:{Children:[]},
+    //     24:{Children:[]},
+    //     25:{Children:[]},
+    //     26:{Children:[]},
+    //     27:{Children:[]},
+    //     22:{Children:[]}
+    // };
+    // var king = '1';
+    var king = window.localStorage.getItem('king');
+    var TREENODEHEIGHT = 80;
+
+    console.log(bodyW,bodyH);
+    canvas.width = bodyW;
+    canvas.height = bodyH;
+
+	console.log(king);
+	console.log(users);
+	var deepRecord = {};
+	function counter() {
+        var deep = 0;
+        return function () {
+             deep ++;
+            deepRecord[deep] = true;
+             // console.log('deep:',deep);
+             return deep;
+        }
+    }
+    var deepAdd = counter();
+    var deep = deepAdd();
+    drawCicleAndText(bodyW/Math.pow(2,deep),40*deep,king,users[king].Children,1,true);
+	function drawCicleAndText(posX,posY,userId,children,dp,isLast) {
+        //开始画图
+        ctx.beginPath();
+        ctx.arc(posX,posY,10,0,360,false);
+        ctx.lineWidth=1;
+        ctx.strokeStyle="blue";
+        ctx.stroke();//画空心圆
+        ctx.closePath();
+
+        //写文字
+        ctx.fillStyle="#FF0000";
+        ctx.font="12px Arial";
+        var textPosX = userId.length === 1?posX-5:userId.length === 2?posX-8:posX-10;
+        ctx.fillText(userId,textPosX,posY+5);
+        if(children.length !== 0){
+            if(isLast && !deepRecord[dp+1]){
+                deep = deepAdd();
+            }
+            //画连接线
+            // var newPosw;//posX-bodyW/Math.pow(2,deep+1)   posX+bodyW/Math.pow(2,deep+1)
+            children.map(function (item,index) {
+                ctx.moveTo(posX,posY);
+                var newPosw = index === 0 ? posX+20-bodyW/Math.pow(2,deep):index === 1 ? posX : index === 2 ? posX+bodyW/Math.pow(2,deep)-20:posX;
+                ctx.lineTo(newPosw,TREENODEHEIGHT*deep);
+                console.log(newPosw,TREENODEHEIGHT*deep);
+                ctx.stroke();
+                drawChildrenCicleAndText(newPosw,TREENODEHEIGHT*deep,item,users[item].Children,deep);
+            });
+        }
+    }
+    function drawChildrenCicleAndText(posX,posY,userId,children,dp) {
+        ctx.beginPath();
+        ctx.arc(posX,posY,10,0,360,false);
+        ctx.lineWidth=1;
+        ctx.strokeStyle="blue";
+        ctx.stroke();//画空心圆
+        ctx.closePath();
+
+        //写文字
+        ctx.fillStyle="#FF0000";
+        ctx.font="12px Arial";
+        var textPosX = userId.length === 1?posX-5:userId.length === 2?posX-8:posX-10;
+        ctx.fillText(userId,textPosX,posY+5);
+        if(children.length !== 0){
+            //画连接线
+            children.map(function (item,index) {
+                ctx.moveTo(posX,posY);
+                var newPosw = index === 0 ? posX-bodyW/Math.pow(2,dp+2):index === 1 ? posX : index === 2 ? posX+bodyW/Math.pow(2,dp+2)-20:posX;
+                ctx.lineTo(newPosw,TREENODEHEIGHT*(dp+1));
+                ctx.stroke();
+                drawChildrenCicleAndText(newPosw,TREENODEHEIGHT*(dp+1),item,users[item].Children,dp+1);
+            });
+        }
+    }
+</script>
+</body>
+</html>

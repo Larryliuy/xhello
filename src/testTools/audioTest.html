@@ -1,0 +1,90 @@
+<?php
+
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>audioTest</title>
+    <link rel="stylesheet" href="../style.css">
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+	<style>
+        #resultBox{
+            width: 800px;
+            margin: 0 auto;
+            color: red;
+        }
+        #resultBox h3{
+            color: blue;
+        }
+        #audioSize{
+            width: 800px;
+            display: flex;
+            flex-wrap:wrap;
+        }
+    </style>
+</head>
+<body>
+<div id="audioBox"></div>
+<div id="resultBox">
+    <h3>请对着麦克风说几句话,如果能听见自己的声音并且下面音量数据会有数值，则正常，否则不正常</h3>
+    <h3>如果不正常，请确认麦克风是否能正常使用（可以用QQ，微信，YY，IS，QT等测试），如果麦克风正常，请检测是否有授权麦克风给浏览器</h3>
+    <h3>通常第一次打开浏览器时会需要用户授予麦克风权限给浏览器，这个必须要授权。否则无法正常使用云直播系统</h3>
+    <h3>以下是测试音量数据(每秒打印一次，如果没有打印，则麦克风不正常)：</h3>
+    <p id="audioSize"></p>
+</div>
+<script>
+    var audioBox = document.getElementById('audioBox');
+    var audioSize = document.getElementById('audioSize');
+    var resultBox = document.getElementById('resultBox');
+    var myWebAudio = new (window.AudioContext || window.webkitAudioContext)();
+    var myAnalyser = myWebAudio.createAnalyser();
+    var micphoneSource = null;
+    if (hasUserMedia()) {
+        navigator.getUserMedia({ video: false, audio: true }, function(myStream) {
+            prepareState = true;
+            sourceConnectAnalyser(myStream);
+            myVideo = document.createElement('audio');
+            myVideo.style.width='100px';
+            myVideo.style.height='30px';
+            myVideo.autoplay=true;
+            myVideo.controls=true;
+            myVideo.srcObject = myStream;
+            audioBox.appendChild(myVideo);
+        }, function(error){
+            console.error(error);
+        });
+    }else{
+        alert('您的浏览器不支持音视频获取');
+    }
+
+
+    function sourceConnectAnalyser(stream) {//观察者模式
+        micphoneSource = myWebAudio.createMediaStreamSource(stream);
+        micphoneSource.connect(myAnalyser);//连接到本地webAudio的AnalyserNode
+        myAnalyser.fftSize = 2048;
+        intval = setInterval(function () {
+            var pTag = document.createElement('span');
+            pTag.style.color = 'green';
+            pTag.style.marginLeft = '10px';
+            pTag.innerText = getVoiceSize(myAnalyser);
+            audioSize.appendChild(pTag)
+        },1000);
+    }
+
+    function getVoiceSize (analyser) {
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(dataArray);
+        const data = dataArray.slice(100, 1000);
+        const sum = data.reduce((a, b) => a + b);
+        return sum
+    }
+
+    function hasUserMedia() {
+        navigator.getUserMedia = navigator.getUserMedia ||
+            navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia;
+        return !!navigator.getUserMedia;
+    }
+</script>
+</body>
+</html>

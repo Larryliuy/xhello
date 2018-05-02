@@ -1,0 +1,64 @@
+<?php
+
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>serverData</title>
+    <link rel="stylesheet" href="../style.css">
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+	<style>
+        #resultBox{
+            width: 900px;
+            margin: 0 auto;
+            color: blue;
+        }
+        #resultBox h3{
+            color: blue;
+        }
+        body{
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+<div id="audioBox"></div>
+<div id="resultBox">
+    <h3>服务器通讯数据量:</h3>
+    <p id="serverDataBox"></p>
+</div>
+<script>
+    var serverDataBox = document.getElementById('serverDataBox');
+    console.log(window.localStorage.getItem('serverData'));
+    var lastSendData = 0,lastReceiveData = 0;
+    setInterval(function () {
+        var serverData = JSON.parse(window.localStorage.getItem('serverData'));
+        console.log(serverData);
+        var ptag1 = document.createElement('p');
+        ptag1.innerHTML = "totalSent："+(serverData.totalSent/1024).toFixed(3)+"kb，totalReceived："+(serverData.totalReceived/1024).toFixed(3)+"kb； "+
+        "sendSpeed："+getSend()+'kb/s，receiveSpeed:'+getReceive()+'kb/s ---'+timetrans(serverData.timestamp);
+        ptag1.style.color = 'blue';
+        serverDataBox.appendChild(ptag1);
+        lastSendData = (serverData.totalSent/1024).toFixed(3);
+        lastReceiveData = (serverData.totalReceived/1024).toFixed(3);
+        console.log(lastSendData,lastReceiveData);
+        function getSend() {
+            return lastSendData === 0?0:(((serverData.totalSent/1024).toFixed(3)-lastSendData)/5).toFixed(3);
+        }
+        function getReceive() {
+            return lastReceiveData === 0?0:(((serverData.totalReceived/1024).toFixed(3)-lastReceiveData)/5).toFixed(3);
+        }
+    },5000);
+    function timetrans(date){
+        var date = new Date(date*1000);//如果date为10位不需要乘1000
+        var Y = date.getFullYear() + '-';
+        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+        var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+        var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+        var m = (date.getMinutes() <10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+        var s = (date.getSeconds() <10 ? '0' + date.getSeconds() : date.getSeconds());
+        return Y+M+D+h+m+s;
+    }
+</script>
+</body>
+</html>

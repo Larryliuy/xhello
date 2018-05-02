@@ -1,0 +1,94 @@
+<?php
+
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--<meta name="viewport" content="width=device-width maximum-scale=1.0 minimum-scale=1.0 user-scalable=0"/>-->
+    <title>faceTracking</title>
+    <link rel="stylesheet" href="../../style.css">
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+	<script src="tracking-min.js"></script>
+    <script src="face-min.js"></script>
+    <!--<script src="stats.min.js"></script>-->
+
+    <style>
+        video, canvas {
+            margin-left: 230px;
+            margin-top: 120px;
+            position: absolute;
+        }
+        .demo-frame{
+            position: relative;
+            width: 800px;
+            margin-left: 200px;
+        }
+        #testResult{
+            position: absolute;
+            margin-left: 230px;
+            margin-top: 380px;
+            color: red;
+        }
+        #testResult h3{
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+
+<div class="demo-frame">
+    <div class="demo-container">
+        <video id="video" width="320" height="240" preload autoplay loop muted></video>
+        <canvas id="canvas" width="320" height="240"></canvas>
+    </div>
+    <div id="testResult">
+        <h3>请确认是否有看到画面，如果没有看到画面，请检测自己的摄像头是否能正常使用，可以用QQ，微信，YY，IS，QT等测试，如果摄像头正常，请检测是否有授权摄像头给浏览器</h3>
+        <h3>通常第一次打开浏览器时会需要用户授予摄像头权限给浏览器，<h2 style="color: red">如果您是主播(连麦者也属于主播)，这个必须要授权。</h2>否则无法正常使用直播功能</h3>
+        <h3>如果不是主播，则不需要检测这项</h3>
+        <h3>测试结果：请等待10s中</h3>
+    </div>
+</div>
+<script>
+    var testResult = document.getElementById('testResult');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    var haveFace = false;
+    var tracker = new tracking.ObjectTracker('face');
+    tracker.setInitialScale(4);
+    tracker.setStepSize(2);
+    tracker.setEdgesDensity(0.1);
+    console.log(tracker);
+    console.log(tracking);
+    tracking.track('#video', tracker, { camera: true });
+
+    tracker.on('track', function(event) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        event.data.forEach(function(rect) {
+            haveFace = true;
+            console.log('have face:',rect.x, rect.y, rect.width, rect.height);
+            context.strokeStyle = '#a64ceb';
+            context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+            context.font = '11px Helvetica';
+            context.fillStyle = "#fff";
+            context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+            context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+        });
+    });
+
+    setInterval(function () {
+        var pTag = document.createElement('p');
+        if(haveFace){
+            // alert('10秒内检测到有人脸');
+            pTag.innerText = '10秒内检测到有人脸';
+            pTag.style.color = 'green';
+        }else{
+            // alert('10秒内未检测到人脸');
+            pTag.innerText = '10秒内未检测到人脸';
+        }
+        testResult.appendChild(pTag);
+        haveFace = false;
+    },10000);
+</script>
+</body>
+</html>
