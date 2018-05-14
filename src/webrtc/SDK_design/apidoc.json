@@ -1,0 +1,13 @@
+{
+  "name": "XRTC APIs",
+  "version": "0.1.1",
+  "description": "XRTC是极致未来科技基于WEBRTC封装的一套网页版音视频通讯的SDK",
+  "title": "XRTC APIs",
+  "url" : "https://www.xtell.cn/meeting/src/web/doc/index.html",
+  "sampleUrl" : "https://www.xtell.cn/meeting/src/web/doc/sample.html",
+  "order": [
+    "init",
+    "call",
+    "answer"
+  ]
+}

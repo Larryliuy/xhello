@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--<meta name="viewport" content="width=640,user-scalable=0,target-densitydpi=device-dpi">-->
+    <meta charset="utf-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        #user1-box{
+            position: absolute;
+            width: 600px;
+            top: 0px;
+            left: 0px;
+            height: 100%;
+        }
+        #user2-box{
+            position: absolute;
+            width: 600px;
+            top: 0px;
+            right: 0px;
+            height: 100%;
+        }
+        #user2-iframe{
+            width: 600px;
+            height: 100%;
+        }
+    </style>
+    <script type="text/javascript" src="sdk_design.js"></script>
+</head>
+
+<body>
+<div style="display: flex;justify-content: space-between">
+    <div id="user1-box" style="width: 400px;height: 300px">
+        <h2>CALL</h2>
+        <video id="my-video" style="width: 400px;height: 300px"></video>
+        <video id="remote-video" style="width: 400px;height: 300px"></video>
+    </div>
+    <div id="user2-box">
+        <h2>ANSWER</h2>
+        <iframe id="user2-iframe" frameborder="0"></iframe>
+    </div>
+</div>
+</body>
+<script>
+    // document.domain = 'xtell.cn';
+    var candidates = [];
+    window.localStorage.setItem('110','');
+    window.localStorage.setItem('candidateAnswer','');
+    var xrtc = window.XRTC;
+    console.log(xrtc);
+    xrtc.init({mode:2,localVideo:document.getElementById('my-video'),remoteVideo:document.getElementById('remote-video')});
+    // xrtc.setMode(2,document.getElementById('my-video'));
+    xrtc.call(111,function (offer) {
+        // console.log(offer);
+        if(offer.type === 'offer'){
+            window.localStorage.setItem('111',JSON.stringify(offer.value));
+        }else{
+            if(offer.value === 'over'){
+                //candidate发送完了
+                console.log(candidates);
+                window.localStorage.setItem('candidateCall',candidates.join('='));
+                document.getElementById('user2-iframe').src = './answer.html';
+            }else{
+                candidates.push(JSON.stringify(offer.value));
+            }
+        }
+    },function (error) {
+        console.log(error);
+    });
+    var interval1 = setInterval(function () {
+        console.log('timer answer');
+        console.log(window.localStorage.getItem('110'));
+        if(window.localStorage.getItem('110')){
+            clearInterval(interval1);
+            xrtc.onAnswer(111,JSON.parse(window.localStorage.getItem('110')));
+        }
+    },2000);
+    var interval2 = setInterval(function () {
+        console.log('timer candidateAnswer');
+        var candidatesAnswer = window.localStorage.getItem('candidateAnswer');
+        // console.log(candidatesAnswer);
+        if(candidatesAnswer){
+            clearInterval(interval2);
+            candidatesAnswer = candidatesAnswer.split('=');
+            candidatesAnswer.map(function (item) {
+                console.log(item);
+                xrtc.onCandidates(111,JSON.parse(item));
+            })
+        }
+    },2000);
+    // console.log(xrtc.sessionList)
+</script>
+</html>

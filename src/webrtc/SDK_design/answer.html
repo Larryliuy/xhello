@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--<meta name="viewport" content="width=640,user-scalable=0,target-densitydpi=device-dpi">-->
+    <meta charset="utf-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+    <script type="text/javascript" src="sdk_design.js"></script>
+</head>
+
+<body>
+<div id="my-video-box" style="width: 400px;height: 300px">
+    <video id="my-video" style="width: 400px;height: 300px"></video>
+    <video id="remote-video" style="width: 400px;height: 300px"></video>
+</div>
+</body>
+<script>
+    // document.domain = 'xtell.cn';
+    // window.localStorage.setItem('111','');
+    var xrtc = window.XRTC,candidates=[];
+    console.log(xrtc);
+    xrtc.init({mode:2,localVideo:document.getElementById('my-video'),remoteVideo:document.getElementById('remote-video')});
+    // xrtc.setMode(2,document.getElementById('my-video'));
+    xrtc.answer(110,JSON.parse(window.localStorage.getItem('111')),function (answer) {
+        // console.log(answer);
+        if(answer.type === 'answer'){
+            window.localStorage.setItem('110',JSON.stringify(answer.value));
+        }else{
+            if(answer.value === 'over'){
+                //candidate发送完了
+                // console.log(candidates);
+                window.localStorage.setItem('candidateAnswer',candidates.join('='));
+            }else{
+                candidates.push(JSON.stringify(answer.value));
+            }
+        }
+    },function (error) {
+        console.log(error);
+    });
+    window.localStorage.setItem('111','');
+    var candidatesCall = window.localStorage.getItem('candidateCall');
+    var interval = setInterval(function () {
+        console.log('timer candidateCall');
+        // console.log(candidatesCall);
+        if(candidatesCall){
+            clearInterval(interval);
+            candidatesCall = candidatesCall.split('=');
+            candidatesCall.map(function (item) {
+                console.log(item);
+                xrtc.onCandidates(110,JSON.parse(item));
+            });
+        }
+    },2000);
+    setTimeout(function () {
+        window.localStorage.setItem('candidateCall','');
+    },3000);
+
+    // console.log(xrtc.sessionList)
+</script>
+</html>
