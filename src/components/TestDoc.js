@@ -38,19 +38,6 @@ const getMeshForConnected = function () {
         console.log('getMesh');
     });
 };
-const getContent = function(){
-    return  (<div style={{width:'150px'}}>
-        <a id={'test-doc'} onClick={testClick}><Button style={{zIndex:1000}}>下载测试数据</Button></a>
-        <br/>
-        <a href={'./testTools/mesh.html'} target={'_blank'} onClick={getMeshForConnected}><Button style={{zIndex:1000}}>获取连接状态</Button></a>
-        <br/>
-        <a href={'./testTools/facetracking/facetRacking.html'} target={'_blank'}><Button style={{zIndex:1000}}>检测摄像头</Button></a>
-        <br/>
-        <a href={'./testTools/audioTest.html'} target={'_blank'}><Button style={{zIndex:1000}}>检测麦克风</Button></a>
-        <br/>
-        <a><Button style={{zIndex:1000}} onClick={()=>serverDataClick()}>服务器通讯量</Button></a>
-    </div>);
-};
 class TestDoc extends Component{
     constructor(props){
         super(props);
@@ -88,20 +75,40 @@ class TestDoc extends Component{
             <a href={'javascript:void(0)'}><Button style={{zIndex:1000}} onClick={()=>this.testMasterAV()}>检测直播音视频</Button></a>
             <br/>
             <a href={'./testTools/serverData.html'} target={'_blank'}><Button style={{zIndex:1000}} onClick={()=>this.serverDataClick()}>服务器通讯量</Button></a>
+            <br/>
+            <a href={'javascript:void(0)'}><Button style={{zIndex:1000}} onClick={()=>this.serverDelayClick()}>通信延时</Button></a>
         </div>);
     }
     serverDataClick(){
         console.log('serverDataClick');
+        const _this = this;
         // this.setState({serverDataVisible:!this.state.serverDataVisible});
+        this.intervalSendCounts();
         setInterval(function () {
-            let msg = {
-                type:'get_count',
-                user:state.homeState.userInfo,
-                data:''
-            };
-            send(JSON.stringify(msg),function () {
-            })
+            _this.intervalSendCounts();
         },5000)
+    }
+    intervalSendCounts(){
+        let msg = {
+            type:'get_count',
+            user:state.homeState.userInfo,
+            data:''
+        };
+        send(JSON.stringify(msg),function () {
+        })
+    }
+    serverDelayClick(){
+        console.log('serverDelayClick');
+        let sdMsg = {
+            type:'msg',
+            typeString:'serverDelay',
+            roomId:state.homeState.currentRoomInfo.roomId,
+            ToUserOnly:state.homeState.userInfo.id,
+            timestamp:new Date().getTime()
+        };
+        send(JSON.stringify(sdMsg),function () {
+            console.log('已发送serverDelay消息')
+        })
     }
     render(){
         return (<div>

@@ -12,10 +12,12 @@ import {
 } from "../webrtc/webRtcVideo";
 import store,{CONSTANT} from "../reducer/reducer";
 import { blockIpApi } from "./apiInfo";
+import { message } from "antd";
 import {
     updataFirstUserAvatar, getNewAllRoomList, log, successlog, keyerror,
     setRoomInfoByRoomInfo, limitFetch, enterRoom, updateTotalClientsByRoomid, ajustUserOrder, updateUserInfo,
-    by, upDateRoomListByDelRoomId, getNewLimit, clearOnMicrophoneUsers, sendSesult, setRoomInfo, delayGetRoomUsers
+    by, upDateRoomListByDelRoomId, getNewLimit, clearOnMicrophoneUsers, sendSesult, setRoomInfo, delayGetRoomUsers,
+    upDateRoomListByAddRoomInfo
 } from "./comFunctions";
 import {
     addToNormalQuitUsers, addUnexpectedUsers, removeToNormalQuitUsers,
@@ -283,7 +285,7 @@ function onmessage(response){
                     console.log(userInfo.Children);
                     // console.log(dataJson.toUser.yes+','+state.homeState.userInfo.Children.length +','+ state.homeState.userInfo.maxChildren);
                     if(sempher < 0) {
-                        sendSesult(dataJson.fromUser,false);
+                        sendSesult(dataJson.fromUser,false,'sempher = 0');
                         return;
                     }
                     sempher = sempher - 1;
@@ -293,16 +295,21 @@ function onmessage(response){
                     // console.error(roomInfo.mode,hasDownStream(),roomInfo.king,userInfo.id);
                     //视频模式下如果我不是king（直播的人，则拒绝连接）
                     if((roomInfo.mode == 1 || roomInfo.mode == 3) && (!hasDownStream() && roomInfo.king != userInfo.id)){
-                        sempher = sempher + 1;
                         keyerror('%c'+dataJson.fromUser.name+'申请连我失败failed:roomMode,'+roomInfo.mode+',hasDownStream:'+hasDownStream(),'color:red');
-                        // console.log(roomInfo.mode,hasDownStream(),roomInfo.king,userInfo.id);
-                        sendSesult(dataJson.fromUser,false);
+                        let reason = '';
+                        if(!hasDownStream()){
+                            reason = 'no downStream,roomMode='+roomInfo.mode+',isOnline:'+userInfo.isOnline;
+                        }else{
+                            reason = 'roomMode:'+roomInfo.mode+',roomKing:'+roomInfo.king;
+                        }
+                        sendSesult(dataJson.fromUser,false,reason);
+                        sempher = sempher + 1;
                         return;
                     }
                     if(userInfo.Children.length < userInfo.maxChildren){
                         if(amISendPreOffer(dataJson.fromUser.id) || amISendPreOfferVideo(dataJson.fromUser.id) || userInfo.parentNode == dataJson.fromUser.id){
                             console.log(userInfo.parentNode,dataJson.fromUser.id);
-                            sendSesult(dataJson.fromUser,false);
+                            sendSesult(dataJson.fromUser,false,'amISendPreOfferAudio:'+amISendPreOffer(dataJson.fromUser.id)+',amISendPreOfferVideo:'+amISendPreOfferVideo(dataJson.fromUser.id)+',isMyParentNode:'+(userInfo.parentNode == dataJson.fromUser.id));
                         }else{
                             if(getPrepareConnectionState()){
                                 //先占位
@@ -317,13 +324,13 @@ function onmessage(response){
                                     // userInfoTmp.seq = dataJson.toUser.seq;//将我的seq设置给本地state
                                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                                 }
-                                sendSesult(dataJson.fromUser,true);
+                                sendSesult(dataJson.fromUser,true,'true');
                             }else{
-                                sendSesult(dataJson.fromUser,false);
+                                sendSesult(dataJson.fromUser,false,'getPrepareConnectionState:'+getPrepareConnectionState());
                             }
                         }
                     }else{
-                        sendSesult(dataJson.fromUser,false);
+                        sendSesult(dataJson.fromUser,false,'孩子节点已满!');
                     }
                     sempher = sempher + 1;
                     break;
@@ -939,6 +946,11 @@ function onmessage(response){
                         }
                     }
                     break;
+                case 'serverDelay':
+                    console.log(new Date().getTime(),dataJson.timestamp,new Date().getTime()-dataJson.timestamp);
+                    message.success('您与服务器的通讯延时为：'+(new Date().getTime() - dataJson.timestamp)+'ms',10);
+                    successlog('您与服务器的通讯延时为：'+(new Date().getTime() - dataJson.timestamp)+'ms',10);
+                    break;
                 default:
                     if(dataJson.user && dataJson.data !== '消息成功发出'){
                         messagedata.push({
@@ -1280,7 +1292,7 @@ function onmessage(response){
             });
             dataTmp.map(function (item) {
                 dataJson.data.map(function (itm) {
-                    if (item.roomId === itm.parentId) {
+                    if (item.roomId == itm.parentId) {
                         item.childNode.push(itm);
                     }
                 });
@@ -1296,22 +1308,38 @@ function onmessage(response){
                 //将两个roomList作对比，不一样的增加进现有的就可以
                 getNewAllRoomList(dataTmp);
             }
-            // store.dispatch({type:CONSTANT.CURRENTROOMINFO,
-            //     val:dataTmp[0].childNode[0]});
-            // store.dispatch({type:CONSTANT.LASTROOMINFO,
-            //     val:dataTmp[0].childNode[0]});
-            //getUserListforAllRoomList(dataTmp);
-            // console.log(dataTmp);
-            //if(roomInfo.)
             break;
         case 'set_room_info':
             console.log(dataJson);
             break;
         case 'create_room':
             console.log(dataJson);
+            let tRoomInfo = dataJson;
+            if(tRoomInfo.data === '有房间被建立' && tRoomInfo.userId !== userInfo.id){
+                if(tRoomInfo.data){
+                    delete tRoomInfo.data;
+                }
+                if(tRoomInfo.type){
+                    delete tRoomInfo.type;
+                }
+                if(tRoomInfo.result){
+                    delete tRoomInfo.result;
+                }
+                if(!tRoomInfo.childNode){
+                    tRoomInfo.childNode = [];
+                    tRoomInfo.totalClients = 0;
+                    tRoomInfo.mode = 0;
+                    tRoomInfo.limited = 0;
+                    tRoomInfo.avatarFileId = 0;
+                    tRoomInfo.advertisementFileId = 0;
+                    tRoomInfo.creatorId = tRoomInfo.userId;
+                    tRoomInfo.creatorName = tRoomInfo.userName;
+                }
+                upDateRoomListByAddRoomInfo(tRoomInfo);
+            }
             break;
         case 'delete_room':
-            console.log(dataJson);
+            // console.log(dataJson);
             upDateRoomListByDelRoomId(dataJson.roomId);
             // console.log(dataJson.data);
             //更新allRoomList

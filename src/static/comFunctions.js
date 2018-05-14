@@ -419,6 +419,28 @@ function upDateRoomListByDelRoomId(roomId) {
 }
 
 /**
+ * 根据新增房间信息更新roomList
+ * */
+
+function upDateRoomListByAddRoomInfo(roomInfo) {
+    let roomList = state.homeState.allRoomList;
+    if(roomList.length !== 0){
+        if(roomInfo.parentId === '0'){
+            roomList.push(roomInfo);
+        }else{
+            roomList.map(function (room) {
+                if(room.roomId == roomInfo.parentId){
+                    room.childNode.push(roomInfo);
+                }
+            })
+        }
+    }
+    console.log(roomList);
+    store.dispatch({type:CONSTANT.ALLROOMLIST,val:roomList});
+
+}
+
+/**
  * 定时更新allRoomList
  * */
 let timer = null;
@@ -857,18 +879,20 @@ function clearOnMicrophoneUsers() {//清空麦序列表函数
 /**
  * 发送请求失败的消息给toUser
  * */
-function sendSesult(userInfo,result) {
+function sendSesult(userInfo,result,reason) {
     let preAnswerMsg = {
         type:'msg',
         typeString:'preAnswer',
         ToUserOnly:userInfo.id,
         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        // roomName: state.homeState.currentRoomInfo.roomName,
         fromUser:state.homeState.userInfo,
         status:result?'ok':'failed'
     };
     send(JSON.stringify(preAnswerMsg),function () {
         log('发送连接申请的回复结果给 '+userInfo.name+',结果：'+result,'onmessage-preOffer','websocket.js');
+        if(!result){
+            keyerror(reason);
+        }
     });
 }
 
@@ -1099,6 +1123,8 @@ function keyerror(msg) {
     keyInfosCopy.push(msg);
     // sendToServer(info);
 }
+
+
 export {
     randomWord, GetQueryString, ajustUserOrder, ajustRoomOrder, callback,
     getUserIconSrc, updataFirstUserAvatar, createRoom, updateRoomInfoById,
@@ -1106,6 +1132,6 @@ export {
     getRoomUsersCount, getRoomUsers, delayGetRoomUsers, getLocationBtUserId, sendCheerAudio, getSingleRoomUserCounts,
     getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, setRoomInfo, leaveRoom,
     CONFIG_CONSTANTS,log, error, successlog, keyerror, setToLocalStorage, by,
-    upDateRoomListByDelRoomId, getNewLimit, limitFetch, enterRoom, clearOnMicrophoneUsers,
+    upDateRoomListByDelRoomId, upDateRoomListByAddRoomInfo, getNewLimit, limitFetch, enterRoom, clearOnMicrophoneUsers,
     sendSesult, updateTotalClientsByRoomid, remaininglogsSendToserver
 }
