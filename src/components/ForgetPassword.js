@@ -3,16 +3,6 @@ import {BrowserRouter, Route, Link} from 'react-router-dom';
 import { Form, Icon, Input, Button, Checkbox,message } from 'antd';
 const FormItem = Form.Item;
 import cookieUtil from '../libs/cookieUtil';
-// console.log('login:'+document.cookie);
-/*import Promise from 'promise-polyfill';
-if(!window.Promise){
-    window.Promise = Promise
-}*/
-
-const iconStyle = {
-    width: '20px',
-    height: '20px'
-}
 
 const Login = (props) => {
     let userName = '';
@@ -37,7 +27,7 @@ const Login = (props) => {
         // if('fetch' in window){
         fetch('/user/login',{
             method:'POST',
-            credentials: "include",
+            credentials: 'include',
             headers:{
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -68,17 +58,17 @@ const Login = (props) => {
 
     };
 
-    return (<Form onSubmit={handleSubmit} className="login-form">
+    return (<Form onSubmit={handleSubmit} className='login-form'>
             <FormItem>
                 <Input id='user' onChange = {(e) => onChangeUserName(e)}
-                       prefix={<Icon type="user" style={{ fontSize: 13 ,color:'#97b5fb' }} />}
-                       defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('userName'):''}  placeholder="Username" />
+                       prefix={<Icon type='user' style={{ fontSize: 13 ,color:'#97b5fb' }} />}
+                       defaultValue={cookieUtil.get('loginChecked')=='true'?cookieUtil.get('userName'):''}  placeholder='Username' />
             </FormItem>
             <FormItem>
-                <Button type="primary" htmlType="submit" className="login-form-button" onClick={()=>onClickHandle()}>
+                <Button type='primary' htmlType='submit' className='login-form-button' onClick={()=>onClickHandle()}>
                     重置密码
                 </Button>
-                Or <Link to="/login" >现在登录<Icon type="right"/></Link>
+                Or <Link to='/login' >现在登录<Icon type='right'/></Link>
             </FormItem>
         </Form>
     );

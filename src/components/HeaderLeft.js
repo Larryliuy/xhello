@@ -3,12 +3,12 @@ import { Icon, Popover, Input, Button, Modal } from 'antd';
 import RoomManager from './RoomManager';
 import { redirect_uri, registerApi, homePage } from '../static/apiInfo';
 import { randomWord } from '../static/comFunctions';
-import store from "../reducer/reducer";
-import { message } from "antd/lib/index";
+import store from '../reducer/reducer';
+import { message } from 'antd/lib/index';
 
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 const headLeftImg={
     verticalAlign:'sub',
@@ -16,14 +16,17 @@ const headLeftImg={
     height:'18px'
 };
 function collectImgClick() {
-    console.log("点击收藏")
+    console.log('点击收藏');
 }
-class HeaderLeft extends Component{
+class HeaderLeft extends React.Component{
+    constructor(props){
+        super(props);
+        this.state = { visible: false, planeVisible: false, userName:'',password:'' };
+    }
     componentDidMount(){
 
     }
-    state = { visible: false, planeVisible: false, userName:'',password:'' };
-    showModal = () => {
+    showModal(){
         if(state.homeState.userInfo.level > 3){//二级管理员以下没有权限,直接返回
             message('您没有权限');
             return;
@@ -31,32 +34,32 @@ class HeaderLeft extends Component{
         this.setState({
             visible: true,
         });
-    };
+    }
     userNameChange(e){
         this.setState({
             userName:e.target.value
-        })
+        });
     }
     passwordChange(e){
         this.setState({
             password:e.target.value
-        })
+        });
     }
-    handleCancel = () => {
+    handleCancel(){
         this.setState({
             visible: false,
         });
-    };
-    handleOk = () => {
+    }
+    handleOk(){
         this.setState({
             visible: false,
         });
-    };
+    }
     planeClickHandle(){
         this.setState({
             planeVisible: true,
         });
-    };
+    }
     planeCancelHandle(){
         this.setState({
             planeVisible: false,
@@ -75,16 +78,16 @@ class HeaderLeft extends Component{
             let args = 'LoginName='+state.homeState.userInfo.name + '-' + this.state.userName+'&Password='+this.state.password+'&sex=1'+'&inviteCode='+inviteCode;
             fetch(registerApi,{
                 method:'POST',
-                // credentials: "include",
+                // credentials: 'include',
                 headers:{
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body:args//JSON.stringify(args)
-            }).then((response) => {console.log(response);return response.json()})
+            }).then((response) => {console.log(response);return response.json();})
                 .then(data=>{
                     console.log(data);
                     if(data.status === 'ok'){
-                        Modal.info({title:'链接地址',content:(<a><p style={{width:'100%',wordBreak:'break-word'}}>{homePage+'?inviteCode='+inviteCode+'&userName='+state.homeState.userInfo.name + '-' +this.state.userName}</p></a>)})
+                        Modal.info({title:'链接地址',content:(<a><p style={{width:'100%',wordBreak:'break-word'}}>{homePage+'?inviteCode='+inviteCode+'&userName='+state.homeState.userInfo.name + '-' +this.state.userName}</p></a>)});
                     }else {
                         message.error('生成失败,可能名字重复了');
                     }
@@ -110,9 +113,9 @@ class HeaderLeft extends Component{
         </div>);
         return (<div style={{paddingLeft:'10px',display:'inline-block',width:'100%',height:'100%',fontSize:'0px'}}>
                     <div style={{height:'50%',width:'100%',fontSize:'14px',textAlign:'left',lineHeight:'20px',cursor:'pointer'}}>
-                        <Popover  placement="bottomLeft"
-                                  content={ <div onClick={this.showModal} ><span className='menu-logo'><img src='./images/icons/menu.png' /> 主菜单</span></div>}   trigger="click">
-                            <Icon style={{fontSize:'28px',color:'#fff'}} type="home" />
+                        <Popover  placement='bottomLeft'
+                                  content={ <div onClick={this.showModal} ><span className='menu-logo'><img src='./images/icons/menu.png' /> 主菜单</span></div>}   trigger='click'>
+                            <Icon style={{fontSize:'28px',color:'#fff'}} type='home' />
                         </Popover>
                         <label style={{paddingLeft:'10px'}}>{state.homeState.currentRoomInfo.roomName}</label>
                         {this.state.visible &&
@@ -127,21 +130,21 @@ class HeaderLeft extends Component{
                         <label style={{paddingRight:'23px'}}>{this.getUserCounts()}</label>
                         <img onClick={collectImgClick}
                              style={headLeftImg}
-                             src="./images/icons/star.png"
-                             alt=""/>
+                             src='./images/icons/star.png'
+                             alt=''/>
                         <label style={{marginRight:'8px'}}>收藏</label>
-                        <Popover placement="rightBottom"
+                        <Popover placement='rightBottom'
                                  title={'生成连接'}
                                  content={content}
                                  visible={this.state.planeVisible}
-                                 trigger="click">
-                            <label onClick={()=>this.planeClickHandle()}><img style={headLeftImg} src="./images/icons/plane.png" alt=""/>飞机票</label>
+                                 trigger='click'>
+                            <label onClick={()=>this.planeClickHandle()}><img style={headLeftImg} src='./images/icons/plane.png' alt=''/>飞机票</label>
                         </Popover>
 
                     </div>
-                </div>)
+                </div>);
     }
 }
 
-export default HeaderLeft
+export default HeaderLeft;
 

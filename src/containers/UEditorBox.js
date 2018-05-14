@@ -1,9 +1,10 @@
-import React,{Component} from 'react'
+import React,{Component} from 'react';
 import store,{ CONSTANT } from '../reducer/reducer';
 import UEditor from '../components/UEditor';
 import { Button, message } from 'antd';
-import '../static/login.scss'
+import '../static/login.scss';
 import { getSendData, send } from '../static/webSocket';
+import {removeHTMLTag} from '../static/comFunctions';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -24,7 +25,7 @@ class UEditorBox extends React.Component {
         this.state={
             value:'',
             textareaDom:''
-        }
+        };
     }
     componentDidMount(){
         uId = state.homeState.userInfo.id;
@@ -47,18 +48,6 @@ class UEditorBox extends React.Component {
             case '1':
                 let value = this.state.value;
                 // console.log(value);
-                function removeHTMLTag(str) {
-                    str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
-                    str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
-                    //str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
-                    str=str.replace(/ /ig,'');//去掉
-                    if(str.length>0){
-                        str=true
-                    }else {
-                        str=false
-                    }
-                    return str;
-                }
                 if(this.state.value.indexOf('<img') !== -1 && removeHTMLTag(value)){
                     if(type === 1){
                         message.warning('您已被禁止发送文字');
@@ -67,7 +56,7 @@ class UEditorBox extends React.Component {
                     }
                     return false;
                 }
-                //检测<p>()<img , ">()<img , ">()</p> 这3组字符串括号内不能存在文本(数字，字母，汉字)即可
+                //检测<p>()<img , '>()<img , '>()</p> 这3组字符串括号内不能存在文本(数字，字母，汉字)即可
                 if(this.state.value.indexOf('<p><img') !== -1 && this.state.value.indexOf('><\/p>') !== -1){
                     return true;
                 }
@@ -93,7 +82,7 @@ class UEditorBox extends React.Component {
                 }else{
                     return true;
                 }
-                break;
+                // break;
             case '123':
             case '12':
                 if(this.state.value.indexOf('<p>') !== -1 || this.state.value.indexOf('<img') !== -1){
@@ -167,11 +156,12 @@ class UEditorBox extends React.Component {
             <UEditor keydownHandle={this.keydownHandle.bind(this)}
                      setDom={this.setDom.bind(this)}
                      setText={this.setText.bind(this)}></UEditor>
-            <Button onClick={() => {this.sendClickhandle()} }
+            <Button onClick={() => {this.sendClickhandle();} }
                     className = 'send-btn'
                     type='primary'
             >发送</Button>
         </div>
-    )}
+    );
+    }
 }
 export default UEditorBox;

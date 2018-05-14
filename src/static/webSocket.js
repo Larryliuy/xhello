@@ -3,30 +3,30 @@ import {
     onCandidate, onLeave, setGetRoomUserListCallback, getRoomUserListCallback, startOnline, applyToBeFirst,
     getRoomInfo, getRoomUserList, openMicrophone, closeMicrophone, initVariableAudio, startMyCam,
     initServerUserInfo, amISendPreOffer, delSendListById
-} from "../webrtc/webRtcAudio";
+} from '../webrtc/webRtcAudio';
 import {
     getRoomUserListVideo, startMyCamVideo, startOnlineVideo, offerPeerConnectionVideo, answerPeerConnectionVideo,
     setCallbackVideo, callbackVideo, getPrepareConnectionStateVideo, onAnswerVideo, onCandidateVideo, onLeaveVideo,
     initVariableVideo, getRoomInfoVideo, hasDownStream, amISendPreOfferVideo, delSendListByIdVideo,
     startMyCamVideoWithCallback
-} from "../webrtc/webRtcVideo";
-import store,{CONSTANT} from "../reducer/reducer";
-import { blockIpApi } from "./apiInfo";
-import { message } from "antd";
+} from '../webrtc/webRtcVideo';
+import store,{CONSTANT} from '../reducer/reducer';
+import { blockIpApi } from './apiInfo';
+import { message } from 'antd';
 import {
     updataFirstUserAvatar, getNewAllRoomList, log, successlog, keyerror,
     setRoomInfoByRoomInfo, limitFetch, enterRoom, updateTotalClientsByRoomid, ajustUserOrder, updateUserInfo,
     by, upDateRoomListByDelRoomId, getNewLimit, clearOnMicrophoneUsers, sendSesult, setRoomInfo, delayGetRoomUsers,
     upDateRoomListByAddRoomInfo
-} from "./comFunctions";
+} from './comFunctions';
 import {
     addToNormalQuitUsers, addUnexpectedUsers, removeToNormalQuitUsers,
     removeUnexpectedUsers
-} from "../webrtc/webRtcBase";
+} from '../webrtc/webRtcBase';
 
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 
 
@@ -41,7 +41,7 @@ let WS = null,lockReconnect = false ,wsUrl = 'wss://www.xtell.cn:443/wss' ;
 if (window.WebSocket) {
     createWebSocket(wsUrl);
 } else {
-    alert("您的电脑不支持webSocket,请更换版本更高的浏览器");
+    alert('您的电脑不支持webSocket,请更换版本更高的浏览器');
 }
 
 function createWebSocket(url) {
@@ -107,8 +107,8 @@ let heartCheck = {
                 // console.log('heartCheck.start,server close ws');
                 keyerror('server close ws');
                 WS.close();//如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
-            }, self.timeout)
-        }, this.timeout)
+            }, self.timeout);
+        }, this.timeout);
     },
 };
 
@@ -144,13 +144,13 @@ export function getSendData(type,roomId,roomTitle,user,data){
         roomName: roomTitle,
         user:user,
         data:data
-    }
+    };
 }
 
 //消息时间以socket事件时间为准
 export function getDateString(){
     let year,month,day,hour,minute,second;
-    let weekString ='';
+    // let weekString ='';
     let date =new Date();
     year = date.getFullYear();
     month = date.getMonth()+1;
@@ -158,30 +158,30 @@ export function getDateString(){
     hour = date.getHours();
     minute = date.getMinutes();
     second = date.getSeconds();
-    let week = date.getDay();
-    switch(week){
-        case 0:
-            weekString = '星期天';
-            break;
-        case 1:
-            weekString = '星期一';
-            break;
-        case 2:
-            weekString = '星期二';
-            break;
-        case 3:
-            weekString = '星期三';
-            break;
-        case 4:
-            weekString = '星期四';
-            break;
-        case 5:
-            weekString = '星期五';
-            break;
-        case 6:
-            weekString = '星期六';
-            break;
-    }
+    // let week = date.getDay();
+    // switch(week){
+    //     case 0:
+    //         weekString = '星期天';
+    //         break;
+    //     case 1:
+    //         weekString = '星期一';
+    //         break;
+    //     case 2:
+    //         weekString = '星期二';
+    //         break;
+    //     case 3:
+    //         weekString = '星期三';
+    //         break;
+    //     case 4:
+    //         weekString = '星期四';
+    //         break;
+    //     case 5:
+    //         weekString = '星期五';
+    //         break;
+    //     case 6:
+    //         weekString = '星期六';
+    //         break;
+    // }
     return year+'-'+month+'-'+day+' '+ hour +':'+ minute + ':' + second;
 }
 
@@ -612,7 +612,7 @@ function onmessage(response){
                                     //打开目标房间的父房间
                                     roomStatueTmp['r'+rId] = true;
                                 }
-                            })
+                            });
                         }
                     });
                     //打开目标房间
@@ -714,9 +714,9 @@ function onmessage(response){
                                         if(itm.id === dataJson.objUserId){
                                             itm.level = dataJson.level;
                                         }
-                                    })
+                                    });
                                 }
-                            })
+                            });
                         });
                         // console.log(allRoomList);]
                         store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
@@ -727,7 +727,7 @@ function onmessage(response){
                     //收到vodSrc后自动播放
                     //如果是youku的视频
                     if(dataJson.webSite === 'youku'){
-                        store.dispatch({type:CONSTANT.ISYOUKU,val:true})
+                        store.dispatch({type:CONSTANT.ISYOUKU,val:true});
                     }
                     if(!isPlaying){
                         let vodVideo = document.getElementById('vodVideo') || document.getElementById('play-audio');
@@ -811,7 +811,7 @@ function onmessage(response){
                             setTimeout(function () {
                                 // console.log('timer 500:'+new Date().getTime());
                                 // alert('viewer');
-                                getRoomInfoVideo(currentRoomInfo.roomId)
+                                getRoomInfoVideo(currentRoomInfo.roomId);
                             },Math.ceil(Math.random() * 2000)+3000);
                         }
                     }
@@ -824,7 +824,7 @@ function onmessage(response){
                 case 'blockIp':
                     console.log('收到blockIp消息');
                     //直接请求封Ip接口即可
-                    fetch(blockIpApi).then(res=>{console.log('您已被禁止')}).catch(e=>console.error(e));
+                    fetch(blockIpApi).then(res=>{console.log('您已被禁止.'+res);}).catch(e=>console.error(e));
                     break;
                 case 'updateContents':
                     // let roomInfo = state.homeState.currentRoomInfo;
@@ -853,7 +853,7 @@ function onmessage(response){
                         }
                         return;
                     }
-                    break;
+                    // break;
                 case 'childReconnect':
                     // let userInfo = state.homeState.userInfo;
                     let toChildrenMsg = {
@@ -874,7 +874,7 @@ function onmessage(response){
                             if(uId === dataJson.newKing)return;
                             toChildrenMsg.ToUserOnly = uId;
                             send(JSON.stringify(toChildrenMsg),function () {});
-                        })
+                        });
                     }
                     getRoomInfoVideo(state.homeState.currentRoomInfo.roomId);
                     break;
@@ -1033,7 +1033,7 @@ function onmessage(response){
                         if(item.roomId == dataJson.roomId.toString()){
                             item.childNode = item.childNode.filter(function(item){
                                 return item.id != dataJson.user.id;
-                            })
+                            });
                         }
                     });
                 }
@@ -1203,7 +1203,7 @@ function onmessage(response){
             }else{
                 initVariableAudio();
             }
-            // console.error("king:"+roomInfo.king+','+new Date().getTime());
+            // console.error('king:'+roomInfo.king+','+new Date().getTime());
             if(roomInfoTmp.king && roomInfoTmp.king != state.homeState.userInfo.id){
                 store.dispatch({type:CONSTANT.NUMBERONE,val:roomInfoTmp.king});
                 if(state.homeState.currentRoomInfo.mode == 0){
@@ -1396,7 +1396,7 @@ function updateAllRoomListUserInfoByRoomId(userInfo,roomId) {
                                 //如果用户存在列表则不让插入
                                 flag = false;
                             }
-                        })
+                        });
                     }
                     if(flag){
                         item.childNode.push({
@@ -1412,7 +1412,7 @@ function updateAllRoomListUserInfoByRoomId(userInfo,roomId) {
                         item.childNode = item.childNode.filter(function (uItem) {
                             //删除其他房间中的该用户
                             return uItem.id != userInfo.id;
-                        })
+                        });
                     }
                 }
             });

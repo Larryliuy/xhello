@@ -9,21 +9,21 @@ const cookieUtil = {
             if(cookieEnd == -1){
                 cookieEnd = document.cookie.length;
             }
-            cookieValue = decodeURIComponent(document.cookie.substring(cookieStart+cookieName.length,cookieEnd))
+            cookieValue = decodeURIComponent(document.cookie.substring(cookieStart+cookieName.length,cookieEnd));
         }
         return cookieValue;
     },
     set:(name,value,expires,path,domain,secure)=> {
         let cookieText = encodeURIComponent(name) + '=' + encodeURIComponent(value);
         if (expires instanceof Date) {
-            cookieText += ";expires=" + expires.toGMTString();
+            cookieText += ';expires=' + expires.toGMTString();
         }
         if (path) {
-            cookieText += ";path=" + path;
+            cookieText += ';path=' + path;
         }
 
         if (secure) {
-            cookieText += ";secure=" + secure;
+            cookieText += ';secure=' + secure;
         }
         document.cookie = cookieText;
     },

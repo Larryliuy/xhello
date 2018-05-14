@@ -2,7 +2,7 @@ import React,{ Component } from 'react';
 import { Input, Icon, message } from 'antd';
 import SearchResult from './SearchResult';
 
-import store ,{ CONSTANT } from "../reducer/reducer";
+import store ,{ CONSTANT } from '../reducer/reducer';
 import { getLocationBtUserId } from '../static/comFunctions';
 
 let state = store.getState();
@@ -31,12 +31,12 @@ class UserSearch extends React.Component{
                             if(itm.name && itm.name.indexOf(e.target.value) !== -1){
                                 resultData.push(itm);
                             }
-                            return itm.name && itm.name.indexOf(e.target.value) !== -1
+                            return itm.name && itm.name.indexOf(e.target.value) !== -1;
                         });
                     }else{
                         return ;
                     }
-                })
+                });
             }
         });
         store.dispatch({type:CONSTANT.SEARCHKEYWORD,val:e.target.value});
@@ -54,21 +54,21 @@ class UserSearch extends React.Component{
             }
             selfDom.scrollIntoView();
             selfDom.style.color = 'green';
-        },200)
+        },200);
     }
     render(){
         return (
             <div>
-                <input type="text" style={{position:'absolute',width:'1px',height:'1px',top:'-1px',left:'-1px'}} placeholder={"请输入用户名"}/>
-                <input type="password" style={{position:'absolute',width:'1px',height:'1px',top:'-1px',left:'-1px'}} placeholder={"以上两个input只是解决Google浏览器自动填充问题"}/>
+                <input type='text' style={{position:'absolute',width:'1px',height:'1px',top:'-1px',left:'-1px'}} placeholder={'请输入用户名'}/>
+                <input type='password' style={{position:'absolute',width:'1px',height:'1px',top:'-1px',left:'-1px'}} placeholder={'以上两个input只是解决Google浏览器自动填充问题'}/>
                 <Input style={{marginLeft:'-10px',width:'180px'}}
-                       placeholder="请输入用户名"
-                       prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                       placeholder='请输入用户名'
+                       prefix={<Icon type='search' style={{ color: 'rgba(0,0,0,.25)' }} />}
                        onChange={value => this.changeSearchHandle(value)}
             />
-                <span onClick={this.clickLocationHandle} style={{overflowX: 'hidden'}}><Icon className='icon-location' type="environment-o" /></span>
+                <span onClick={this.clickLocationHandle} style={{overflowX: 'hidden'}}><Icon className='icon-location' type='environment-o' /></span>
                 <SearchResult data={state.homeState.resultData}></SearchResult>
-            </div>)
+            </div>);
     }
 }
 

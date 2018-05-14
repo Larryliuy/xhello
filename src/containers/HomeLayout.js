@@ -14,16 +14,14 @@ import VideoOnDemand from '../components/VideoOnDemand';
 import HeaderTopBox from './HeaderTopBox';
 import FooterBottomBox from './FooterBottomBox';
 import RightClickPanelBox from './RightClickPanelBox';
-import '../static/login.scss'
+import '../static/login.scss';
 
-import { send } from "../static/webSocket";
-import {getPrepareConnectionState, startMyCam} from '../webrtc/webRtcAudio';
-import {startMyCamVideo} from "../webrtc/webRtcVideo";
-import {getUserInfo} from "../static/comFunctions";
+import { send } from '../static/webSocket';
+import { startMyCam } from '../webrtc/webRtcAudio';
 
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 
 const layoutStyle = {
@@ -53,7 +51,7 @@ class HomeLayout extends React.Component {
                 check:1
             };
             send(JSON.stringify(Msg),function () {
-            })
+            });
         },10000);
 
         //获取自己麦克音频流
@@ -141,7 +139,7 @@ class HomeLayout extends React.Component {
                             {state.homeState.currentRoomInfo.mode == 3 && <MessageListBox></MessageListBox>}
                         </div>
                         {/*广告区域*/}
-                        <div className="ad-area" >
+                        <div className='ad-area' >
                             {state.homeState.currentRoomInfo.mode == 0 && <AdvertisementBox></AdvertisementBox>}
                             {state.homeState.currentRoomInfo.mode == 1 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}
                             {state.homeState.currentRoomInfo.mode == 2 && <UEditorBox setData={this.setSendData.bind(this)}></UEditorBox>}

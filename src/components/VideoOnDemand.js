@@ -2,10 +2,10 @@ import React,{ Component } from 'react';
 import { Popover, Input, Button, message } from 'antd';
 import { send } from '../static/webSocket';
 import { closeVideoMode } from '../webrtc/webRtcVideo';
-import store,{CONSTANT} from "../reducer/reducer";
+import store,{CONSTANT} from '../reducer/reducer';
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 class VideoOnDemand extends React.Component{
     constructor(){
@@ -51,7 +51,7 @@ class VideoOnDemand extends React.Component{
             if(videoId.indexOf('/') !== -1){
                 videoId = videoId.substring(videoId.indexOf('/')+1);
             }
-            videoSrc = "https://v.qq.com/iframe/player.html?vid="+videoId+"&tiny=0";
+            videoSrc = 'https://v.qq.com/iframe/player.html?vid='+videoId+'&tiny=0';
         }
         console.log(videoSrc);
         sendSrcMsg.vodSrc = videoSrc;
@@ -77,7 +77,7 @@ class VideoOnDemand extends React.Component{
                 return;
             }
             _this.setState({popVisible:false});
-        })
+        });
     }
     userNameChange(e){
         console.log(e.target.value);
@@ -98,11 +98,11 @@ class VideoOnDemand extends React.Component{
         return (
             <div style={{height:'100%',textAlign:'center !important'}}>
                 <div style={{textAlign:'center',display:(state.homeState.currentRoomInfo.mode !== 0 && state.homeState.currentRoomInfo.player == state.homeState.userInfo.id)?'block':'none'}}>
-                    <Popover placement="bottom"
+                    <Popover placement='bottom'
                              title={'添加网络视频连接'}
                              content={this.getContent()}
                              visible={this.state.popVisible}
-                             trigger="click">
+                             trigger='click'>
                         <Button onClick={()=>this.addVideoSrc()}>添加视频网址</Button>
                     </Popover>
                     <Button onClick={closeVideoMode}>关闭点播</Button>
@@ -122,7 +122,7 @@ class VideoOnDemand extends React.Component{
                     不支持video
                 </video>*/}
             </div>
-        )
+        );
     }
 }
 

@@ -1,8 +1,8 @@
 import React,{ Component } from 'react';
 import { Modal, Input, Button, Table, message } from 'antd';
 import { ajustRoomOrder } from '../static/comFunctions';
-import store, {CONSTANT} from "../reducer/reducer";
-import {send} from "../static/webSocket";
+import store, {CONSTANT} from '../reducer/reducer';
+import {send} from '../static/webSocket';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -39,7 +39,7 @@ class SortRoom extends React.Component{
             item.key = item.roomId;
         });
         console.log(roomDatas);
-        this.setState({columns:columns,roomData:roomDatas})
+        this.setState({columns:columns,roomData:roomDatas});
 
     }
     handleOk(){
@@ -50,7 +50,7 @@ class SortRoom extends React.Component{
         // let args = 'action=update&table=room&cond=id='+roomId+'&color='+this.state.color+'&roomName='+this.state.title+'&password='+this.state.password;
         // fetch(generalApi,{
         //     method:'POST',
-        //     // credentials: "include",
+        //     // credentials: 'include',
         //     headers:{
         //         'Content-Type': 'application/x-www-form-urlencoded'
         //     },
@@ -148,7 +148,7 @@ class SortRoom extends React.Component{
 
         return (<div>
             <Modal className={'sort-room'}
-                title="调整子房间顺序"
+                title='调整子房间顺序'
                 okText={'确定'}
                 cancelText={'取消'}
                 visible={this.state.visible}
@@ -166,7 +166,7 @@ class SortRoom extends React.Component{
                 <br/>
                 <div><span><Button onClick={()=>this.upRoomOrder()}>上移</Button></span><span><Button  onClick={()=>this.downRoomOrder()}>下移</Button></span></div>
             </Modal>
-        </div>)
+        </div>);
     }
 }
 

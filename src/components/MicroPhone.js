@@ -1,7 +1,7 @@
-import React,{ Component }  from 'react'
+import React,{ Component }  from 'react';
 import { Select, List, Icon, Modal, message } from 'antd';
-import store, {CONSTANT} from "../reducer/reducer";
-import { send } from "../static/webSocket";
+import store, {CONSTANT} from '../reducer/reducer';
+import { send } from '../static/webSocket';
 import { updataFirstUserAvatar } from  '../static/comFunctions';
 const Option = Select.Option;
 
@@ -148,7 +148,7 @@ class MicroPhone extends React.Component {
             user:state.homeState.userInfo
         };
         // console.log(micrpMsg);
-        send(JSON.stringify(micrpMsg),function(){console.log('发送 '+text+' 消息')});
+        send(JSON.stringify(micrpMsg),function(){console.log('发送 '+text+' 消息');});
     }
     getMicModeText() {
         // console.log('进入getMicModeText');
@@ -190,7 +190,7 @@ class MicroPhone extends React.Component {
         };
         send(JSON.stringify(msg),function () {
             console.log('发送调整麦序消息');
-        })
+        });
     }
     downMicrophoneOrder(e){
         if(state.homeState.userInfo.level > 3){
@@ -215,12 +215,12 @@ class MicroPhone extends React.Component {
         };
         send(JSON.stringify(msg),function () {
             console.log('发送调整麦序消息');
-        })
+        });
     }
     render(){
         return (<div className='microphone-a'>
             {/*头像区域*/}
-            <div className="avatar-area" >
+            <div className='avatar-area' >
                 <img src={state.homeState.firstUserAvatar?state.homeState.firstUserAvatar:'./images/avatar.png'} />
                 <p className='user-name'>
                     {state.homeState.roomMicrophoneUser[0]?state.homeState.roomMicrophoneUser[0].name:'暂无人员'}
@@ -232,10 +232,10 @@ class MicroPhone extends React.Component {
                         disabled={(state.homeState.userInfo.level < 4) ? false : true}
                         defaultValue={'自由模式'}
                         value={this.getMicModeText()}
-                        onChange={e => {this.handleChange(e)}}>
-                    <Option value="自由模式">自由模式</Option>
-                    <Option value="主席模式">主席模式</Option>
-                    <Option value="麦序模式">麦序模式</Option>
+                        onChange={e => {this.handleChange(e);}}>
+                    <Option value='自由模式'>自由模式</Option>
+                    <Option value='主席模式'>主席模式</Option>
+                    <Option value='麦序模式'>麦序模式</Option>
                 </Select>
                 <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>上麦</span> |</span>
                 <span onClick={e=>this.onClickHandle(e)}> <span className={state.homeState.microphoneMode != 3 ? 'disabled':''}>禁麦</span> |</span>
@@ -247,16 +247,16 @@ class MicroPhone extends React.Component {
                     dataSource={state.homeState.roomMicrophoneUser}
                     renderItem={item => (item && <List.Item>
                         <span className={'microphone-user-span'}>
-                            <span><Icon className='list-icon' type="user" />{item.name}</span>
+                            <span><Icon className='list-icon' type='user' />{item.name}</span>
                             <span>
-                                <span onClick={e=>this.upMicrophoneOrder(e)} title={'向上移'} className={'arrow-up-span'}><Icon data-uid={item.id}  type="arrow-up" /></span>
-                                <span onClick={e=>this.downMicrophoneOrder(e)} title={'向下移'} className={'arrow-down-span'}><Icon data-uid={item.id} type="arrow-down" /></span>
+                                <span onClick={e=>this.upMicrophoneOrder(e)} title={'向上移'} className={'arrow-up-span'}><Icon data-uid={item.id}  type='arrow-up' /></span>
+                                <span onClick={e=>this.downMicrophoneOrder(e)} title={'向下移'} className={'arrow-down-span'}><Icon data-uid={item.id} type='arrow-down' /></span>
                             </span>
                         </span>
                     </List.Item>)}
                 />
             </div>
-        </div>)
+        </div>);
     }
 }
 

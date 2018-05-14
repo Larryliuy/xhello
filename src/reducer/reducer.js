@@ -36,7 +36,7 @@ export function collapsed(bool) {
     return {
         type:CONSTANT.VIEWMODEL,
         val:bool
-    }
+    };
 }
 
 /*reducer

@@ -92,12 +92,12 @@ class UEditor extends React.Component {
         // let { value }=this.props;
         let value = this.editor.root.innerHTML;
         let temp = value.replace(/<p><br><\/p>/g,'');
-        this.props.setText(temp)
+        this.props.setText(temp);
     }
     render(){
         return (
-                <div onKeyDown={(e)=>{this.props.keydownHandle(e)}} ref="textarea"> </div>
-        )
+                <div onKeyDown={(e)=>{this.props.keydownHandle(e);}} ref='textarea'> </div>
+        );
     }
 }
 

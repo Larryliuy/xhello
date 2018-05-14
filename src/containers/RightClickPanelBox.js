@@ -61,7 +61,7 @@ class RightClickPanelBox extends React.Component{
             top:state.homeState.location.y}}
         >
             <RightClickPanel listData={this.getPlaneByType(state.homeState.location.obj)}></RightClickPanel>
-        </div>)
+        </div>);
     }
 }
 

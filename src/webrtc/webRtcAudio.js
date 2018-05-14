@@ -2,12 +2,12 @@
  * webRTC与web audio函数库
  */
 
-import { send } from "../static/webSocket";
-import store, {CONSTANT} from "../reducer/reducer";
+import { send } from '../static/webSocket';
+import store, {CONSTANT} from '../reducer/reducer';
 import {CONFIG_CONSTANTS, log, successlog, keyerror, updateUserInfo} from '../static/comFunctions';
 import { iceServers } from './iceServer';
 import { message } from 'antd';
-import {emptyNormalQuitUsers, emptyUnexpectedUsers, getNormalQuitUsers} from "./webRtcBase";
+import {emptyNormalQuitUsers, emptyUnexpectedUsers, getNormalQuitUsers} from './webRtcBase';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -53,9 +53,9 @@ function getVoiceSize (analyser) {
     analyser.getByteFrequencyData(dataArray);
     const data = dataArray.slice(100, 1000);
     const sum = data.reduce((a, b) => a + b);
-    return sum
+    return sum;
 }
-let intval = null;
+// let intval = null;
 /**
  *超过一定时间没有音源输入，则清除定时器
  */
@@ -72,7 +72,7 @@ function sourceConnectAnalyser(stream) {//观察者模式
     micphoneSource = myWebAudio.createMediaStreamSource(stream);
     micphoneSource.connect(myAnalyser);//连接到本地webAudio的AnalyserNode
     myAnalyser.fftSize = 2048;
-    intval = setInterval(function () {
+    setInterval(function () {
         // console.log(getVoiceSize(myAnalyser),state.homeState.microphoneOpen,state.homeState.microphoneInput);
         if(state.homeState.microphoneOpen) {
             msgFlag = true;
@@ -83,19 +83,19 @@ function sourceConnectAnalyser(stream) {//观察者模式
                 msg.inputSource = true;
                 send(JSON.stringify(msg), function () {
                     // console.log('发送audioSourceInput消息：true');
-                })
+                });
             } else {
                 store.dispatch({type: CONSTANT.MICROPHONEINPUT, val: false});
                 msg.inputSource = false;
                 send(JSON.stringify(msg), function () {
-                })
+                });
             }
         }else{
             if(msgFlag){
                 msg.inputSource = false;
                 send(JSON.stringify(msg), function () {
                     msgFlag = false;
-                })
+                });
             }
         }
     },1000);
@@ -175,7 +175,7 @@ function startMyCam(videoBox){
  * onopenmicrophone：开启麦克风事件函数
  */
 function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type) {
-    log("进入preparePeerConnection函数!",'preparePeerConnection','webRtcAudio.js');
+    log('进入preparePeerConnection函数!','preparePeerConnection','webRtcAudio.js');
     let newConnection;
     if (hasRTCPeerConnection()) {
         // console.log('prepareState:'+prepareState);
@@ -221,30 +221,32 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
         };
         // Setup ice handling
         newConnection.onicecandidate = function (event) {
-            //	console.log("yourConnection.onicecandidate!");
+            //	console.log('yourConnection.onicecandidate!');
             if (event.candidate) {
                 let Msg = wbMsg;
                 if(Msg.offer) delete Msg.offer;//删除回传的offer
                 if(Msg.answer) delete Msg.answer;//删除回传的answer
                 Msg.candidate = event.candidate;
                 send(JSON.stringify(Msg),function () {
-                })
+                });
             }else{
                 //all the candidate have been sent
-                // log("发送 candidate 给 "+Msg.toUser.name,'onicecandidate','webRtcAudio.js');
-                successlog("audio-发送 candidate 给 "+Msg.toUser.name);
+                // log('发送 candidate 给 '+Msg.toUser.name,'onicecandidate','webRtcAudio.js');
+                successlog('audio-发送 candidate 给 '+Msg.toUser.name);
                 // checkPeerConnectionStatus(Msg.toUser.id,type);//这里
             }
         };
         newConnection.onsignalingstatechange = function (e) {
+            console.log(e);
             console.log('%c signalingState:'+newConnection.signalingState,'color:red');
         };
         newConnection.onicegatheringstatechange = function (e) {
+            console.log(e);
             console.log('%c iceGatheringsState:'+newConnection.iceGatheringState,'color:red');
         };
         newConnection.oniceconnectionstatechange = function(event) {
-            // console.log(type);
-            let userInfo = state.homeState.userInfo, updateUserMsg;
+            console.log(event);
+            let userInfo = state.homeState.userInfo;
             let objItem ;
             rtcSessionList.map(function (item) {
                 if(item.toUserId == wbMsg.toUser.id) {
@@ -252,7 +254,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 }
             });
             switch(newConnection.iceConnectionState) {
-                case "connected":
+                case 'connected':
                     rtcSessionList.map(function (item) {
                         if(item.toUserId == wbMsg.toUser.id) {
                             item.pcState = 'connected';
@@ -294,8 +296,8 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     // });
                     updateUserInfo(userInfo);
                     break;
-                case "disconnected":
-                    console.log("disconnected:"+wbMsg.toUser.name);
+                case 'disconnected':
+                    console.log('disconnected:'+wbMsg.toUser.name);
                     // 重启ICE
                     if(type === 'offer'){
                         if(getNormalQuitUsers()[wbMsg.toUser.id]){
@@ -320,16 +322,16 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                         }
                     }
                     break;
-                case "failed":
-                    console.log("failed:"+wbMsg.toUser.name);
+                case 'failed':
+                    console.log('failed:'+wbMsg.toUser.name);
                     if(objItem){
                         console.log(objItem.pcState);
                         objItem.ondisconnected('failed');
                     }
                     // One or more transports has terminated unexpectedly or in an error
                     break;
-                case "closed":
-                    console.log("closed:"+wbMsg.toUser.name);
+                case 'closed':
+                    console.log('closed:'+wbMsg.toUser.name);
                     // The connection has been closed,本人关闭或被动通知后关闭会触发（即调用peerConnection.close()）,通知后台我已关闭连接
                     if(objItem){
                         if(type === 'offer'){
@@ -363,8 +365,8 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
             // log('进入ondisconnected','ondisconnected','webRtcAudio.js');
                 successlog('进入ondisconnected，'+status);
             if(this.pcState === 'disconnected')return;
-            let preState = this.pcState;
-            let preStateTime = this.pcStateTime;
+            // let preState = this.pcState;
+            // let preStateTime = this.pcStateTime;
                 this.pcStateTime = new Date().getTime()/1000;
                 this.pcState = 'disconnected';
 
@@ -422,7 +424,7 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                 //这里添加播放音乐的流(本地或网络)，然后混入mixer
             }};
     }else{
-        alert("NO WEBRTC"); return;
+        alert('NO WEBRTC'); return;
     }
 }
 
@@ -466,7 +468,7 @@ function iceRestart(toUser) {
  * @param videoBox 用于将video或audio标签包裹的容易Dom对象
  */
 function offerPeerConnection(wbMsg,videoBox) {
-    let videoId = "video_" + wbMsg.toUser.id;
+    let videoId = 'video_' + wbMsg.toUser.id;
     let theirVideo = document.createElement('video');
     // theirVideo.src = window.URL.createObjectURL(stream);
     theirVideo.style.width='1px';
@@ -540,11 +542,11 @@ function offerPeerConnection(wbMsg,videoBox) {
  * */
 function onCreateOfferError(error) {
     keyerror('audio-create offer error,'+error.toString());
-    alert("audio-An error has occurred 1."+error.toString());
+    alert('audio-An error has occurred 1.'+error.toString());
 }
 function answerPeerConnection(wbMsg,offer,videoBox) {
     // log('进入answerPeerConnection','answerPeerConnection','webRtcAudio.js');
-    let videoId = "video_" + wbMsg.toUser.id;
+    let videoId = 'video_' + wbMsg.toUser.id;
     let theirVideo = document.createElement('video');
     // theirVideo.src = window.URL.createObjectURL(stream);
     theirVideo.style.width='1px';
@@ -604,12 +606,12 @@ function answerPeerConnection(wbMsg,offer,videoBox) {
             successlog('audio-给 '+wbMsg.toUser.name+'发answer');
         });
     }, function (error) {
-        alert("An error has occurred 1.");
+        alert('An error has occurred 1.');
         keyerror('createAnswer error,'+error.toString());
     });
 }
 
-function onAnswer(answer,sessionId,toUserId) {
+function onAnswer(answer,sessionId) {
     log('进入onAnswer','onAnswer','webRtcAudio.js');
     // console.log(rtcSessionList);
     let tmpStr = sessionId.split('-')[1]+'-'+sessionId.split('-')[0];
@@ -626,8 +628,8 @@ function onAnswer(answer,sessionId,toUserId) {
 }
 
 function onCandidate(candidate,sessionId) {
-	// console.log("onCandidate:"+candidate);
-//     console.log("Adding candidate for " + g_username);
+	// console.log('onCandidate:'+candidate);
+//     console.log('Adding candidate for ' + g_username);
     let tmpStr = sessionId.split('-')[1]+'-'+sessionId.split('-')[0];
     rtcSessionList.map(function (item) {
         if(item.sessionId == tmpStr){
@@ -683,7 +685,7 @@ function mixerAudio(stream,pc,type) {
                         mixerBysecond(stream,pc,type,item1.toUser);
                     }
                 }
-            })
+            });
         }
     });
     // console.log(rtcSessionList);
@@ -734,7 +736,7 @@ function mixerAudioByAppointUser(stream,pc,type,toUser) {
                 }/*else{
                     keyerror('mixerAudioByAppointUser--未找到指定用户的连接：'+toUser.name);
                 }*/
-            })
+            });
         }/*else{//这个else如果延迟混音成功还是有人听不到语音，则再增加这个else做测试
             if(item.wa){
                 let awTmpStream = item.wa.createMediaStreamSource(stream);
@@ -845,33 +847,33 @@ function onLeave(userInfo) {
 /**
  * 用于检测pc是否连接成功,成功不做任何事，失败直接kill
  * */
-function checkPeerConnectionStatus(toUserId,type) {
-    //3秒后如果还是在连接中，则answer清除rtsSession,offer清除并重新连接
-    setTimeout(function () {
-        rtcSessionList.map(function (item) {
-            // console.log(item);
-            if(item.toUserId == toUserId){
-                if(item.pcState === 'connecting'){
-                    successlog('发送candidate5秒后仍未连接成功,checkPeerConnectionStatus');
-                    removeInstance(item);
-                    delRtcSession(toUserId);
-                    //是否需要重新连接
-                    if(type === 'offer'){
-                        // 重新去连接(入网)
-                        console.error('连接超时,重新入网');
-                        getRoomInfo(state.homeState.currentRoomInfo.roomId);
-                    }
-                }
-            }
-        });
-    },10000)
-}
+// function checkPeerConnectionStatus(toUserId,type) {
+//     //3秒后如果还是在连接中，则answer清除rtsSession,offer清除并重新连接
+//     setTimeout(function () {
+//         rtcSessionList.map(function (item) {
+//             // console.log(item);
+//             if(item.toUserId == toUserId){
+//                 if(item.pcState === 'connecting'){
+//                     successlog('发送candidate5秒后仍未连接成功,checkPeerConnectionStatus');
+//                     removeInstance(item);
+//                     delRtcSession(toUserId);
+//                     //是否需要重新连接
+//                     if(type === 'offer'){
+//                         // 重新去连接(入网)
+//                         console.error('连接超时,重新入网');
+//                         getRoomInfo(state.homeState.currentRoomInfo.roomId);
+//                     }
+//                 }
+//             }
+//         });
+//     },10000);
+// }
 
 /**
  * 根据toUserId删除RTCSession
  * */
 function delRtcSession(toUserId) {
-    console.log("%ctoUserId:"+toUserId,'color:red');
+    console.log('%ctoUserId:'+toUserId,'color:red');
     rtcSessionList = rtcSessionList.filter(function (item) {
         return item.toUserId != toUserId;
     });

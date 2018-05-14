@@ -8,7 +8,7 @@ class FooterBottomBox extends React.Component{
     render(){
         return (<div>
             <FooterBottom userName={this.props.userName}></FooterBottom>
-        </div>)
+        </div>);
     }
 }
 

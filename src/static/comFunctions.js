@@ -2,10 +2,10 @@
  * 整体说明，可变变量使用let定义，需要se6及以上才可以直接使用
  */
 
-import { generalApi, getImgApi } from "./apiInfo";
-import store, {CONSTANT} from "../reducer/reducer";
-import {send, updateAllRoomListUserInfoByRoomId} from "./webSocket";
-import {closeMicrophone, microphoneStatus} from "../webrtc/webRtcAudio";
+import { generalApi, getImgApi } from './apiInfo';
+import store, {CONSTANT} from '../reducer/reducer';
+import {send, updateAllRoomListUserInfoByRoomId} from './webSocket';
+import {closeMicrophone, microphoneStatus} from '../webrtc/webRtcAudio';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -18,7 +18,7 @@ store.subscribe(function () {
  * @returns {string} 返回生成的随机数
  */
 function randomWord(randomFlag, min, max){
-    let str = "",
+    let str = '',
         range = min,
         pos,
         arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
@@ -43,7 +43,7 @@ function randomWord(randomFlag, min, max){
  */
 function GetQueryString(str,name) {
     // console.log(str,name);
-    let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
     let r = str.match(reg);
     // console.log(r);
     if (r != null) return decodeURI(r[2]);
@@ -136,12 +136,12 @@ function updataFirstUserAvatar(userInfo) {
     //更换第一个用户的头像
     if(userInfo && userInfo.fileId){
         //根据请求获取用户头像
-        fetch(getImgApi+userInfo.fileId+".dat")
-            .then(res=>{/*console.log(res)*/return res.text()})
+        fetch(getImgApi+userInfo.fileId+'.dat')
+            .then(res=>{/*console.log(res)*/return res.text();})
             .then(data=>{
                 store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:data});
             })
-            .catch(e=>console.error(e))
+            .catch(e=>console.error(e));
     }else{
         store.dispatch({type:CONSTANT.FIRSTUSERAVATAR,val:'./images/avatar.png'});
     }
@@ -161,12 +161,6 @@ function getUserIconSrc(sex,level) {
     let src = '';
     switch(level){
         case 1:
-        /*if(sex === 1){
-            src = 'p_man.png';
-        }else{
-            src = 'p_female.png';
-        }
-        break;*/
         case 2:
             if(sex === 1){
                 src = 'p_man.png';
@@ -211,7 +205,7 @@ function getUserIconSrc(sex,level) {
             break;
     }
     // console.log(src);
-    return "./images/icons/"+src;
+    return './images/icons/'+src;
 }
 
 
@@ -318,7 +312,7 @@ function updateUserInfo(userInfo) {
         user:userInfo
     };
     send(JSON.stringify(updateUserMsg),function () {
-    })
+    });
 }
 /**
  * 根据房间信息更新服务器房间信息
@@ -332,7 +326,7 @@ function setRoomInfoByRoomInfo(roomInfo) {
     };
     send(JSON.stringify(updateRoomMsg),function () {
         console.log('set_room_info,'+roomInfo.roomName+',order:'+roomInfo.order);
-    })
+    });
 }
 /**
  * 替换服务器roomInfo信息
@@ -376,7 +370,7 @@ function deleteRoomById(roomId) {
         //     // send(JSON.stringify(enterMsg),function(){
         //     // });
         // });
-    })
+    });
     //let args = '?action=del&table=room&cond=id=%22'+roomId+'%22';
     // fetch(generalApi+args)
     //     .then(res=>res.json())
@@ -409,10 +403,10 @@ function upDateRoomListByDelRoomId(roomId) {
             if(room.childNode.length !== 0){
                 room.childNode = room.childNode.filter(function (cRoom) {
                     return roomId != cRoom.roomId;
-                })
+                });
             }
             return roomId != room.roomId;
-        })
+        });
     }
     store.dispatch({type:CONSTANT.ALLROOMLIST,val:roomList});
 
@@ -432,7 +426,7 @@ function upDateRoomListByAddRoomInfo(roomInfo) {
                 if(room.roomId == roomInfo.parentId){
                     room.childNode.push(roomInfo);
                 }
-            })
+            });
         }
     }
     console.log(roomList);
@@ -487,7 +481,7 @@ function updateTotalClientsByRoomid(roomId,totalClients) {
                     if(roomId == cItem.roomId){
                         cItem.totalClients = totalClients;
                     }
-                })
+                });
             }
         }
     });
@@ -503,24 +497,24 @@ function updateTotalClientsByRoomid(roomId,totalClients) {
 /**
  * 根据房间id列表获取个房间的用户列表
  * */
-function getUserListforAllRoomList(roomList) {
-    let allRoomList = roomList,
-        userInfo = state.homeState.userInfo,roomInfo = state.homeState.currentRoomInfo;
-    let getUsersMsg = {
-        type:'get_room_users',
-        user:userInfo,
-    };
-    allRoomList.map(function (item) {
-        if (item.childNode && item.childNode.length !== 0){
-            item.childNode.map(function (citem) {
-                // if(citem.roomId !== roomInfo.roomId){
-                getUsersMsg.roomId = citem.roomId;
-                send(JSON.stringify(getUsersMsg),function(){});
-                // }
-            })
-        }
-    })
-}
+// function getUserListforAllRoomList(roomList) {
+//     let allRoomList = roomList,
+//         userInfo = state.homeState.userInfo,roomInfo = state.homeState.currentRoomInfo;
+//     let getUsersMsg = {
+//         type:'get_room_users',
+//         user:userInfo,
+//     };
+//     allRoomList.map(function (item) {
+//         if (item.childNode && item.childNode.length !== 0){
+//             item.childNode.map(function (citem) {
+//                 // if(citem.roomId !== roomInfo.roomId){
+//                 getUsersMsg.roomId = citem.roomId;
+//                 send(JSON.stringify(getUsersMsg),function(){});
+//                 // }
+//             })
+//         }
+//     })
+// }
 
 /**
  * 根据Id获取房间用户
@@ -532,7 +526,7 @@ function getRoomUsers(roomId){
         roomId:roomId
     };
     send(JSON.stringify(msg),function () {
-    })
+    });
 }
 
 /**
@@ -554,7 +548,7 @@ function getRoomUsersCount(rooms){
     if(rooms && rooms.length !== 0){
         rooms.map(function (item) {
             count += item.totalClients;
-        })
+        });
     }
     return count;
 }
@@ -590,9 +584,9 @@ function getLocationBtUserId(userId) {
                             roomStatueTmp['r'+item.roomId] = true;
                             store.dispatch({type:CONSTANT.ROOMSTATUS,val:roomStatueTmp});
                         }
-                    })
+                    });
                 }
-            })
+            });
         }
     });
     return result;
@@ -609,13 +603,13 @@ function sendCheerAudio(type) {
         user:state.homeState.userInfo
     };
     if(type === 'cheer'){
-        msg.audiotype = 'cheer'
+        msg.audiotype = 'cheer';
     }else if(type === 'applause'){
-        msg.audiotype = 'applause'
+        msg.audiotype = 'applause';
     }
     send(JSON.stringify(msg),function () {
         console.log('send play music msg');
-    })
+    });
 
 }
 
@@ -634,9 +628,9 @@ function getNewAllRoomList(newRoomList) {
                         if (item.roomId === xitem.roomId) {
                             xitem.childNode.push(cItem);
                         }
-                    })
+                    });
                 }
-            })
+            });
         } else {
             newAllRoomList.push(item);
         }
@@ -669,7 +663,7 @@ function incRoomList(cRoomId,roomId,rooms) {
                 if(cRoomId === cItem.roomId){
                     result = true;
                 }
-            })
+            });
         }
     });
     return result;
@@ -692,18 +686,18 @@ function leaveRoom(roomInfo) {
 /**
  * 延时进入房间
  * */
-function enterRoomDelay(roomId) {
-    let msg = {
-        type:'enter_room',
-        roomId:roomId,
-        user:state.homeState.userInfo
-    };
-    setTimeout(function () {
-        send(JSON.stringify(msg),function () {
-        });
-    },500);
-
-}
+// function enterRoomDelay(roomId) {
+//     let msg = {
+//         type:'enter_room',
+//         roomId:roomId,
+//         user:state.homeState.userInfo
+//     };
+//     setTimeout(function () {
+//         send(JSON.stringify(msg),function () {
+//         });
+//     },500);
+//
+// }
 
 /**
  * 进入房间
@@ -743,9 +737,9 @@ let by = function(name,minor){
             }
             return typeof a < typeof b ? -1 : 1;
         }else{
-            throw ("error");
+            throw ('error');
         }
-    }
+    };
 };
 
 
@@ -813,12 +807,12 @@ function getNewLimit(oldLimit,addLimit) {
 function limitFetch(args) {
     fetch(generalApi,{
         method:'POST',
-        // credentials: "include",
+        // credentials: 'include',
         headers:{
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body:args//JSON.stringify(args)
-    }).then((response) => {/*console.log(response);*/return response.text()})
+    }).then((response) => {/*console.log(response);*/return response.text();})
         .then(data=>{
             console.log(data);
             let datatmp;
@@ -897,6 +891,42 @@ function sendSesult(userInfo,result,reason) {
 }
 
 /**
+ * 清除字符串中的标签，检测字符串清除标签之后是否包含文字
+ * */
+function removeHTMLTag(str) {
+    str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+    str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+    //str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+    str=str.replace(/ /ig,'');//去掉
+    if(str.length>0){
+        str=true;
+    }else {
+        str=false;
+    }
+    return str;
+}
+
+/**
+ * 提升用户等级时更新用户等级信息
+ * */
+function updateByPower(level,objId) {
+    let allRoomList = state.homeState.allRoomList;
+    allRoomList.map(function (item1) {
+        item1.childNode.map(function (item) {
+            if(item.roomId === state.homeState.currentRoomInfo.roomId){
+                item.childNode.map(function (itm) {
+                    if(itm.id === objId){
+                        itm.level = level;
+                    }
+                });
+            }
+        });
+    });
+    // console.log(allRoomList);
+    store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
+}
+
+/**
  * 用户情况抓取，比如浏览器代理，是否只是webSocket，webRTC，webAudio等,用户测试
  * */
 
@@ -954,50 +984,50 @@ function getUserInfo() {
         .catch(e=>console.error(e));*/
 }
 
-function getBrowserInfo(){
-    var Sys={};
-    var ua=navigator.userAgent.toLowerCase();
-    var s;
-    (s=ua.match(/msie ([\d.]+)/))?Sys.ie=s[1]:
-        (s=ua.match(/firefox\/([\d.]+)/))?Sys.firefox=s[1]:
-            (s=ua.match(/chrome\/([\d.]+)/))?Sys.chrome=s[1]:
-                (s=ua.match(/opera.([\d.]+)/))?Sys.opera=s[1]:
-                    (s=ua.match(/version\/([\d.]+).*safari/))?Sys.safari=s[1]:0;
-    if(Sys.ie){//Js判断为IE浏览器
-        return {
-            'type':'ie',
-            'ver':Sys.ie
-        };
-    }
-    if(Sys.firefox){//Js判断为火狐(firefox)浏览器
-        return {
-            'type':'firefox',
-            'ver':Sys.firefox
-        };
-    }
-    if(Sys.chrome){//Js判断为谷歌chrome浏览器
-        return {
-            'type':'chrome',
-            'ver':Sys.chrome
-        };
-    }
-    if(Sys.opera){//Js判断为opera浏览器
-        return {
-            'type':'opera',
-            'ver':Sys.opera
-        };
-    }
-    if(Sys.safari){//Js判断为苹果safari浏览器
-        return {
-            'type':'safari',
-            'ver':Sys.safari
-        };
-    }
-    return {
-        'type':'unknow',
-        'ver':-1
-    };
-}
+// function getBrowserInfo(){
+//     var Sys={};
+//     var ua=navigator.userAgent.toLowerCase();
+//     var s;
+//     (s=ua.match(/msie ([\d.]+)/))?Sys.ie=s[1]:
+//         (s=ua.match(/firefox\/([\d.]+)/))?Sys.firefox=s[1]:
+//             (s=ua.match(/chrome\/([\d.]+)/))?Sys.chrome=s[1]:
+//                 (s=ua.match(/opera.([\d.]+)/))?Sys.opera=s[1]:
+//                     (s=ua.match(/version\/([\d.]+).*safari/))?Sys.safari=s[1]:0;
+//     if(Sys.ie){//Js判断为IE浏览器
+//         return {
+//             'type':'ie',
+//             'ver':Sys.ie
+//         };
+//     }
+//     if(Sys.firefox){//Js判断为火狐(firefox)浏览器
+//         return {
+//             'type':'firefox',
+//             'ver':Sys.firefox
+//         };
+//     }
+//     if(Sys.chrome){//Js判断为谷歌chrome浏览器
+//         return {
+//             'type':'chrome',
+//             'ver':Sys.chrome
+//         };
+//     }
+//     if(Sys.opera){//Js判断为opera浏览器
+//         return {
+//             'type':'opera',
+//             'ver':Sys.opera
+//         };
+//     }
+//     if(Sys.safari){//Js判断为苹果safari浏览器
+//         return {
+//             'type':'safari',
+//             'ver':Sys.safari
+//         };
+//     }
+//     return {
+//         'type':'unknow',
+//         'ver':-1
+//     };
+// }
 
 /**
  * 将log信息存到后台
@@ -1032,7 +1062,7 @@ let keyInfos = [],keyInfosCopy=[];
  * @param message 表示打印的消息
  * @param file 代码所在文件名
  */
-let logInfos={},erroInfos={},logCount = 0,errorCount = 0;
+let logInfos={},erroInfos={},logCount = 0;
 function log(msg,funName,file) {
     // console.log(msg);
     // console.log('%c'+msg+'==='+state.homeState.userInfo.name+'==='+funName+'==='+file,'color:blue');
@@ -1058,15 +1088,15 @@ function successlog(msg) {
     keyInfosCopy.push(msg);
     // sendToServer(info);
 }
-function keylog(msg) {
-    let info = {};
-    info.name = state.homeState.userInfo.name;
-    info.msg = msg;
-    console.log('%c'+info.name+'==='+msg,'color:#df402a');
-    keyInfos.push(msg);
-    keyInfosCopy.push(msg);
-    sendToServer(info);
-}
+// function keylog(msg) {
+//     let info = {};
+//     info.name = state.homeState.userInfo.name;
+//     info.msg = msg;
+//     console.log('%c'+info.name+'==='+msg,'color:#df402a');
+//     keyInfos.push(msg);
+//     keyInfosCopy.push(msg);
+//     sendToServer(info);
+// }
 function setToLocalStorage() {
     let logs = ' ',UserName = state.homeState.userInfo.name;
     keyInfos.map(function (item,index) {
@@ -1108,8 +1138,6 @@ function error(msg,funName,file) {
     errorInfo.message = msg;
     errorInfo.caller = funName;
     errorInfo.fileName = file;
-    erroInfos[logCount] = errorInfo;
-    errorCount++;
 }
 /**
  * 打印关键错误
@@ -1133,5 +1161,5 @@ export {
     getNewAllRoomList, getUserInfo, updateUserInfo, setRoomInfoByRoomInfo, setRoomInfo, leaveRoom,
     CONFIG_CONSTANTS,log, error, successlog, keyerror, setToLocalStorage, by,
     upDateRoomListByDelRoomId, upDateRoomListByAddRoomInfo, getNewLimit, limitFetch, enterRoom, clearOnMicrophoneUsers,
-    sendSesult, updateTotalClientsByRoomid, remaininglogsSendToserver
-}
+    sendSesult, updateTotalClientsByRoomid, remaininglogsSendToserver, removeHTMLTag, updateByPower
+};

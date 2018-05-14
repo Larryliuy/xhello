@@ -4,7 +4,7 @@ import store,{CONSTANT} from '../reducer/reducer';
 
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 
 const text = <span>请选择颜色</span>;
@@ -38,10 +38,10 @@ const content = (
 class Skin extends React.Component{
     render(){
         return (
-            <Popover placement="bottom" title={text} content={content} trigger="click">
+            <Popover placement='bottom' title={text} content={content} trigger='click'>
                 <span className='changeskin-logo'><img src='./images/icons/ChangeSkin.png' /></span>
             </Popover>
-        )
+        );
     }
 }
 

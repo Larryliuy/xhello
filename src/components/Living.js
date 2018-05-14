@@ -1,12 +1,12 @@
 import React,{ Component } from 'react';
 import { Button, Popover, Input } from 'antd';
-import {closeVideoMode, refreshVideo} from "../webrtc/webRtcVideo";
-import store, {CONSTANT} from "../reducer/reducer";
-import {send} from "../static/webSocket";
-import {setRoomInfo} from "../static/comFunctions";
+import {closeVideoMode, refreshVideo} from '../webrtc/webRtcVideo';
+import store, {CONSTANT} from '../reducer/reducer';
+import {send} from '../static/webSocket';
+import {setRoomInfo} from '../static/comFunctions';
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 class Living extends React.Component{
     constructor(props){
@@ -14,7 +14,7 @@ class Living extends React.Component{
         this.state = {
             popVisible:false,
             newContents:'文字内容显示区域'
-        }
+        };
     }
     componentDidMount(){
         // setTimeout(function () {
@@ -40,7 +40,7 @@ class Living extends React.Component{
     }
     editChange(e){
         // console.log(e.target.value);
-        this.setState({newContents:e.target.value})
+        this.setState({newContents:e.target.value});
     }
     editCancelHandle(){
         this.setState({popVisible:false});
@@ -93,18 +93,18 @@ class Living extends React.Component{
                 }
                 <div className='host-text'>
                     {this.isKingPlayer() &&
-                    <Popover placement="top"
+                    <Popover placement='top'
                              title={'编辑文字'}
                              content={this.getContent()}
                              visible={this.state.popVisible}
-                             trigger="click">
+                             trigger='click'>
                         <span id={'edit-contents'} onClick={()=>this.editContents()}>点击编辑内容</span>
                     </Popover>
                     }
                     <p style={{color:'red',fontSize:'16px'}}>{state.homeState.currentRoomInfo.contents}</p>
                 </div>
             </div>
-        )
+        );
     }
 }
 

@@ -1,11 +1,11 @@
 import React,{ Component } from 'react';
 import { Button, message } from 'antd';
-import store from "../reducer/reducer";
-import { send } from "../static/webSocket";
-import {closeVideoMode, onLeaveVideo, refreshVideo, startMyCamVideo} from "../webrtc/webRtcVideo";
+import store from '../reducer/reducer';
+import { send } from '../static/webSocket';
+import {closeVideoMode, onLeaveVideo, refreshVideo, startMyCamVideo} from '../webrtc/webRtcVideo';
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 
 class LivingDouble extends React.Component{
@@ -46,7 +46,7 @@ class LivingDouble extends React.Component{
             send(JSON.stringify(msg),function () {
                 message.info('同意agreeToBebarley已发出');
             });
-        },500)
+        },500);
     }
     render(){
         return (
@@ -70,7 +70,7 @@ class LivingDouble extends React.Component{
                     </div>}
                 <div className='host-text'><p><a target={'_blank'} href={'http://www.xtell.cn'}>打个小广告:极智未来</a></p></div>
             </div>
-        )
+        );
     }
 }
 

@@ -3,7 +3,7 @@ import { Modal, Input, Select  } from 'antd';
 const Option = Select.Option;
 import WS,{ upDateAllRoomList, send } from '../static/webSocket.js';
 import { createRoom } from '../static/comFunctions';
-import store, {CONSTANT} from "../reducer/reducer";
+import store, {CONSTANT} from '../reducer/reducer';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -39,7 +39,7 @@ class CreateRoom extends React.Component{
                         order = Number(item.childNode[item.childNode.length-1].order)+1;
                     }
                 }
-            })
+            });
         }
         console.log(roomType+';'+parentId+';'+order);
         //在这里请求https，创建房间，将返回的房间ID传给websocket
@@ -75,7 +75,7 @@ class CreateRoom extends React.Component{
     render(){
         return (<div>
             <Modal className={'create-room'}
-                title="新建房间"
+                title='新建房间'
                 okText={'确定'}
                 cancelText={'取消'}
                 visible={this.state.visible}
@@ -101,7 +101,7 @@ class CreateRoom extends React.Component{
                 <br/>
                 <label><span>房间密码：</span><Input type={'password'} onChange={e=>this.onChangePasswordHandle(e)}  className={'input-style'} placeholder={'请输入房间密码'}/></label>
             </Modal>
-        </div>)
+        </div>);
     }
 }
 

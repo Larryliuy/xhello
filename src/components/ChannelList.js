@@ -5,8 +5,8 @@ import store,{ CONSTANT } from '../reducer/reducer';
 import WS,{ getSendData, send, resetIsplaying } from '../static/webSocket.js';
 import {getUserIconSrc, getRoomUsersCount, getSingleRoomUserCounts, getRoomUsers} from '../static/comFunctions';
 import '../static/login.scss';
-import { onLeave, getRoomInfo, getPrepareConnectionState, initVariableAudio } from "../webrtc/webRtcAudio";
-import { onLeaveVideo, getPrepareConnectionStateVideo} from "../webrtc/webRtcVideo";
+import { onLeave, getRoomInfo, getPrepareConnectionState, initVariableAudio } from '../webrtc/webRtcAudio';
+import { onLeaveVideo, getPrepareConnectionStateVideo} from '../webrtc/webRtcVideo';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -42,7 +42,7 @@ class ChannelList extends React.Component{
             // console.log('crid：'+state.homeState.currentRoomInfo.id);
             //判断用户是否在房间里 && WS.send(JSON.stringify({type:'in_room'}))
             if(firstRoom.roomId){
-                let data = state.homeState.userInfo.name + "<p>进入了房间</p>",
+                let data = state.homeState.userInfo.name + '<p>进入了房间</p>',
                     enterMsg = getSendData(
                         'enter_room',
                         firstRoom.roomId,
@@ -75,7 +75,7 @@ class ChannelList extends React.Component{
         if(!roomIdInt || !roomName) return;
             //离开上一个聊天室
         let userInfo = state.homeState.userInfo;
-        let data = userInfo.name + "<p>离开了房间</p>" + state.homeState.lastRoomInfo.title,
+        let data = userInfo.name + '<p>离开了房间</p>' + state.homeState.lastRoomInfo.title,
             leaveMsg = getSendData(
                 'leave_room',
                 state.homeState.currentRoomInfo.roomId,
@@ -101,7 +101,7 @@ class ChannelList extends React.Component{
         // 进入该房间聊天室
         // console.log(state.homeState.lastRoomInfo);
         // console.log(roomIdInt+','+roomName);
-        data ="<p>"+ state.homeState.userInfo.name + "进入了房间" +"</p>";
+        data ='<p>'+ state.homeState.userInfo.name + '进入了房间' +'</p>';
         userInfo.Children = [];
         let enterMsg = getSendData(
             'enter_room',
@@ -134,7 +134,7 @@ class ChannelList extends React.Component{
         store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
         getRoomInfo(roomIdInt.toString());
     }
-    dblClickHandle = (event) =>{
+    dblClickHandle(event){
         // if(event.target.id.indexOf('rc') === -1)return;
         const _this = this;
         let roomId = parseInt(event.target.id)? ('rc'+parseInt(event.target.id)) :  event.target.id;
@@ -167,11 +167,11 @@ class ChannelList extends React.Component{
                 });
             }
             });
-    };
+    }
     /*rightClickHandle = (e) =>{
 
     };*/
-    clickOpenHandle  = (e) => {
+    clickOpenHandle(e){
         const roomId = e.target.parentNode.parentNode.getAttribute('id');
         if(!roomId){console.log(roomId);return;}
         let tRoomState = state.homeState.roomStatus;
@@ -190,7 +190,7 @@ class ChannelList extends React.Component{
         }
         // this.setState({roomStatus:tRoomState});
         store.dispatch({type:CONSTANT.ROOMSTATUS,val:tRoomStatus});
-    };
+    }
     setRoomPassword(value){
         this.setState({inputPassword:value});
     }
@@ -203,7 +203,7 @@ class ChannelList extends React.Component{
         }else{
             Modal.info({
                 title:'密码错误'
-            })
+            });
         }
     }
     handleCancel(){
@@ -222,15 +222,15 @@ class ChannelList extends React.Component{
                 <ul>
                 {state.homeState.allRoomList && state.homeState.allRoomList.map(function (item) {
                     return <li id={'r'+item.roomId} key={'r'+item.roomId}>
-                        <span onClick={clickOpenHandle}><Icon type={roomStatus['r'+item.roomId] ?"minus" : "plus"} /> </span>
-                        <span id={item.roomId+'r'} style={{color:item.color}}>{item.roomName}</span><span className={'room-online-count'}>{" ("+getRoomUsersCount(item.childNode)+")"}</span>
+                        <span onClick={clickOpenHandle}><Icon type={roomStatus['r'+item.roomId] ?'minus' : 'plus'} /> </span>
+                        <span id={item.roomId+'r'} style={{color:item.color}}>{item.roomName}</span><span className={'room-online-count'}>{' ('+getRoomUsersCount(item.childNode)+')'}</span>
                         {roomStatus['r'+item.roomId] && item.childNode &&
                         <ul style={{paddingLeft:'10px'}}>
                             {item.childNode.map(function (item) {
                                 // console.log(item)
                                 return <li id={'rc'+item.roomId} key={'rc'+item.roomId}>
-                                    <span onClick={clickOpenHandle}><Icon type={roomStatus['rc'+item.roomId] ?"minus" : "plus"} /></span>
-                                    <span id={item.roomId+'rc'} style={{color:item.color}}>{item.roomName}</span><span className={'room-online-count'}>{" ("+item.totalClients+")"}</span>
+                                    <span onClick={clickOpenHandle}><Icon type={roomStatus['rc'+item.roomId] ?'minus' : 'plus'} /></span>
+                                    <span id={item.roomId+'rc'} style={{color:item.color}}>{item.roomName}</span><span className={'room-online-count'}>{' ('+item.totalClients+')'}</span>
                                     {roomStatus['rc'+item.roomId] && item.childNode &&
                                     <ul style={{paddingLeft:'15px'}}>
                                         {item.childNode.map(function (item) {
@@ -240,14 +240,14 @@ class ChannelList extends React.Component{
                                                     <span className='user-icon'><img src={getUserIconSrc(item.sex,item.level)} /></span>
                                                     {item.name}
                                                 </span>
-                                                <span><Icon style={{color:state.homeState.microphoneInputUsers[item.id]?'green':'#fff'}} type="sound" /></span>
-                                            </li>
+                                                <span><Icon style={{color:state.homeState.microphoneInputUsers[item.id]?'green':'#fff'}} type='sound' /></span>
+                                            </li>;
                                         })}
                                     </ul>}
-                                    </li>
+                                    </li>;
                             })}
                         </ul>}
-                        </li>
+                        </li>;
                 })}
                 </ul>
                 <VerifyPassword visible={this.state.passwordModal}
@@ -257,8 +257,8 @@ class ChannelList extends React.Component{
                 >
                 </VerifyPassword>
             </div>
-        )
+        );
     }
-};
+}
 
 export default ChannelList;

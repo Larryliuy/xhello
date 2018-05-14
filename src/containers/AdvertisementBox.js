@@ -1,33 +1,36 @@
-import React,{ Component } from 'react'
+import React,{ Component } from 'react';
 import UploadAvatar from '../components/UploadAvatar';
-import store, {CONSTANT} from "../reducer/reducer";
-import {message} from "antd/lib/index";
-import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
-import { setRoomInfo } from "../static/comFunctions";
+import store, {CONSTANT} from '../reducer/reducer';
+import {message} from 'antd/lib/index';
+import {generalApi, getImgApi, uploadJpegApi} from '../static/apiInfo';
+import { setRoomInfo } from '../static/comFunctions';
 
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
 });
 class AdvertisementBox extends React.Component{
-    state={visible:false,advertisement:'./images/ads.png'};
+    constructor(props){
+        super(props);
+        this.state={visible:false,advertisement:'./images/ads.png'};
+    }
     componentDidMount(){
         const _this = this;
         setTimeout(function () {
             let fileId = state.homeState.currentRoomInfo.advertisementFileId;
             //根据请求获取用户头像
             if(fileId && fileId != 0){
-                fetch(getImgApi+fileId+".dat")
-                    .then(res=>{/*console.log(res)*/return res.text()})
+                fetch(getImgApi+fileId+'.dat')
+                    .then(res=>{/*console.log(res)*/return res.text();})
                     .then(data=>{
                         _this.setState({advertisement:data});
                     })
-                    .catch(e=>console.error(e))
+                    .catch(e=>console.error(e));
             }
         },100);
     }
     onClickHandle(e){
-        // console.log(e.button);
+        console.log(e.button);
         if(state.homeState.userInfo.level <=2){
             this.setState({visible:true});
         }
@@ -51,13 +54,13 @@ class AdvertisementBox extends React.Component{
             args;
         console.log(fileName);
         if(roomInfo.advertisementFileId){
-            args = "uid="+roomInfo.roomId+"&fileId="+ roomInfo.advertisementFileId +"&name="+fileName+"&img="+encodeURIComponent(imgData);
+            args = 'uid='+roomInfo.roomId+'&fileId='+ roomInfo.advertisementFileId +'&name='+fileName+'&img='+encodeURIComponent(imgData);
         }else{
-            args = "uid="+roomInfo.roomId+"&name="+roomInfo+"&img="+encodeURIComponent(imgData);
+            args = 'uid='+roomInfo.roomId+'&name='+roomInfo+'&img='+encodeURIComponent(imgData);
         }
         fetch(uploadJpegApi,{
             method:'POST',
-            // credentials: "include",
+            // credentials: 'include',
             headers:{
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -73,7 +76,7 @@ class AdvertisementBox extends React.Component{
                     store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
                     setRoomInfo(roomInfo);
                     //将fileId存入房间表
-                    args = "?action=update&table=room&cond=id="+roomInfo.roomId+"&advertisementFileId="+fileId;
+                    args = '?action=update&table=room&cond=id='+roomInfo.roomId+'&advertisementFileId='+fileId;
                     fetch(generalApi+args)
                         .then(res=>res.json())
                         .then(data=>{
@@ -82,12 +85,12 @@ class AdvertisementBox extends React.Component{
                                 message.success('更换成功');
                                 let fileId = state.homeState.currentRoomInfo.advertisementFileId;
                                 //根据请求获取用户头像
-                                fetch(getImgApi+fileId+".dat")
-                                    .then(res=>{/*console.log(res)*/return res.text()})
+                                fetch(getImgApi+fileId+'.dat')
+                                    .then(res=>{/*console.log(res)*/return res.text();})
                                     .then(data=>{
                                         _this.setState({advertisement:data});
                                     })
-                                    .catch(e=>console.error(e))
+                                    .catch(e=>console.error(e));
                             }
                         })
                         .catch(e=>console.error(e));
@@ -107,7 +110,7 @@ class AdvertisementBox extends React.Component{
                           handleCancel={this.handleCancel.bind(this)}
             >
             </UploadAvatar>
-        </div>)
+        </div>);
     }
 }
 

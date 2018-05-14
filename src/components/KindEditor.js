@@ -18,7 +18,7 @@ class KindEditor extends React.Component {
     }
     render(){
         return (
-                <div ref="textarea"> </div>
+                <div ref='textarea'> </div>
         )
     }
 }

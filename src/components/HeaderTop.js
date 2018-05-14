@@ -1,28 +1,27 @@
 import React, { Component } from 'react';
-import {Link} from 'react-router-dom'
+import {Link} from 'react-router-dom';
 import { Icon ,message, Popover, List } from 'antd';
-import cookieUtil from "../libs/cookieUtil";
-import HeaderLeft from "../components/HeaderLeft";
+import HeaderLeft from '../components/HeaderLeft';
 import { send } from '../static/webSocket';
-import store, {CONSTANT} from "../reducer/reducer";
+import store, {CONSTANT} from '../reducer/reducer';
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 
 import Skin from './Skin';
-import {getRoomInfoVideo, initVariableVideo, onLeaveVideo} from "../webrtc/webRtcVideo";
-import {leaveRoom} from "../static/comFunctions";
-import {initVariableAudio, onLeave} from "../webrtc/webRtcAudio";
+import {getRoomInfoVideo, initVariableVideo, onLeaveVideo} from '../webrtc/webRtcVideo';
+import {leaveRoom} from '../static/comFunctions';
+import {initVariableAudio, onLeave} from '../webrtc/webRtcAudio';
 
 class HeaderTop extends React.Component{
     constructor(){
         super();
         this.state = {
             menuVisible:false
-        }
+        };
     }
-    loginOut=()=>{
+    loginOut(){
         // location.reload();
         message.success('退出成功！');
         let localUri = location.href,
@@ -54,7 +53,7 @@ class HeaderTop extends React.Component{
         //     }
         // },200);
         // location.reload();
-    };
+    }
     switchVideoMode(e){
         console.log(e.target.innerText);
         let roomInfo = state.homeState.currentRoomInfo ;
@@ -135,14 +134,14 @@ class HeaderTop extends React.Component{
         const data = ['播放网络视频','开启单人直播','开启双人直播'];
         const content = (<div className={'vodMenu'} style={{width:'200px',cursor:'pointer'}} onClick={(e)=>this.switchVideoMode(e)}>
             <List dataSource={data}
-                  size="small"
+                  size='small'
                   bordered
                   renderItem={item => (<List.Item>{item}</List.Item>)}
             >
             </List>
         </div>);
         return (<div>
-            <div className="logo">
+            <div className='logo'>
                 <HeaderLeft></HeaderLeft>
             </div>
             <h2>
@@ -150,10 +149,10 @@ class HeaderTop extends React.Component{
             </h2>
             <span style={{cursor:'pointer',position:'absolute',width:80,fontSize:16,right:60,top:3,display:'flex',justifyContent:'space-around',alignItems:'center'}}>
                 <span style={{display:state.homeState.userInfo.level < 3?'block':'none'}}>
-                    <Popover placement="bottomLeft"
+                    <Popover placement='bottomLeft'
                                content={content}
-                               trigger="click">
-                        <span><Icon style={{color:'#fff',display:'block',marginTop:'3px'}} type="appstore-o" /></span>
+                               trigger='click'>
+                        <span><Icon style={{color:'#fff',display:'block',marginTop:'3px'}} type='appstore-o' /></span>
                     </Popover>
                 </span>
                 <span><Skin></Skin></span>
@@ -162,10 +161,10 @@ class HeaderTop extends React.Component{
                   onClick={this.loginOut}
                   style={{position:'absolute',top:5,right:30,cursor:'pointer'}}
             >
-                <Icon type="poweroff" style={{fontSize:16,color:'red'}}/>
+                <Icon type='poweroff' style={{fontSize:16,color:'red'}}/>
             </Link>
 
-        </div>)
+        </div>);
     }
 }
 

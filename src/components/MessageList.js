@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import { List, Avatar, message } from 'antd';
-import WS, {send, timeStamp} from "../static/webSocket";
-import store from "../reducer/reducer";
+import WS, {send, timeStamp} from '../static/webSocket';
+import store from '../reducer/reducer';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -14,7 +14,7 @@ class MessageList extends React.Component{
             left:'0px',
             display:'none',
             timeStamp:0,
-        }
+        };
     }
     componentDidMount(){
 
@@ -63,13 +63,13 @@ class MessageList extends React.Component{
     }
     render(){
         return (<div><List
-            size="small"
-            itemLayout="horizontal"
+            size='small'
+            itemLayout='horizontal'
             dataSource={this.props.data}
             renderItem={item => (
                 <List.Item>
                     <List.Item.Meta
-                        avatar={<Avatar src="./images/avatar.png" />}
+                        avatar={<Avatar src='./images/avatar.png' />}
                         title={<p>{item.userName} {item.time}</p>}
                         description={<div onMouseDown={e=>this.rightClickHanle(e)}
                                           id={item.timeStamp && item.userId +'id' + item.timeStamp}
@@ -81,7 +81,7 @@ class MessageList extends React.Component{
             <div id={'withdraw'}
                  onClick={()=>this.withdrawHandle()}
                  style={{top:this.state.top,left:this.state.left,display:this.state.display}}>撤回消息</div>
-        </div>)
+        </div>);
     }
 }
 

@@ -5,9 +5,9 @@ import CreateRoom from './CreateRoom';
 import SetRoom from './SetRoom';
 import SortRoom from './SortRoom';
 import { getSendData, send } from '../static/webSocket.js';
-import { deleteRoomById, limitFetch } from '../static/comFunctions';
-import store, {CONSTANT} from "../reducer/reducer";
-import {generalApi, blockUserApi} from "../static/apiInfo";
+import {deleteRoomById, limitFetch, updateByPower} from '../static/comFunctions';
+import store, {CONSTANT} from '../reducer/reducer';
+import {generalApi, blockUserApi} from '../static/apiInfo';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -16,16 +16,16 @@ store.subscribe(function () {
 class RightClickPanel extends React.Component{
     constructor(props){
         super(props);
-        this.state = {display:'none',operate:[],createRoom:false,setRoom:false,sortRoom:false,roomType:1,roomInfo:{}}
+        this.state = {display:'none',operate:[],createRoom:false,setRoom:false,sortRoom:false,roomType:1,roomInfo:{}};
     }
     setCreateRoomVisible(){
-        this.setState({createRoom:false})
+        this.setState({createRoom:false});
     }
     setSetRoomVisible(){
-        this.setState({setRoom:false})
+        this.setState({setRoom:false});
     }
     setSortRoomVisible(){
-        this.setState({sortRoom:false})
+        this.setState({sortRoom:false});
     }
     componentWillMount(){
         // this.setState({operate:operateData});
@@ -63,23 +63,6 @@ class RightClickPanel extends React.Component{
                 message.warning('不能操作等级相同或比您高的用户');
                 return;
             }
-            //提升用户等级时更新用户等级信息
-            function updateByPower(level) {
-                let allRoomList = state.homeState.allRoomList;
-                allRoomList.map(function (item1) {
-                    item1.childNode.map(function (item) {
-                        if(item.roomId === state.homeState.currentRoomInfo.roomId){
-                            item.childNode.map(function (itm) {
-                                if(itm.id === objId.substring(1)){
-                                    itm.level = level;
-                                }
-                            })
-                        }
-                    })
-                });
-                // console.log(allRoomList);
-                store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
-            }
             let args ='';
             // console.log(text);
             switch(text){
@@ -98,9 +81,9 @@ class RightClickPanel extends React.Component{
                                         objUserInfo = uItem;
                                         // console.log(objUserInfo);
                                     }
-                                })
+                                });
                             }
-                        })
+                        });
                     });
                     // console.log(objRoomInfo);
                     // console.log(objUserInfo);
@@ -121,9 +104,9 @@ class RightClickPanel extends React.Component{
                                     cTtem.childNode = cTtem.childNode.filter(function (uItem) {
                                         // console.log(uItem.id+','+objUserInfo.id);
                                         return uItem.id !== objUserInfo.id;
-                                    })
+                                    });
                                 }
-                            })
+                            });
                         });
                         // console.log(allRoomListTmp);
                         store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomListTmp});
@@ -147,14 +130,14 @@ class RightClickPanel extends React.Component{
                     //直接插入表backlist
                     console.log(objId);
                     let userId = objId.substring(1);
-                    let args = "?action=get&table=xuser&cond=Id="+userId;
+                    let args = '?action=get&table=xuser&cond=Id='+userId;
                     fetch(generalApi+args)
                         .then(res=>res.json())
                         .then(data=>{
                             console.log(data);
                             let userInfo = data.data[0];
                             console.log(userInfo);
-                            args = "?username="+userInfo.LoginName;
+                            args = '?username='+userInfo.LoginName;
                             fetch(blockUserApi+args).then(res=>{message.success('禁止成功');}).catch(e=>console.error(e));
                         })
                         .catch(e=>console.error(e));
@@ -225,7 +208,7 @@ class RightClickPanel extends React.Component{
                         level:3
                     };
                     send(JSON.stringify(Msg),function(){
-                        updateByPower(3);
+                        updateByPower(3,objId.substring(1));
                         //http请求修改数据
                         let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=3';
                         limitFetch(args);
@@ -242,7 +225,7 @@ class RightClickPanel extends React.Component{
                         level:4
                     };
                     send(JSON.stringify(Msg),function(){
-                        updateByPower(4);
+                        updateByPower(4,objId.substring(1));
                         //http请求修改数据
                         let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=4';
                         limitFetch(args);
@@ -259,7 +242,7 @@ class RightClickPanel extends React.Component{
                         level:2
                     };
                     send(JSON.stringify(Msg),function(){
-                        updateByPower(2);
+                        updateByPower(2,objId.substring(1));
                         //http请求修改数据
                         let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=2';
                         limitFetch(args);
@@ -276,7 +259,7 @@ class RightClickPanel extends React.Component{
                         level:5
                     };
                     send(JSON.stringify(Msg),function(){
-                        updateByPower(5);
+                        updateByPower(5,objId.substring(1));
                         //http请求修改数据
                         let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=5';
                         limitFetch(args);
@@ -292,7 +275,7 @@ class RightClickPanel extends React.Component{
                         level:6
                     };
                     send(JSON.stringify(Msg),function(){
-                        updateByPower(6);
+                        updateByPower(6,objId.substring(1));
                         //http请求修改数据
                         let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=6';
                         limitFetch(args);
@@ -309,7 +292,7 @@ class RightClickPanel extends React.Component{
                         level:7
                     };
                     send(JSON.stringify(Msg),function(){
-                        updateByPower(7);
+                        updateByPower(7,objId.substring(1));
                         //http请求修改数据
                         let args = 'action=update&table=xuser&cond=id='+objId.substring(1)+'&Type=7';
                         limitFetch(args);
@@ -473,7 +456,7 @@ class RightClickPanel extends React.Component{
                     <List
                         onMouseOver={e=>this.mouseOverHandle(e)}
                         className={'right-panel'}
-                        size="small"
+                        size='small'
                         bordered
                         dataSource={this.props.listData}
                         renderItem={item => (<List.Item>{item.title}</List.Item>)}
@@ -482,7 +465,7 @@ class RightClickPanel extends React.Component{
                     >
                     <List
                         className={'right-panel-item'}
-                        size="small"
+                        size='small'
                         bordered
                         dataSource={this.state.operate}
                         renderItem={item => (<List.Item>{item}</List.Item>)}
@@ -491,7 +474,7 @@ class RightClickPanel extends React.Component{
             {this.state.setRoom && <SetRoom roomInfo={this.state.roomInfo} setVisible={this.setSetRoomVisible.bind(this)}></SetRoom>}
             {this.state.sortRoom && <SortRoom roomInfo={this.state.roomInfo} setVisible={this.setSortRoomVisible.bind(this)}></SortRoom>}
 
-        </div>)
+        </div>);
     }
 }
 

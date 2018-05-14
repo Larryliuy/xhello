@@ -1,9 +1,8 @@
-import React,{ Component } from 'react'
-import MessageList from '../components/MessageList'
-import WS, {getDateString, getSendData, send} from "../static/webSocket";
+import React,{ Component } from 'react';
+import MessageList from '../components/MessageList';
 
 
-import store,{ CONSTANT } from '../reducer/reducer';
+import store from '../reducer/reducer';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -20,9 +19,9 @@ class MessageListBox extends React.Component{
     render(){
         return (<div className='message-box' id='messageBox'>
             <MessageList data={state.homeState.messageData}/>
-        </div>)
+        </div>);
     }
 }
 
 
-export default MessageListBox
+export default MessageListBox;

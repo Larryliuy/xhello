@@ -3,10 +3,10 @@ import UserSearch from '../components/UserSearch';
 
 class UserSearchBox extends React.Component{
     render(){
-        return (<div className="logo-slider">
+        return (<div className='logo-slider'>
             <UserSearch></UserSearch>
-        </div>)
+        </div>);
     }
 }
 
-export default UserSearchBox
+export default UserSearchBox;

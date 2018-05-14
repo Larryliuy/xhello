@@ -1,4 +1,4 @@
-import React,{Component} from 'react'
+import React,{Component} from 'react';
 import Register from '../components/Register';
 
 const divStyle = {

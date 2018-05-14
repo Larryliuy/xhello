@@ -1,10 +1,10 @@
 import React,{ Component } from 'react';
 import { Modal, Input, Select  } from 'antd';
 const Option = Select.Option;
-import store, {CONSTANT} from "../reducer/reducer";
-import {message} from "antd/lib/index";
-import {generalApi} from "../static/apiInfo";
-import { updateRoomInfoById } from "../static/comFunctions";
+import store, {CONSTANT} from '../reducer/reducer';
+import {message} from 'antd/lib/index';
+import {generalApi} from '../static/apiInfo';
+import { updateRoomInfoById } from '../static/comFunctions';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -25,11 +25,11 @@ class SetRoom extends React.Component{
                 item.childNode.map(function (citem) {
                     if(roomId === citem.roomId){
                         console.log(citem.color+','+citem.password);
-                        _this.setState({color:citem.color,password:citem.password,title:citem.roomName})
+                        _this.setState({color:citem.color,password:citem.password,title:citem.roomName});
                     }
-                })
+                });
             }
-        })
+        });
 
     }
     handleOk(){
@@ -43,12 +43,12 @@ class SetRoom extends React.Component{
         let args = 'action=update&table=room&cond=id='+roomId+'&color='+roomColor+'&roomName='+roomName+'&password='+roomPassword;
         fetch(generalApi,{
             method:'POST',
-            // credentials: "include",
+            // credentials: 'include',
             headers:{
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body:args//JSON.stringify(args)
-        }).then((response) => {/*console.log(response);*/return response.json()})
+        }).then((response) => {/*console.log(response);*/return response.json();})
             .then(data=>{
                 if(data.status === 'ok'){
                     message.success('修改成功');
@@ -79,7 +79,7 @@ class SetRoom extends React.Component{
     render(){
         return (<div>
             <Modal className={'create-room'}
-                title="设置房间"
+                title='设置房间'
                 okText={'确定'}
                 cancelText={'取消'}
                 visible={this.state.visible}
@@ -106,7 +106,7 @@ class SetRoom extends React.Component{
                 <br/>
                 <label><span>房间密码：</span><Input value={this.state.password} type={'password'} onChange={e=>this.onChangePasswordHandle(e)}  className={'input-style'} placeholder={'请输入房间密码'}/></label>
             </Modal>
-        </div>)
+        </div>);
     }
 }
 

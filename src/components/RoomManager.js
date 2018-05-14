@@ -1,11 +1,11 @@
 import React,{ Component } from 'react';
-import { Modal,Row, Col, Select, Table, Button, List } from 'antd';
+import { Modal,Row, Col, Table, Button, List } from 'antd';
 import UploadAvatar from './UploadAvatar';
-import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
-import {send} from "../static/webSocket";
-import { getUserIconSrc, setRoomInfo } from "../static/comFunctions";
-import {message} from "antd/lib/index";
-import store, {CONSTANT} from "../reducer/reducer";
+import {generalApi, getImgApi, uploadJpegApi} from '../static/apiInfo';
+import {send} from '../static/webSocket';
+import { getUserIconSrc, setRoomInfo } from '../static/comFunctions';
+import {message} from 'antd/lib/index';
+import store, {CONSTANT} from '../reducer/reducer';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -31,7 +31,7 @@ class RoomManager extends React.Component{
                 title: '身份',
                 dataIndex: 'type',
                 key: 'type',
-                render: (text, record) => {return <img src={getUserIconSrc(record.sex,record.type)} />},
+                render: (text, record) => {return <img src={getUserIconSrc(record.sex,record.type)} />;},
             }, {
                 title: '用户名',
                 dataIndex: 'name',
@@ -67,9 +67,9 @@ class RoomManager extends React.Component{
                 width:'80px',
             }];
         }else{
-            console.error("未知的type:"+type);
+            console.error('未知的type:'+type);
         }
-        this.setState({tableColumns:columns})
+        this.setState({tableColumns:columns});
     }
     getDatas(type){
         let datas = [],args,_this=this;
@@ -77,7 +77,7 @@ class RoomManager extends React.Component{
             //请求获取管理员用户
             args = '?action=get&table=xuser&cond=Type<5';
             fetch(generalApi+args)
-                .then(response=>{/*console.log(response);*/return response.json()})
+                .then(response=>{/*console.log(response);*/return response.json();})
                 .then(data=>{
                     // console.log(data);
                     data.data.map(function (item) {
@@ -100,7 +100,7 @@ class RoomManager extends React.Component{
         }else if (type === '黑名单管理'){
             args = '?action=get&table=blacklist';
             fetch(generalApi+args)
-                .then(response=>{/*console.log(response);*/return response.json()})
+                .then(response=>{/*console.log(response);*/return response.json();})
                 .then(data=>{
                     // console.log(data);
                     data.data.map(function (item) {
@@ -119,7 +119,7 @@ class RoomManager extends React.Component{
                 })
                 .catch(e=>console.log(e));
         }else{
-            console.error("未知的type:"+type);
+            console.error('未知的type:'+type);
         }
     }
     componentDidMount(){
@@ -131,14 +131,14 @@ class RoomManager extends React.Component{
             let fileId = state.homeState.currentRoomInfo.avatarFileId;
             console.log(fileId);
             //根据请求获取用户头像
-            console.log(getImgApi+fileId+".dat");
-            fetch(getImgApi+fileId+".dat")
-                .then(res=>{/*console.log(res)*/return res.text()})
+            console.log(getImgApi+fileId+'.dat');
+            fetch(getImgApi+fileId+'.dat')
+                .then(res=>{/*console.log(res)*/return res.text();})
                 .then(data=>{
                     // console.log(data);
                     _this.setState({roomAvatar:data});
                 })
-                .catch(e=>console.error(e))
+                .catch(e=>console.error(e));
         // },10);
     }
     // HandleOk = () => {
@@ -146,9 +146,9 @@ class RoomManager extends React.Component{
     // };
     removeBlackListHandle(blackListId,userName,userIp){
         // console.log(blackListId,userName,userIp);
-        let args = "?action=del&table=blacklist&cond=id="+blackListId;
+        let args = '?action=del&table=blacklist&cond=id='+blackListId;
         fetch(generalApi+args)
-            .then(res=>{/*console.log(res.json());*/message.success('解封成功')})
+            .then(res=>{/*console.log(res.json());*/message.success('解封成功');})
             .catch(e=>console.error(e));
     }
     handleClick(id){
@@ -163,9 +163,9 @@ class RoomManager extends React.Component{
                             if(itm.id === id.toString()){
                                 itm.level = level;
                             }
-                        })
+                        });
                     }
-                })
+                });
             });
             // console.log(allRoomList);
             store.dispatch({type:CONSTANT.ALLROOMLIST,val:allRoomList});
@@ -173,12 +173,12 @@ class RoomManager extends React.Component{
         function limitFetch(args) {
             fetch(generalApi,{
                 method:'POST',
-                // credentials: "include",
+                // credentials: 'include',
                 headers:{
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body:args//JSON.stringify(args)
-            }).then((response) => {/*console.log(response);*/return response.text()})
+            }).then((response) => {/*console.log(response);*/return response.text();})
                 .then(data=>{
                     console.log(data);
                     let datatmp;
@@ -216,9 +216,9 @@ class RoomManager extends React.Component{
                             objRoomInfo = cItem;
                             objUserInfo = uItem;
                         }
-                    })
+                    });
                 }
-            })
+            });
         });
         console.log(objRoomInfo);
         console.log(objUserInfo);
@@ -261,13 +261,13 @@ class RoomManager extends React.Component{
             args;
         console.log(roomInfo.avatarFileId);
         if(roomInfo.avatarFileId){
-            args = "uid="+roomInfo.roomId+"&fileId="+ roomInfo.avatarFileId +"&name="+fileName+"&img="+encodeURIComponent(imgData);
+            args = 'uid='+roomInfo.roomId+'&fileId='+ roomInfo.avatarFileId +'&name='+fileName+'&img='+encodeURIComponent(imgData);
         }else{
-            args = "uid="+roomInfo.roomId+"&name="+roomInfo+"&img="+encodeURIComponent(imgData);
+            args = 'uid='+roomInfo.roomId+'&name='+roomInfo+'&img='+encodeURIComponent(imgData);
         }
         fetch(uploadJpegApi,{
             method:'POST',
-            // credentials: "include",
+            // credentials: 'include',
             headers:{
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -284,7 +284,7 @@ class RoomManager extends React.Component{
                     store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfo});
                     setRoomInfo(roomInfo);
                     //将fileId存入房间表
-                    args = "?action=update&table=room&cond=id="+roomInfo.roomId+"&avatarFileId="+fileId;
+                    args = '?action=update&table=room&cond=id='+roomInfo.roomId+'&avatarFileId='+fileId;
                     fetch(generalApi+args)
                         .then(res=>res.json())
                         .then(data=>{
@@ -293,12 +293,12 @@ class RoomManager extends React.Component{
                                 message.success('更换成功');
                                 let fileId = roomInfo.avatarFileId;
                                 //根据请求获取用户头像
-                                fetch(getImgApi+fileId+".dat")
-                                    .then(res=>{/*console.log(res)*/return res.text()})
+                                fetch(getImgApi+fileId+'.dat')
+                                    .then(res=>{/*console.log(res)*/return res.text();})
                                     .then(data=>{
                                         _this.setState({roomAvatar:data});
                                     })
-                                    .catch(e=>console.error(e))
+                                    .catch(e=>console.error(e));
                             }
                         })
                         .catch(e=>console.error(e));
@@ -332,22 +332,22 @@ class RoomManager extends React.Component{
                 visible={this.props.visible}
                 onOk={this.props.handleOk}
                 onCancel={this.props.handleCancel}
-                okText="确认"
-                cancelText="取消"
+                okText='确认'
+                cancelText='取消'
                 bodyStyle = {{padding:'0px'}}
             >
                 <Row>
                     <Col span={6}>
                         <div className='room-manage-dialog'>
                             <div className='room-manage-list'>
-                                <div className="Dialog-room-avatar">
-                                    <img src={this.state.roomAvatar} alt="logo"/>
+                                <div className='Dialog-room-avatar'>
+                                    <img src={this.state.roomAvatar} alt='logo'/>
                                     <div><button onClick={this.uploadAvatarBtnHandle.bind(this)}>更换头像</button></div>
                                 </div>
                                 <List
                                     style={{paddingLeft:'11px',cursor:'pointer'}}
                                     onClick={e=>this.menuClickhandle(e)}
-                                    size="small"
+                                    size='small'
                                     bordered
                                     dataSource={['管理员设置','黑名单管理']}
                                     renderItem={item => (<List.Item>{item}</List.Item>)}
@@ -368,7 +368,7 @@ class RoomManager extends React.Component{
                           handleOk={this.uploadHandOk.bind(this)}
                           handleCancel={this.uploadHandleCancel.bind(this)}>
             </UploadAvatar>
-        </div>)
+        </div>);
     }
 }
 

@@ -2,13 +2,13 @@
  * webRTC与web audio函数库
  */
 
-import { send } from "../static/webSocket";
-import store, {CONSTANT} from "../reducer/reducer";
-import {getRoomInfo, startMyCam, getPrepareConnectionState, initServerUserInfo} from "./webRtcAudio";
+import { send } from '../static/webSocket';
+import store, {CONSTANT} from '../reducer/reducer';
+import {getRoomInfo, startMyCam, getPrepareConnectionState} from './webRtcAudio';
 import {CONFIG_CONSTANTS, successlog, log, keyerror, updateUserInfo, setRoomInfo} from '../static/comFunctions';
 import { iceServers } from './iceServer';
-import {message} from "antd/lib/index";
-import {emptyNormalQuitUsers, emptyUnexpectedUsers, getNormalQuitUsers, getUnexpectedUsers} from "./webRtcBase";
+import {message} from 'antd/lib/index';
+import {emptyNormalQuitUsers, emptyUnexpectedUsers, getNormalQuitUsers, getUnexpectedUsers} from './webRtcBase';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -19,7 +19,6 @@ let localStream = null, /** 本地音视频流*/
     rtcSessionList=[], /** 本地peerConnection连接对象组*/
     remoteVidoeDom = null, /** 远程video标签Dom*/
     Msg = {}, /** 发送消息*/
-    secondKing ='', /** 连麦者ID*/
     barleyAudioTrack, /** 连麦者音轨*/
     downStream = null, /** 我收到的远程流（作为offer方）*/
     firstCandidate = 0, /** 第一候选人的seq*/
@@ -139,7 +138,7 @@ function startMyCamVideoWithCallback(myVideoTag,isKing,msg){
  * pcOutStream：用于存储peerConnection远程接受到的音频流，作为自己的输出流
  */
 function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isKing) {
-    // log("进入preparePeerConnection函数!",'preparePeerConnectionVideo','webRtcVideo.js');
+    // log('进入preparePeerConnection函数!','preparePeerConnectionVideo','webRtcVideo.js');
     let newConnection,webAudio;
     if (hasRTCPeerConnection()) {
         if(type === 'answer'){//直播模式下，我是发起offer的人不需要获取视频流
@@ -301,16 +300,16 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                 if(Msg.answer) delete Msg.answer;//删除回传的answer
                 Msg.candidate = event.candidate;
                 send(JSON.stringify(Msg),function () {
-                    // log("发送 candidate 给 "+Msg.toUser.id,'onicecandidate','webRtcVideo.js');
-                    // successlog("video-发送 candidate 给 "+Msg.toUser.name);
-                })
+                    // log('发送 candidate 给 '+Msg.toUser.id,'onicecandidate','webRtcVideo.js');
+                    // successlog('video-发送 candidate 给 '+Msg.toUser.name);
+                });
             }else{
-                successlog("video-发送 candidate 给 "+Msg.toUser.name);
+                successlog('video-发送 candidate 给 '+Msg.toUser.name);
             }
         };
         newConnection.oniceconnectionstatechange = function(event) {
-            // console.log(type);
-            let userInfo = state.homeState.userInfo, updateUserMsg;
+            console.log(event);
+            let userInfo = state.homeState.userInfo;
             let objItem ;
             // console.log(userInfo);
             // console.log(wbMsg);
@@ -320,7 +319,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                 }
             });
             switch(newConnection.iceConnectionState) {
-                case "connected":
+                case 'connected':
                     rtcSessionList.map(function (item) {
                         if(item.toUserId == wbMsg.toUser.id) {
                             item.pcState = 'connected';
@@ -383,7 +382,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     }
                     //如果是连麦者则更新set_room_info的secondKing
                     if(vidoeId === 'firstVideo' && localStream && isKing){
-                        secondKing = userInfo.id;
+                        // secondKing = userInfo.id;
                         // console.error('secondKing:'+secondKing);
                         let roomInfo = state.homeState.currentRoomInfo;
                         roomInfo.secondKing = userInfo.id;
@@ -401,8 +400,8 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         };
                         // setTimeout(function () {
                         send(JSON.stringify(msg),function () {
-                            console.log('通知其他用户重新连接')
-                        })
+                            console.log('通知其他用户重新连接');
+                        });
                         // },1000);
                     }
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
@@ -411,8 +410,8 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                     // });
                     updateUserInfo(userInfo);
                     break;
-                case "disconnected":
-                    // console.log("disconnected");
+                case 'disconnected':
+                    // console.log('disconnected');
                     if(type==='offer'){
                         console.log('NormalQuitUsers:',getNormalQuitUsers());
                         if(getNormalQuitUsers()[wbMsg.toUser.id]){
@@ -450,13 +449,13 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
                         }
                     }
                     return;
-                case "failed":
+                case 'failed':
                     if(objItem){
                         objItem.ondisconnected('failed');
                     }
                     // One or more transports has terminated unexpectedly or in an error
                     break;
-                case "closed":
+                case 'closed':
                     // The connection has been closed,本人关闭或被动通知后关闭会触发（即调用peerConnection.close()）,通知后台我已关闭连接
                     if(objItem){
                         if(type === 'offer'){
@@ -552,7 +551,7 @@ function preparePeerConnectionVideo(wbMsg,sessionId,localStream,vidoeId,type,isK
             }
             };
     }else{
-        alert("NO WEBRTC"); return;
+        alert('NO WEBRTC'); return;
     }
 
 }
@@ -667,7 +666,7 @@ function offerPeerConnectionVideo(wbMsg,videoTag,isKing) {
  * */
 function onCreateOfferError(error) {
     keyerror('video-create offer error,'+error.toString());
-    alert("video-An error has occurred 1."+error.toString());
+    alert('video-An error has occurred 1.'+error.toString());
 }
 function answerPeerConnectionVideo(wbMsg,offer,videoId,isKing) {
     // log('进入answerPeerConnection','answerPeerConnectionVideo','webRtcVideo.js');
@@ -714,11 +713,11 @@ function answerPeerConnectionVideo(wbMsg,offer,videoId,isKing) {
             xpc.pc.setLocalDescription(answer);
         });
     }, function (error) {
-        alert("An error has occurred 1.");
+        alert('An error has occurred 1.'+error.toString());
     });
 }
 
-function onAnswerVideo(answer,sessionId,toUserId) {
+function onAnswerVideo(answer,sessionId) {
     log('进入onAnswer','onAnswerVideo','webRtcVideo.js');
     console.log(rtcSessionList);
     let tmpStr = sessionId.split('-')[1]+'-'+sessionId.split('-')[0];
@@ -807,7 +806,7 @@ function onLeaveVideo(userInfo) {
  * 根据toUserId删除RTCSession
  * */
 function delRtcSessionVideo(toUserId) {
-    console.log("%ctoUserId:"+toUserId,'color:red');
+    console.log('%ctoUserId:'+toUserId,'color:red');
     rtcSessionList = rtcSessionList.filter(function (item) {
         return item.toUserId != toUserId;
     });
@@ -890,17 +889,17 @@ function getRoomUserListVideo(callback) {
 /**
  * 申请成为王的函数
  */
-function applyToBeFirstVideo(){
-    let beFirstMsg = {
-        type:'declare_king',
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
-        // roomName: state.homeState.currentRoomInfo.roomName,
-        user:state.homeState.userInfo
-    };
-    send(JSON.stringify(beFirstMsg),function () {
-        log('发送称王的消息到服务器','applyToBeFirstVideo','webRtcVideo.js');
-    });
-}
+// function applyToBeFirstVideo(){
+//     let beFirstMsg = {
+//         type:'declare_king',
+//         roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+//         // roomName: state.homeState.currentRoomInfo.roomName,
+//         user:state.homeState.userInfo
+//     };
+//     send(JSON.stringify(beFirstMsg),function () {
+//         log('发送称王的消息到服务器','applyToBeFirstVideo','webRtcVideo.js');
+//     });
+// }
 
 /**
  * 获取房间信息函数
@@ -921,7 +920,7 @@ function getRoomInfoVideo(roomId){
 /**
  * 入网函数（开始入网）
  */
-let isContinueCounts = 0,sendList = {};
+let sendList = {};
 function startOnlineVideo() {
     if(state.homeState.numberOne == state.homeState.userInfo.id){
         console.log('我已经是王了，不需要连别人');
@@ -1011,9 +1010,9 @@ function mixerAudio(isSecond) {
     }
 }
 
-function hasSecondking() {
-    return !!secondKing;
-}
+// function hasSecondking() {
+//     return !!secondKing;
+// }
 
 /**
  * 初始化webTrcVideo变量
@@ -1026,7 +1025,7 @@ function initVariableVideo() {
     remoteVidoeDom = null;
     Msg = {};
     sendList={};
-    secondKing ='';
+    // secondKing = '';
     barleyAudioTrack=null;
     firstCandidate = 0;
     microphoneStatus = false;
@@ -1044,20 +1043,20 @@ function initVariableVideo() {
 /**
  * 将video视频实时绘到canvas上
  * */
-let intval1 = null,intval2 = null;
+// let intval1 = null,intval2 = null;
 function drawVideoToCanvas() {
-    let firstVideo = document.getElementById("firstVideo");
-    let secondVideo = document.getElementById("secondVideo");
-    let canvas = document.getElementById("liveCanvas");
+    let firstVideo = document.getElementById('firstVideo');
+    let secondVideo = document.getElementById('secondVideo');
+    let canvas = document.getElementById('liveCanvas');
     if(!canvas)return;
     let canvasCtx = canvas.getContext('2d');
     firstVideo.addEventListener('play', function() {
-        intval1 = window.setInterval(function() {
+        window.setInterval(function() {
             canvasCtx.drawImage(firstVideo, 0, 0, 150, 150);
         }, 20);
     }, false);
     secondVideo.addEventListener('play', function() {
-        intval2 = window.setInterval(function() {
+        window.setInterval(function() {
             canvasCtx.drawImage(secondVideo, 150, 0, 150, 150);
         }, 20);
     }, false);
@@ -1106,8 +1105,8 @@ function closeVideoMode() {
             console.log('发送改变房间模式消息给服务器');
             // getRoomInfoVideo(roomInfoTmp.roomId);
             message.success('关闭成功，如需再次开启直播，请等待10~20秒',10);
-        })
-    })
+        });
+    });
 }
 
 /**
@@ -1132,9 +1131,9 @@ function hasDownStream() {
 /**
  * 判断是否有localStream
  * */
-function hasLocalStream() {
-    return !!localStream;
-}
+// function hasLocalStream() {
+//     return !!localStream;
+// }
 
 export {
     startMyCamVideo,
@@ -1147,7 +1146,7 @@ export {
     getPrepareConnectionStateVideo,
     localStream,
     hasDownStream,
-    hasLocalStream,
+    iceRestartVideo,
     getRoomUserListVideo,
     startOnlineVideo,
     setCallbackVideo,

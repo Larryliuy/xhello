@@ -5,7 +5,7 @@ class LivingBox extends React.Component{
     render(){
         return (
             <Living style={{textAlign:'center'}}></Living>
-        )
+        );
     }
 }
 

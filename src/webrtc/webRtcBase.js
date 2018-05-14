@@ -66,4 +66,4 @@ function emptyUnexpectedUsers() {
 export {
     getNormalQuitUsers, addToNormalQuitUsers, removeToNormalQuitUsers, emptyNormalQuitUsers,
     getUnexpectedUsers, addUnexpectedUsers, removeUnexpectedUsers, emptyUnexpectedUsers,
-}
+};

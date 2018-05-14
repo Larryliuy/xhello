@@ -2,11 +2,11 @@ import React,{ Component } from 'react';
 import { message ,Input, Button, Slider, Popover } from 'antd';
 import UploadAvatar from './UploadAvatar';
 import TestDoc from './TestDoc';
-import {generalApi, getImgApi, uploadJpegApi} from "../static/apiInfo";
-import store, {CONSTANT} from "../reducer/reducer";
+import {generalApi, getImgApi, uploadJpegApi} from '../static/apiInfo';
+import store, {CONSTANT} from '../reducer/reducer';
 import { closeMicrophone, openMicrophone } from '../webrtc/webRtcAudio';
-import {send} from "../static/webSocket";
-import { sendCheerAudio, setRoomInfo } from "../static/comFunctions";
+import {send} from '../static/webSocket';
+import { sendCheerAudio, setRoomInfo } from '../static/comFunctions';
 
 let state = store.getState();
 store.subscribe(function () {
@@ -26,7 +26,7 @@ class FooterBottom extends React.Component{
             audioTrack:'',
             microphoneOpen:false,
             avatar:'./images/avatar.png'
-        }
+        };
     }
     componentDidMount(){
         const _this = this;
@@ -34,12 +34,12 @@ class FooterBottom extends React.Component{
             let userInfo = state.homeState.userInfo;
             //根据请求获取用户头像
             if(userInfo.fileId){
-                fetch(getImgApi+userInfo.fileId+".dat")
-                    .then(res=>{/*console.log(res)*/return res.text()})
+                fetch(getImgApi+userInfo.fileId+'.dat')
+                    .then(res=>{/*console.log(res)*/return res.text();})
                     .then(data=>{
                        _this.setState({avatar:data});
                     })
-                    .catch(e=>console.error(e))
+                    .catch(e=>console.error(e));
             }else{
                 _this.setState({avatar:'./images/avatar.png'});
             }
@@ -119,13 +119,13 @@ class FooterBottom extends React.Component{
             userInfo = state.homeState.userInfo;
         let args;
         if(userInfo.fileId){
-            args = "uid="+userInfo.id+"&fileId="+ userInfo .fileId +"&name="+fileName+"&img="+encodeURIComponent(imgData);
+            args = 'uid='+userInfo.id+'&fileId='+ userInfo .fileId +'&name='+fileName+'&img='+encodeURIComponent(imgData);
         }else{
-            args = "uid="+userInfo.id+"&name="+fileName+"&img="+encodeURIComponent(imgData);
+            args = 'uid='+userInfo.id+'&name='+fileName+'&img='+encodeURIComponent(imgData);
         }
         fetch(uploadJpegApi,{
             method:'POST',
-            // credentials: "include",
+            // credentials: 'include',
             headers:{
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -140,7 +140,7 @@ class FooterBottom extends React.Component{
                     userInfo.fileId = fileId;
                     store.dispatch({type:CONSTANT.USERINFO,val:userInfo});
                     //将fileId存入用户表
-                    args = "?action=update&table=xuser&cond=Id="+userInfo.id+"&AvatarFileId="+fileId;
+                    args = '?action=update&table=xuser&cond=Id='+userInfo.id+'&AvatarFileId='+fileId;
                     fetch(generalApi+args)
                         .then(res=>res.json())
                         .then(data=>{
@@ -168,12 +168,12 @@ class FooterBottom extends React.Component{
             _this = this;
         fetch(generalApi,{
             method:'POST',
-            // credentials: "include",
+            // credentials: 'include',
             headers:{
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body:args//JSON.stringify(args)
-        }).then((response) => {/*console.log(response);*/return response.text()})
+        }).then((response) => {/*console.log(response);*/return response.text();})
             .then(data=>{
                 console.log(data);
                 let datatmp;
@@ -284,9 +284,9 @@ class FooterBottom extends React.Component{
                 console.log('send play music msg');
                 roomInfo.musicSrc = musicSrc;
                 setRoomInfo(roomInfo);
-            })
+            });
         }else{
-            message.error('请输入有效音频连接,音频格式 .mp3 .m4a ogg 等')
+            message.error('请输入有效音频连接,音频格式 .mp3 .m4a ogg 等');
         }
     }
     checkFileType(musicSrc){
@@ -357,11 +357,11 @@ class FooterBottom extends React.Component{
             <div className='play-sound'>
                 <span>
                     <img id='play-img' src='./images/icons/music.png' />
-                    <Popover placement="top"
+                    <Popover placement='top'
                              title={'播放网络音乐'}
                              content={this.getContent()}
                              visible={this.state.popVisible}
-                             trigger="click">
+                             trigger='click'>
                     <span id={'play-span'} onClick={()=>this.playMusic()}>播放</span>
                     </Popover>
                 </span>
@@ -372,7 +372,7 @@ class FooterBottom extends React.Component{
                 <video id={'play-audio'}></video>
             </div>
            <TestDoc></TestDoc>
-        </div>)
+        </div>);
     }
 }
 

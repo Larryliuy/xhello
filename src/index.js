@@ -1,14 +1,14 @@
-import React,{ Component } from 'react';
+import React from 'react';
 import ReactDom from 'react-dom';
 import { HashRouter, Route, withRouter, Switch} from 'react-router-dom';
 import { connect,Provider } from 'react-redux';
-import store,{collapsed,CONSTANT} from './reducer/reducer';
+import store from './reducer/reducer';
 import LoginBox from './containers/LoginBox';
 import RegisterBox from './containers/RegisterBox';
 import HomeLayout from './containers/HomeLayout';
 let state = store.getState();
 store.subscribe(function () {
-    state = store.getState()
+    state = store.getState();
 });
 //css
 const h4Style = {
@@ -29,7 +29,7 @@ render(){
                     <Route path='/' component={LoginBox}/>
                 </Switch>
             </div>
-        )
+        );
 }
 
 }
@@ -39,14 +39,14 @@ function mapStateToProps(state) {
     return {
         loginState:state.loginState,
         homeState:state.homeState
-    }
+    };
 }
 //映射Redux action到组件属性
-function mapDispatchToProps(dispatch) {
-    return {
-        onClick:dispatch(collapsed(CONSTANT.COLLAPSED))
-    }
-}
+// function mapDispatchToProps(dispatch) {
+//     return {
+//         onClick:dispatch(collapsed(CONSTANT.COLLAPSED))
+//     }
+// }
 
 
 const App1=withRouter(connect(mapStateToProps)(App));

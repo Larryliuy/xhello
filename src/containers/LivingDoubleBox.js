@@ -5,7 +5,7 @@ class LivingDoubleBox extends React.Component{
     render(){
         return (
             <LivingDouble style={{textAlign:'center'}}></LivingDouble>
-        )
+        );
     }
 }
 

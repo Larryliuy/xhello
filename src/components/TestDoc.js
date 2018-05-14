@@ -1,8 +1,8 @@
-import React,{ Component } from 'react'
-import store from "../reducer/reducer";
+import React,{ Component } from 'react';
+import store from '../reducer/reducer';
 import { Button, Popover, message } from 'antd';
-import {send} from "../static/webSocket";
-import {remaininglogsSendToserver} from "../static/comFunctions";
+import {send} from '../static/webSocket';
+import {remaininglogsSendToserver} from '../static/comFunctions';
 let state = store.getState();
 store.subscribe(function () {
     state = store.getState();
@@ -86,7 +86,7 @@ class TestDoc extends Component{
         this.intervalSendCounts();
         setInterval(function () {
             _this.intervalSendCounts();
-        },5000)
+        },5000);
     }
     intervalSendCounts(){
         let msg = {
@@ -95,7 +95,7 @@ class TestDoc extends Component{
             data:''
         };
         send(JSON.stringify(msg),function () {
-        })
+        });
     }
     serverDelayClick(){
         console.log('serverDelayClick');
@@ -107,23 +107,23 @@ class TestDoc extends Component{
             timestamp:new Date().getTime()
         };
         send(JSON.stringify(sdMsg),function () {
-            console.log('已发送serverDelay消息')
-        })
+            console.log('已发送serverDelay消息');
+        });
     }
     render(){
         return (<div>
-        <Popover placement="top"
+        <Popover placement='top'
                  title={'测试工具'}
                  content={this.getContent()}
                  visible={this.state.popVisible}
-                 trigger="click">
+                 trigger='click'>
             <Button onClick={()=>this.testBtnClick()} style={{position:'absolute',right:'20px',bottom:'10px',zIndex:1000}}>测试工具</Button>
         </Popover>
            {/* <div id={'serverData'} style={{display:this.state.serverDataVisible?'block':'none',position:'absolute',border:'1px solid red',width:'238px',height:'80px',top:'90px',right:'300px',backgroundColor:'white'}}>
                 <p>服务器发送:<span id={'send'} style={{color:'blue'}}>0</span></p>
                 <p>服务器接收:<span id={'recive'} style={{color:'blue'}}>0</span></p>
             </div>*/}
-    </div>)
+    </div>);
     }
 }
 
