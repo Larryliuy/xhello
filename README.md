@@ -4,7 +4,7 @@
     软件架构：p2p架构
     服务端：php+nginx
     前端：react技术栈+webRTC+webAudio+webSocket
-    网址：https://a701.xtell.cn/softwares/xtell_projects_dev/24_YUN_VIDEO/src/web/index.php
+    网址：https://www.xtell.cn/projects/24_YUN_VIDEO/src/web/index.php
     混音频架构：如图所示
 ![](https://github.com/Larryliuy/live/blob/master/screenshots/audioMixer.png)
     混视频架构：如图所示
@@ -22,4 +22,4 @@
 ![](https://github.com/Larryliuy/live/blob/master/screenshots/audioMode.png)
 
 ## 备注描述
-    
+
