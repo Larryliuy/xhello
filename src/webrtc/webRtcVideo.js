@@ -913,7 +913,7 @@ function getRoomInfoVideo(roomId){
     };
     // console.log(beFirstMsg);//这个消息发过去就挂了
     send(JSON.stringify(beFirstMsg),function () {
-        log('发送getRoomInfo消息到服务器','getRoomInfoVideo','webRtcVideo.js');
+        log('video-发送getRoomInfo消息到服务器','getRoomInfoVideo','webRtcVideo.js');
     });
 }
 
@@ -922,7 +922,9 @@ function getRoomInfoVideo(roomId){
  */
 let sendList = {};
 function startOnlineVideo() {
-    if(state.homeState.numberOne == state.homeState.userInfo.id){
+    let userInfo = state.homeState.userInfo;
+    let roomInfo = state.homeState.currentRoomInfo;
+    if(state.homeState.numberOne == userInfo.id){
         console.log('我已经是王了，不需要连别人');
         return;
     }
@@ -942,12 +944,16 @@ function startOnlineVideo() {
         type:'msg',
         typeString:'preOffer',
         ToUserOnly:objUser.minSeqUser.id,
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomId: roomInfo.roomId,		//房间唯一标识符
         // roomName: state.homeState.currentRoomInfo.roomName,
-        fromUser: state.homeState.userInfo,
+        fromUser: userInfo,
         toUser:objUser.minSeqUser
     };
     // console.log(preOfferMsg);
+    if(roomInfo.mode != '1'&& roomInfo.mode != '3'){
+        keyerror('video-当前房间模式非视频模式');
+        return;
+    }
     if(!prepareState){
         setTimeout(function () {
             send(JSON.stringify(preOfferMsg),function () {

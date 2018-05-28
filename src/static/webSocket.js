@@ -1170,11 +1170,11 @@ function onmessage(response){
 
             break;
         case 'get_room_info':
-            log('收到get_room_info消息','onmessage-get_room_info','websocket.js');
             // console.log(state.homeState.currentRoomInfo);
             console.log(dataJson.data);
             // alert(dataJson.data.advertisementFileId,dataJson.data.avatarFileId);
             let roomInfoTmp = dataJson.data;
+            log('收到get_room_info消息:mode'+roomInfoTmp.mode,'onmessage-get_room_info','websocket.js');
             // console.error(roomInfo.mode);
             store.dispatch({type:CONSTANT.CURRENTROOMINFO,val:roomInfoTmp});
             store.dispatch({type:CONSTANT.ROOMMICROPHONEUSER,val:roomInfoTmp.onMicrophoneUsers});
@@ -1206,21 +1206,21 @@ function onmessage(response){
             // console.error('king:'+roomInfo.king+','+new Date().getTime());
             if(roomInfoTmp.king && roomInfoTmp.king != state.homeState.userInfo.id){
                 store.dispatch({type:CONSTANT.NUMBERONE,val:roomInfoTmp.king});
-                if(state.homeState.currentRoomInfo.mode == 0){
-                    log('king已存在，我要入网:'+state.homeState.currentRoomInfo.mode,'onmessage-get_room_info','websocket.js');
+                if(roomInfoTmp.mode == 0){
+                    log('audio-king已存在，我要入网:'+roomInfoTmp.mode,'onmessage-get_room_info','websocket.js');
                     getRoomUserList(startOnline);
-                }else if(state.homeState.currentRoomInfo.mode == 3){
+                }else if(roomInfoTmp.mode == 3){
                     /*Object.keys(roomInfo).map(function (item) {
                         console.log(item+','+roomInfo[item]);
                     });*/
                     if(roomInfoTmp.secondKing){
-                        log('连麦者已存在，我要入网:'+state.homeState.currentRoomInfo.mode,'onmessage-get_room_info','websocket.js');
+                        log('连麦者已存在，我要入网:'+roomInfoTmp.mode,'onmessage-get_room_info','websocket.js');
                         startMyCamVideo(null,false);
                     }
                     getRoomUserListVideo(startOnlineVideo);
                 }else{
                     // alert('already:'+roomInfo.king);
-                    log('king已存在，我要入网:'+state.homeState.currentRoomInfo.mode,'onmessage-get_room_info','websocket.js');
+                    log('video-king已存在，我要入网:'+roomInfoTmp.mode,'onmessage-get_room_info','websocket.js');
                     startMyCamVideo(null,false);
                     getRoomUserListVideo(startOnlineVideo);
                 }

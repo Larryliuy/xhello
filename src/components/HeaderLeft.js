@@ -114,7 +114,7 @@ class HeaderLeft extends React.Component{
         return (<div style={{paddingLeft:'10px',display:'inline-block',width:'100%',height:'100%',fontSize:'0px'}}>
                     <div style={{height:'50%',width:'100%',fontSize:'14px',textAlign:'left',lineHeight:'20px',cursor:'pointer'}}>
                         <Popover  placement='bottomLeft'
-                                  content={ <div onClick={this.showModal} ><span className='menu-logo'><img src='./images/icons/menu.png' /> 主菜单</span></div>}   trigger='click'>
+                                  content={ <div onClick={e=>this.showModal(e)} ><span className='menu-logo'><img src='./images/icons/menu.png' /> 主菜单</span></div>}   trigger='click'>
                             <Icon style={{fontSize:'28px',color:'#fff'}} type='home' />
                         </Popover>
                         <label style={{paddingLeft:'10px'}}>{state.homeState.currentRoomInfo.roomName}</label>

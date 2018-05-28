@@ -1,0 +1,800 @@
+ 0:webSocket连接成功 
+ 1:audio-已获取音频流Audio 
+ 2:发送getRoomInfo消息到服务器 
+ 3:收到get_room_info消息 
+ 4:没有king，我要申请成为新的king 
+ 5:发送称王的消息到服务器 
+ 6:我成为了新的王： 
+ 7:larry1-1异常掉线,unexpected close 
+ 8:VeqhkPe5gb异常掉线,unexpected close 
+ 9:scRYD7XRJM异常掉线,unexpected close 
+ 10:795K9rEgHU异常掉线,unexpected close 
+ 11:从彩云收到准备连接申请 
+ 12:audio-我是否已经发送preOffer给507?:undefined 
+ 13:video-我是否已经发送preOffer给507?:undefined 
+ 14:发送连接申请的回复结果给 彩云,结果：true 
+ 15:从彩云收到offer 
+ 16:进入preparePeerConnection函数! 
+ 17:audio-给 彩云发answer 
+ 18:触发onaddstream 
+ 19:进入mixerAudio 
+ 20:audio-发送 candidate 给 彩云 
+ 21:audio- 与 彩云 连接成功 
+ 22:Dc8dPYEx9B异常掉线,unexpected close 
+ 23:VDNxCODoyH异常掉线,unexpected close 
+ 24:hh3VymNFKF异常掉线,unexpected close 
+ 25:FQlpG2F9hQ异常掉线,unexpected close 
+ 26:从百合收到准备连接申请 
+ 27:audio-我是否已经发送preOffer给509?:undefined 
+ 28:video-我是否已经发送preOffer给509?:undefined 
+ 29:发送连接申请的回复结果给 百合,结果：true 
+ 30:从百合收到offer 
+ 31:进入preparePeerConnection函数! 
+ 32:audio-给 百合发answer 
+ 33:触发onaddstream 
+ 34:进入mixerAudio 
+ 35:audio-发送 candidate 给 百合 
+ 36:audio- 与 百合 连接成功 
+ 37:cL6i2EHUHS异常掉线,unexpected close 
+ 38:OUFgbIb9AW异常掉线,unexpected close 
+ 39:x1IHGaNRfB异常掉线,unexpected close 
+ 40:从彩云-明月1收到准备连接申请 
+ 41:audio-我是否已经发送preOffer给539?:undefined 
+ 42:video-我是否已经发送preOffer给539?:undefined 
+ 43:发送连接申请的回复结果给 彩云-明月1,结果：true 
+ 44:从彩云-明月1收到offer 
+ 45:进入preparePeerConnection函数! 
+ 46:audio-给 彩云-明月1发answer 
+ 47:触发onaddstream 
+ 48:进入mixerAudio 
+ 49:audio-发送 candidate 给 彩云-明月1 
+ 50:audio- 与 彩云-明月1 连接成功 
+ 51:uu5B2k3KGG异常掉线,unexpected close 
+ 52:vpktjFTkwm异常掉线,unexpected close 
+ 53:ICQKLiP7m0异常掉线,unexpected close 
+ 54:NMpLEAfbwW异常掉线,unexpected close 
+ 55:DokLyIy4wz异常掉线,unexpected close 
+ 56:ykNCW2mFOp异常掉线,unexpected close 
+ 57:张慧-阿镜1异常掉线,unexpected close 
+ 58:A72z0IH2SG异常掉线,unexpected close 
+ 59:jPwqaF8x7j异常掉线,unexpected close 
+ 60:liu异常掉线,unexpected close 
+ 61:百合异常掉线,unexpected close 
+ 62:进入ondisconnected，failed 
+ 63:百合进入onLeave! 
+ 64:audio-断开与百合的连接 
+ 65:从张慧-阿镜1收到准备连接申请 
+ 66:audio-我是否已经发送preOffer给541?:undefined 
+ 67:video-我是否已经发送preOffer给541?:undefined 
+ 68:发送连接申请的回复结果给 张慧-阿镜1,结果：true 
+ 69:从张慧-阿镜1收到offer 
+ 70:进入preparePeerConnection函数! 
+ 71:audio-给 张慧-阿镜1发answer 
+ 72:触发onaddstream 
+ 73:进入mixerAudio 
+ 74:audio-发送 candidate 给 张慧-阿镜1 
+ 75:audio- 与 张慧-阿镜1 连接成功 
+ 76:Q7x2TXkDgu异常掉线,unexpected close 
+ 77:进入onopenmicrophone 
+ 78:进入onopenmicrophone 
+ 79:进入onopenmicrophone 
+ 80:LwF1mAjr4G异常掉线,unexpected close 
+ 81:进入onclosemicrophone 
+ 82:进入onclosemicrophone 
+ 83:进入onclosemicrophone 
+ 84:MqaokvN2RX异常掉线,unexpected close 
+ 85:30jjUqZrfu异常掉线,unexpected close 
+ 86:tKtLbxKTNp异常掉线,unexpected close 
+ 87:NcTT5CiNB7异常掉线,unexpected close 
+ 88:进入onopenmicrophone 
+ 89:进入onopenmicrophone 
+ 90:进入onopenmicrophone 
+ 91:从张慧-阿镜1收到offer 
+ 92:进入preparePeerConnection函数! 
+ 93:audio-给 张慧-阿镜1发answer 
+ 94:触发onaddstream 
+ 95:进入mixerAudio 
+ 96:audio-发送 candidate 给 张慧-阿镜1 
+ 97:audio- 与 张慧-阿镜1 连接成功 
+ 98:w3x1PfJufd异常掉线,unexpected close 
+ 99:YQFPJiMbGP异常掉线,unexpected close 
+ 100:91XoyMGGsy异常掉线,unexpected close 
+ 
+  0:3caR8sKWmg异常掉线,unexpected close 
+ 1:P6jGwRcPod异常掉线,unexpected close 
+ 2:收到改变房间模式消息：2,1 
+ 3:larry1进入onLeave! 
+ 4:audio-断开自己的连接 
+ 5:进入onLeaveVideo!1 
+ 6:Video-模式，断开自己的连接 
+ 7:发送getRoomInfo消息到服务器 
+ 8:收到get_room_info消息 
+ 9:audio-已初始化语音模式变量 
+ 10:没有king，我要申请成为新的king 
+ 11:发送称王的消息到服务器 
+ 12:我成为了新的王： 
+ 13:从张慧-阿镜1收到准备连接申请 
+ 14:audio-我是否已经发送preOffer给541?:undefined 
+ 15:video-我是否已经发送preOffer给541?:undefined 
+ 16:发送连接申请的回复结果给 张慧-阿镜1,结果：true 
+ 17:从liu收到准备连接申请 
+ 18:audio-我是否已经发送preOffer给512?:undefined 
+ 19:video-我是否已经发送preOffer给512?:undefined 
+ 20:发送连接申请的回复结果给 liu,结果：true 
+ 21:从彩云-明月1收到准备连接申请 
+ 22:audio-我是否已经发送preOffer给539?:undefined 
+ 23:video-我是否已经发送preOffer给539?:undefined 
+ 24:发送连接申请的回复结果给 彩云-明月1,结果：true 
+ 25:从张慧收到准备连接申请 
+ 26:发送连接申请的回复结果给 张慧,结果：false 
+ 27:从彩云收到准备连接申请 
+ 28:发送连接申请的回复结果给 彩云,结果：false 
+ 29:从张慧收到准备连接申请 
+ 30:发送连接申请的回复结果给 张慧,结果：false 
+ 31:从百合收到准备连接申请 
+ 32:发送连接申请的回复结果给 百合,结果：false 
+ 33:从liu-金花1收到准备连接申请 
+ 34:发送连接申请的回复结果给 liu-金花1,结果：false 
+ 35:从彩云收到准备连接申请 
+ 36:发送连接申请的回复结果给 彩云,结果：false 
+ 37:ieeqfdX4Ca异常掉线,unexpected close 
+ 38:从百合收到准备连接申请 
+ 39:发送连接申请的回复结果给 百合,结果：false 
+ 40:从liu-金花1收到准备连接申请 
+ 41:发送连接申请的回复结果给 liu-金花1,结果：false 
+ 42:从张慧收到准备连接申请 
+ 43:audio-我是否已经发送preOffer给510?:undefined 
+ 44:video-我是否已经发送preOffer给510?:undefined 
+ 45:发送连接申请的回复结果给 张慧,结果：true 
+ 46:从彩云收到准备连接申请 
+ 47:audio-我是否已经发送preOffer给507?:undefined 
+ 48:video-我是否已经发送preOffer给507?:undefined 
+ 49:发送连接申请的回复结果给 彩云,结果：true 
+ 50:从liu-金花1收到准备连接申请 
+ 51:audio-我是否已经发送preOffer给540?:undefined 
+ 52:video-我是否已经发送preOffer给540?:undefined 
+ 53:发送连接申请的回复结果给 liu-金花1,结果：true 
+ 54:从百合收到准备连接申请 
+ 55:发送连接申请的回复结果给 百合,结果：false 
+ 56:从百合收到准备连接申请 
+ 57:发送连接申请的回复结果给 百合,结果：false 
+ 58:从百合收到准备连接申请 
+ 59:发送连接申请的回复结果给 百合,结果：false 
+ 60:收到vodSrc:https://player.youku.com/embed/XMzUxMzIxODg5Mg==?isAutoPlay=true 
+ 61:从百合收到准备连接申请 
+ 62:发送连接申请的回复结果给 百合,结果：false 
+ 63:从百合收到准备连接申请 
+ 64:发送连接申请的回复结果给 百合,结果：false 
+ 65:从百合收到准备连接申请 
+ 66:发送连接申请的回复结果给 百合,结果：false 
+ 67:从百合收到准备连接申请 
+ 68:发送连接申请的回复结果给 百合,结果：false 
+ 69:从百合收到准备连接申请 
+ 70:发送连接申请的回复结果给 百合,结果：false 
+ 71:从百合收到准备连接申请 
+ 72:发送连接申请的回复结果给 百合,结果：false 
+ 73:从百合收到准备连接申请 
+ 74:发送连接申请的回复结果给 百合,结果：false 
+ 75:从百合收到准备连接申请 
+ 76:发送连接申请的回复结果给 百合,结果：false 
+ 77:从百合收到准备连接申请 
+ 78:发送连接申请的回复结果给 百合,结果：false 
+ 79:从百合收到准备连接申请 
+ 80:发送连接申请的回复结果给 百合,结果：false 
+ 81:从百合收到准备连接申请 
+ 82:发送连接申请的回复结果给 百合,结果：false 
+ 83:从百合收到准备连接申请 
+ 84:发送连接申请的回复结果给 百合,结果：false 
+ 85:从百合收到准备连接申请 
+ 86:发送连接申请的回复结果给 百合,结果：false 
+ 87:从百合收到准备连接申请 
+ 88:发送连接申请的回复结果给 百合,结果：false 
+ 89:从百合收到准备连接申请 
+ 90:发送连接申请的回复结果给 百合,结果：false 
+ 91:从百合收到准备连接申请 
+ 92:发送连接申请的回复结果给 百合,结果：false 
+ 93:从百合收到准备连接申请 
+ 94:发送连接申请的回复结果给 百合,结果：false 
+ 95:从百合收到准备连接申请 
+ 96:发送连接申请的回复结果给 百合,结果：false 
+ 97:从百合收到准备连接申请 
+ 98:发送连接申请的回复结果给 百合,结果：false 
+ 99:从百合收到准备连接申请 
+ 100:发送连接申请的回复结果给 百合,结果：false 
+ 101:从xinran1收到准备连接申请 
+ 102:发送连接申请的回复结果给 xinran1,结果：false 
+ 103:从xinran1收到准备连接申请 
+ 104:发送连接申请的回复结果给 xinran1,结果：false 
+ 105:从百合收到准备连接申请 
+ 106:发送连接申请的回复结果给 百合,结果：false 
+ 
+  0:从xinran1收到准备连接申请 
+ 1:发送连接申请的回复结果给 xinran1,结果：false 
+ 2:从xinran1收到准备连接申请 
+ 3:发送连接申请的回复结果给 xinran1,结果：false 
+ 4:从百合收到准备连接申请 
+ 5:发送连接申请的回复结果给 百合,结果：false 
+ 6:从百合收到准备连接申请 
+ 7:发送连接申请的回复结果给 百合,结果：false 
+ 8:从xinran1收到准备连接申请 
+ 9:发送连接申请的回复结果给 xinran1,结果：false 
+ 10:从xinran1收到准备连接申请 
+ 11:发送连接申请的回复结果给 xinran1,结果：false 
+ 12:从百合收到准备连接申请 
+ 13:发送连接申请的回复结果给 百合,结果：false 
+ 14:从xinran1收到准备连接申请 
+ 15:发送连接申请的回复结果给 xinran1,结果：false 
+ 16:从xinran1收到准备连接申请 
+ 17:发送连接申请的回复结果给 xinran1,结果：false 
+ 18:从百合收到准备连接申请 
+ 19:发送连接申请的回复结果给 百合,结果：false 
+ 20:从xinran1收到准备连接申请 
+ 21:发送连接申请的回复结果给 xinran1,结果：false 
+ 22:从xinran1收到准备连接申请 
+ 23:发送连接申请的回复结果给 xinran1,结果：false 
+ 24:从百合收到准备连接申请 
+ 25:发送连接申请的回复结果给 百合,结果：false 
+ 26:从百合收到准备连接申请 
+ 27:发送连接申请的回复结果给 百合,结果：false 
+ 28:从xinran1收到准备连接申请 
+ 29:发送连接申请的回复结果给 xinran1,结果：false 
+ 30:从xinran1收到准备连接申请 
+ 31:发送连接申请的回复结果给 xinran1,结果：false 
+ 32:从百合收到准备连接申请 
+ 33:发送连接申请的回复结果给 百合,结果：false 
+ 34:从xinran1收到准备连接申请 
+ 35:发送连接申请的回复结果给 xinran1,结果：false 
+ 36:从百合收到准备连接申请 
+ 37:发送连接申请的回复结果给 百合,结果：false 
+ 38:从xinran1收到准备连接申请 
+ 39:发送连接申请的回复结果给 xinran1,结果：false 
+ 40:从xinran1收到准备连接申请 
+ 41:发送连接申请的回复结果给 xinran1,结果：false 
+ 42:从xinran1收到准备连接申请 
+ 43:发送连接申请的回复结果给 xinran1,结果：false 
+ 44:从百合收到准备连接申请 
+ 45:发送连接申请的回复结果给 百合,结果：false 
+ 46:从百合收到准备连接申请 
+ 47:发送连接申请的回复结果给 百合,结果：false 
+ 48:从xinran1收到准备连接申请 
+ 49:发送连接申请的回复结果给 xinran1,结果：false 
+ 50:从xinran1收到准备连接申请 
+ 51:发送连接申请的回复结果给 xinran1,结果：false 
+ 52:从百合收到准备连接申请 
+ 53:发送连接申请的回复结果给 百合,结果：false 
+ 54:从xinran1收到准备连接申请 
+ 55:发送连接申请的回复结果给 xinran1,结果：false 
+ 56:从百合收到准备连接申请 
+ 57:发送连接申请的回复结果给 百合,结果：false 
+ 58:从xinran1收到准备连接申请 
+ 59:发送连接申请的回复结果给 xinran1,结果：false 
+ 60:FknnjsITW3异常掉线,unexpected close 
+ 61:nAoTeXyLs3异常掉线,unexpected close 
+ 62:从xinran1收到准备连接申请 
+ 63:audio-我是否已经发送preOffer给544?:undefined 
+ 64:video-我是否已经发送preOffer给544?:undefined 
+ 65:发送连接申请的回复结果给 xinran1,结果：true 
+ 66:从百合收到准备连接申请 
+ 67:audio-我是否已经发送preOffer给509?:undefined 
+ 68:video-我是否已经发送preOffer给509?:undefined 
+ 69:发送连接申请的回复结果给 百合,结果：true 
+ 70:6JqfjxEhbm异常掉线,unexpected close 
+ 71:从土016QW顺南收到准备连接申请 
+ 72:audio-我是否已经发送preOffer给545?:undefined 
+ 73:video-我是否已经发送preOffer给545?:undefined 
+ 74:发送连接申请的回复结果给 土016QW顺南,结果：true 
+ 75:nCz70wGpvq异常掉线,unexpected close 
+ 76:从张慧-欣然1收到准备连接申请 
+ 77:audio-我是否已经发送preOffer给543?:undefined 
+ 78:video-我是否已经发送preOffer给543?:undefined 
+ 79:发送连接申请的回复结果给 张慧-欣然1,结果：true 
+ 80:从舒楠收到准备连接申请 
+ 81:audio-我是否已经发送preOffer给506?:undefined 
+ 82:video-我是否已经发送preOffer给506?:undefined 
+ 83:发送连接申请的回复结果给 舒楠,结果：true 
+ 84:HPUfPKEx9w异常掉线,unexpected close 
+ 85:从舒楠收到准备连接申请 
+ 86:audio-我是否已经发送preOffer给506?:undefined 
+ 87:video-我是否已经发送preOffer给506?:undefined 
+ 88:发送连接申请的回复结果给 舒楠,结果：true 
+ 89:发送getRoomInfo消息到服务器 
+ 90:收到get_room_info消息 
+ 91:audio-已初始化语音模式变量 
+ 92:没有king，我要申请成为新的king 
+ 93:发送称王的消息到服务器 
+ 94:收到改变房间模式消息：0,undefined 
+ 95:larry1进入onLeave! 
+ 96:audio-断开自己的连接 
+ 97:进入onLeaveVideo!1 
+ 98:Video-模式，断开自己的连接 
+ 99:我成为了新的王： 
+ 100:从xinran1收到准备连接申请 
+ 101:audio-我是否已经发送preOffer给544?:undefined 
+ 102:video-我是否已经发送preOffer给544?:undefined 
+ 103:发送连接申请的回复结果给 xinran1,结果：true 
+ 104:从张慧-欣然1收到准备连接申请 
+ 105:audio-我是否已经发送preOffer给543?:undefined 
+ 106:video-我是否已经发送preOffer给543?:undefined 
+ 107:发送连接申请的回复结果给 张慧-欣然1,结果：true 
+ 108:从张慧-阿镜1收到准备连接申请 
+ 109:audio-我是否已经发送preOffer给541?:undefined 
+ 110:video-我是否已经发送preOffer给541?:undefined 
+ 111:发送连接申请的回复结果给 张慧-阿镜1,结果：true 
+ 112:从土016QW顺南收到准备连接申请 
+ 113:发送连接申请的回复结果给 土016QW顺南,结果：false 
+ 114:从彩云-明月1收到准备连接申请 
+ 115:发送连接申请的回复结果给 彩云-明月1,结果：false 
+ 116:从liu-金花1收到准备连接申请 
+ 117:发送连接申请的回复结果给 liu-金花1,结果：false 
+ 118:从张慧收到准备连接申请 
+ 119:发送连接申请的回复结果给 张慧,结果：false 
+ 120:从xinran1收到offer 
+ 121:进入preparePeerConnection函数! 
+ 122:audio-给 xinran1发answer 
+ 123:触发onaddstream 
+ 124:进入mixerAudio 
+ 125:从彩云收到准备连接申请 
+ 126:发送连接申请的回复结果给 彩云,结果：false 
+ 127:从张慧-阿镜1收到offer 
+ 128:进入preparePeerConnection函数! 
+ 129:从张慧-欣然1收到offer 
+ 130:进入preparePeerConnection函数! 
+ 131:audio-给 张慧-阿镜1发answer 
+ 132:audio-给 张慧-欣然1发answer 
+ 133:触发onaddstream 
+ 134:进入mixerAudio 
+ 135:pcOutStream is not exist! and pcStatus:connecting,toUser:张慧-欣然1 
+ 136:audio-发送 candidate 给 张慧-欣然1 
+ 137:audio- 与 xinran1 连接成功 
+ 138:触发onaddstream 
+ 139:进入mixerAudio 
+ 140:audio-发送 candidate 给 张慧-欣然1 
+ 141:从百合收到准备连接申请 
+ 142:发送连接申请的回复结果给 百合,结果：false 
+ 143:audio- 与 张慧-欣然1 连接成功 
+ 144:已与张慧-欣然1完成混音 
+ 145:audio-发送 candidate 给 张慧-欣然1 
+ 
+  0:audio- 与 张慧-阿镜1 连接成功 
+ 1:土016QW顺南异常掉线,unexpected close 
+ 2:舒楠异常掉线,unexpected close 
+ 3:张慧-欣然1异常掉线,unexpected close 
+ 4:进入ondisconnected，failed 
+ 5:张慧-欣然1进入onLeave! 
+ 6:audio-断开与张慧-欣然1的连接 
+ 7:从liu-金花1收到准备连接申请 
+ 8:audio-我是否已经发送preOffer给540?:undefined 
+ 9:video-我是否已经发送preOffer给540?:undefined 
+ 10:发送连接申请的回复结果给 liu-金花1,结果：true 
+ 11:从liu-金花1收到offer 
+ 12:进入preparePeerConnection函数! 
+ 13:audio-给 liu-金花1发answer 
+ 14:触发onaddstream 
+ 15:进入mixerAudio 
+ 16:audio-发送 candidate 给 liu-金花1 
+ 17:audio- 与 liu-金花1 连接成功 
+ 18:cUQ6N4dcLA异常掉线,unexpected close 
+ 19:vNvxIxJDXy异常掉线,unexpected close 
+ 20:2X6HyFyrnr异常掉线,unexpected close 
+ 21:bUSe6XkUg4异常掉线,unexpected close 
+ 22:8TZzCSMnH5异常掉线,unexpected close 
+ 23:xinran1异常掉线,unexpected close 
+ 24:liu异常掉线,unexpected close 
+ 25:进入ondisconnected，failed 
+ 26:xinran1进入onLeave! 
+ 27:audio-断开与xinran1的连接 
+ 28:从彩云-明月1收到准备连接申请 
+ 29:audio-我是否已经发送preOffer给539?:undefined 
+ 30:video-我是否已经发送preOffer给539?:undefined 
+ 31:发送连接申请的回复结果给 彩云-明月1,结果：true 
+ 32:从彩云收到准备连接申请 
+ 33:发送连接申请的回复结果给 彩云,结果：false 
+ 34:从彩云-明月1收到offer 
+ 35:进入preparePeerConnection函数! 
+ 36:audio-给 彩云-明月1发answer 
+ 37:触发onaddstream 
+ 38:进入mixerAudio 
+ 39:audio-发送 candidate 给 彩云-明月1 
+ 40:audio- 与 彩云-明月1 连接成功 
+ 41:从张慧收到准备连接申请 
+ 42:发送连接申请的回复结果给 张慧,结果：false 
+ 43:7mMci3LFQb异常掉线,unexpected close 
+ 44:audio- 与 张慧-阿镜1 连接成功 
+ 45:收到改变房间模式消息：1,1 
+ 46:larry1进入onLeave! 
+ 47:audio-断开自己的连接 
+ 48:进入onLeaveVideo!1 
+ 49:Video-模式，断开自己的连接 
+ 50:发送getRoomInfo消息到服务器 
+ 51:收到get_room_info消息 
+ 52:audio-已初始化语音模式变量 
+ 53:没有king，我要申请成为新的king 
+ 54:发送称王的消息到服务器 
+ 55:我成为了新的王： 
+ 56:video-我是直播者，已获取音视频流Video 
+ 57:从百合收到准备连接申请 
+ 58:audio-我是否已经发送preOffer给509?:undefined 
+ 59:video-我是否已经发送preOffer给509?:undefined 
+ 60:发送连接申请的回复结果给 百合,结果：true 
+ 61:从百合收到offer 
+ 62:从liu收到准备连接申请 
+ 63:audio-我是否已经发送preOffer给512?:undefined 
+ 64:video-我是否已经发送preOffer给512?:undefined 
+ 65:发送连接申请的回复结果给 liu,结果：true 
+ 66:从土016QW顺南收到准备连接申请 
+ 67:audio-我是否已经发送preOffer给545?:undefined 
+ 68:video-我是否已经发送preOffer给545?:undefined 
+ 69:发送连接申请的回复结果给 土016QW顺南,结果：true 
+ 70:从张慧-阿镜1收到准备连接申请 
+ 71:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 72:video-已发送answer给百合 
+ 73:从张慧收到准备连接申请 
+ 74:发送连接申请的回复结果给 张慧,结果：false 
+ 75:从土016QW顺南收到offer 
+ 76:从liu-金花1收到准备连接申请 
+ 77:发送连接申请的回复结果给 liu-金花1,结果：false 
+ 78:从彩云-明月1收到准备连接申请 
+ 79:发送连接申请的回复结果给 彩云-明月1,结果：false 
+ 80:从彩云收到准备连接申请 
+ 81:发送连接申请的回复结果给 彩云,结果：false 
+ 82:video-已发送answer给土016QW顺南 
+ 83:从张慧-欣然1收到准备连接申请 
+ 84:发送连接申请的回复结果给 张慧-欣然1,结果：false 
+ 85:从张慧-阿镜1收到准备连接申请 
+ 86:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 87:从张慧收到准备连接申请 
+ 88:发送连接申请的回复结果给 张慧,结果：false 
+ 89:从liu-金花1收到准备连接申请 
+ 90:发送连接申请的回复结果给 liu-金花1,结果：false 
+ 91:从彩云-明月1收到准备连接申请 
+ 92:发送连接申请的回复结果给 彩云-明月1,结果：false 
+ 93:video-发送 candidate 给 土016QW顺南 
+ 94:从彩云收到准备连接申请 
+ 95:发送连接申请的回复结果给 彩云,结果：false 
+ 96:从百合收到准备连接申请 
+ 97:发送连接申请的回复结果给 百合,结果：false 
+ 98:从张慧-欣然1收到准备连接申请 
+ 99:发送连接申请的回复结果给 张慧-欣然1,结果：false 
+ 100:video- 与 土016QW顺南 连接成功 
+ 101:从舒楠收到准备连接申请 
+ 102:发送连接申请的回复结果给 舒楠,结果：false 
+ 
+  0:从舒楠收到准备连接申请 
+ 1:发送连接申请的回复结果给 舒楠,结果：false 
+ 2:lkVIpZIbJ4异常掉线,unexpected close 
+ 3:video-进入ondisconnected,status:failed 
+ 4:进入onLeaveVideo!509 
+ 5:从张慧-阿镜1收到准备连接申请 
+ 6:audio-我是否已经发送preOffer给541?:undefined 
+ 7:video-我是否已经发送preOffer给541?:undefined 
+ 8:发送连接申请的回复结果给 张慧-阿镜1,结果：true 
+ 9:从张慧-阿镜1收到offer 
+ 10:从张慧收到准备连接申请 
+ 11:发送连接申请的回复结果给 张慧,结果：false 
+ 12:video-已发送answer给张慧-阿镜1 
+ 13:ouHmcWCy0Q异常掉线,unexpected close 
+ 14:video-发送 candidate 给 张慧-阿镜1 
+ 15:从张慧收到准备连接申请 
+ 16:发送连接申请的回复结果给 张慧,结果：false 
+ 17:从张慧-阿镜1收到准备连接申请 
+ 18:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 19:video- 与 张慧-阿镜1 连接成功 
+ 20:video-发送 candidate 给 张慧-阿镜1 
+ 21:Rroj00XvWC异常掉线,unexpected close 
+ 22:video-进入ondisconnected,status:failed 
+ 23:进入onLeaveVideo!541 
+ 24:从liu收到准备连接申请 
+ 25:audio-我是否已经发送preOffer给512?:undefined 
+ 26:video-我是否已经发送preOffer给512?:undefined 
+ 27:发送连接申请的回复结果给 liu,结果：true 
+ 28:从百合收到准备连接申请 
+ 29:audio-我是否已经发送preOffer给509?:undefined 
+ 30:video-我是否已经发送preOffer给509?:undefined 
+ 31:发送连接申请的回复结果给 百合,结果：true 
+ 32:从百合收到offer 
+ 33:video-已发送answer给百合 
+ 34:JzGoDD6rg2异常掉线,unexpected close 
+ 35:从舒楠收到准备连接申请 
+ 36:audio-我是否已经发送preOffer给506?:undefined 
+ 37:video-我是否已经发送preOffer给506?:undefined 
+ 38:发送连接申请的回复结果给 舒楠,结果：true 
+ 39:从百合收到准备连接申请 
+ 40:发送连接申请的回复结果给 百合,结果：false 
+ 41:video-进入ondisconnected,status:failed 
+ 42:进入onLeaveVideo!509 
+ 43:从舒楠收到准备连接申请 
+ 44:发送连接申请的回复结果给 舒楠,结果：false 
+ 45:您与土016QW顺南进入disconnected状态,收到了他的onLeave消息 
+ 46:video-进入ondisconnected,status:disconnected 
+ 47:进入onLeaveVideo!545 
+ 48:从张慧-欣然1收到准备连接申请 
+ 49:audio-我是否已经发送preOffer给543?:undefined 
+ 50:video-我是否已经发送preOffer给543?:undefined 
+ 51:发送连接申请的回复结果给 张慧-欣然1,结果：true 
+ 52:从张慧-欣然1收到offer 
+ 53:从彩云-明月1收到准备连接申请 
+ 54:发送连接申请的回复结果给 彩云-明月1,结果：false 
+ 55:video-已发送answer给张慧-欣然1 
+ 56:video-发送 candidate 给 张慧-欣然1 
+ 57:video- 与 张慧-欣然1 连接成功 
+ 58:video-发送 candidate 给 张慧-欣然1 
+ 59:舒楠异常掉线,unexpected close 
+ 60:从舒楠收到准备连接申请 
+ 61:发送连接申请的回复结果给 舒楠,结果：false 
+ 62:收到 larry1的申请答复， 结果：failed 
+ 63:发送getRoomInfo消息到服务器 
+ 64:收到get_room_info消息 
+ 65:audio-已初始化语音模式变量 
+ 66:没有king，我要申请成为新的king 
+ 67:发送称王的消息到服务器 
+ 68:我成为了新的王： 
+ 69:video-我是直播者，已获取音视频流Video 
+ 70:从舒楠收到准备连接申请 
+ 71:发送连接申请的回复结果给 舒楠,结果：false 
+ 72:video-进入ondisconnected,status:failed 
+ 73:jnJ0vrVdrE异常掉线,unexpected close 
+ 74:舒楠异常掉线,unexpected close 
+ 75:F5cQZKYmfq异常掉线,unexpected close 
+ 76:发送getRoomInfo消息到服务器 
+ 77:收到get_room_info消息 
+ 78:audio-已初始化语音模式变量 
+ 79:没有king，我要申请成为新的king 
+ 80:发送称王的消息到服务器 
+ 81:收到改变房间模式消息：0,undefined 
+ 82:larry1进入onLeave! 
+ 83:audio-断开自己的连接 
+ 84:进入onLeaveVideo!1 
+ 85:Video-模式，断开自己的连接 
+ 86:我成为了新的王： 
+ 87:从xinran1收到准备连接申请 
+ 88:audio-我是否已经发送preOffer给544?:undefined 
+ 89:video-我是否已经发送preOffer给544?:undefined 
+ 90:发送连接申请的回复结果给 xinran1,结果：true 
+ 91:从xinran1收到offer 
+ 92:进入preparePeerConnection函数! 
+ 93:audio-给 xinran1发answer 
+ 94:触发onaddstream 
+ 95:进入mixerAudio 
+ 96:从彩云收到准备连接申请 
+ 97:audio-我是否已经发送preOffer给507?:undefined 
+ 98:video-我是否已经发送preOffer给507?:undefined 
+ 99:发送连接申请的回复结果给 彩云,结果：true 
+ 100:从liu收到准备连接申请 
+ 101:audio-我是否已经发送preOffer给512?:undefined 
+ 102:video-我是否已经发送preOffer给512?:undefined 
+ 103:发送连接申请的回复结果给 liu,结果：true 
+ 104:从liu收到准备连接申请 
+ 105:发送连接申请的回复结果给 liu,结果：false 
+ 106:从张慧-欣然1收到准备连接申请 
+ 107:发送连接申请的回复结果给 张慧-欣然1,结果：false 
+ 108:从liu-金花1收到准备连接申请 
+ 109:发送连接申请的回复结果给 liu-金花1,结果：false 
+ 110:从彩云-明月1收到准备连接申请 
+ 111:发送连接申请的回复结果给 彩云-明月1,结果：false 
+ 112:audio-发送 candidate 给 xinran1 
+ 113:从彩云收到offer 
+ 114:进入preparePeerConnection函数! 
+ 115:从张慧-欣然1收到准备连接申请 
+ 116:发送连接申请的回复结果给 张慧-欣然1,结果：false 
+ 117:audio-给 彩云发answer 
+ 118:触发onaddstream 
+ 119:进入mixerAudio 
+ 120:从百合收到准备连接申请 
+ 121:发送连接申请的回复结果给 百合,结果：false 
+ 122:从张慧-阿镜1收到准备连接申请 
+ 123:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 124:audio- 与 xinran1 连接成功 
+ 125:audio-发送 candidate 给 彩云 
+ 126:audio- 与 彩云 连接成功 
+ 127:从彩云-明月1收到准备连接申请 
+ 128:发送连接申请的回复结果给 彩云-明月1,结果：false 
+ 129:从张慧-欣然1收到准备连接申请 
+ 130:发送连接申请的回复结果给 张慧-欣然1,结果：false 
+ 
+  0:webSocket连接成功 
+ 1:audio-已获取音频流Audio 
+ 2:发送getRoomInfo消息到服务器 
+ 3:收到get_room_info消息 
+ 4:king已存在，我要入网:0 
+ 5:发送准备连接（pre-offer）消息给 510 
+ 6:收到 张慧的申请答复， 结果：ok 
+ 7:audio-已发offer给 张慧 
+ 8:进入preparePeerConnection函数! 
+ 9:从张慧收到answer 
+ 10:进入onAnswer 
+ 11:触发onaddstream 
+ 12:进入mixerAudio 
+ 13:audio-发送 candidate 给 张慧 
+ 14:audio- 与 张慧 连接成功 
+ 15:tHGcDtvOVa异常掉线,unexpected close 
+ 16:收到改变房间模式消息：3,1 
+ 17:larry1进入onLeave! 
+ 18:audio-断开自己的连接 
+ 19:进入onLeaveVideo!1 
+ 20:Video-模式，断开自己的连接 
+ 21:发送getRoomInfo消息到服务器 
+ 22:收到get_room_info消息 
+ 23:audio-已初始化语音模式变量 
+ 24:没有king，我要申请成为新的king 
+ 25:发送称王的消息到服务器 
+ 26:我成为了新的王： 
+ 27:video-我是直播者，已获取音视频流Video 
+ 28:从张慧-欣然1收到准备连接申请 
+ 29:audio-我是否已经发送preOffer给543?:undefined 
+ 30:video-我是否已经发送preOffer给543?:undefined 
+ 31:发送连接申请的回复结果给 张慧-欣然1,结果：true 
+ 32:从张慧-阿镜1收到准备连接申请 
+ 33:audio-我是否已经发送preOffer给541?:undefined 
+ 34:video-我是否已经发送preOffer给541?:undefined 
+ 35:发送连接申请的回复结果给 张慧-阿镜1,结果：true 
+ 36:从张慧-欣然1收到offer 
+ 37:video-已发送answer给张慧-欣然1 
+ 38:从张慧-阿镜1收到offer 
+ 39:video-已发送answer给张慧-阿镜1 
+ 40:video-发送 candidate 给 张慧-阿镜1 
+ 41:video- 与 张慧-欣然1 连接成功 
+ 42:彩云异常掉线,unexpected close 
+ 43:百合异常掉线,unexpected close 
+ 44:从张慧收到准备连接申请 
+ 45:audio-我是否已经发送preOffer给510?:undefined 
+ 46:video-我是否已经发送preOffer给510?:undefined 
+ 47:发送连接申请的回复结果给 张慧,结果：true 
+ 48:video-发送 candidate 给 张慧-阿镜1 
+ 49:video- 与 张慧-阿镜1 连接成功 
+ 50:从张慧收到offer 
+ 51:video-已发送answer给张慧 
+ 52:liu异常掉线,unexpected close 
+ 53:xinran1异常掉线,unexpected close 
+ 54:video-发送 candidate 给 张慧 
+ 55:video- 与 张慧 连接成功 
+ 56:PRac4YvIeB异常掉线,unexpected close 
+ 57:收到连麦申请:543 
+ 58:进入onLeaveVideo!1 
+ 59:Video-模式，断开自己的连接 
+ 60:收到连麦申请:507 
+ 61:进入onLeaveVideo!1 
+ 62:Video-模式，断开自己的连接 
+ 63:从彩云收到offer 
+ 64:video-已发送answer给彩云 
+ 65:video-发送 candidate 给 彩云 
+ 66:video- 与 彩云 连接成功 
+ 67:从xinran1收到准备连接申请 
+ 68:audio-我是否已经发送preOffer给544?:undefined 
+ 69:video-我是否已经发送preOffer给544?:undefined 
+ 70:发送连接申请的回复结果给 xinran1,结果：true 
+ 71:从张慧-欣然1收到准备连接申请 
+ 72:audio-我是否已经发送preOffer给543?:undefined 
+ 73:video-我是否已经发送preOffer给543?:undefined 
+ 74:发送连接申请的回复结果给 张慧-欣然1,结果：true 
+ 75:从liu收到准备连接申请 
+ 76:发送连接申请的回复结果给 liu,结果：false 
+ 77:从张慧-阿镜1收到准备连接申请 
+ 78:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 79:从xinran1收到offer 
+ 80:video-已发送answer给xinran1 
+ 81:从百合收到准备连接申请 
+ 82:发送连接申请的回复结果给 百合,结果：false 
+ 83:从张慧-欣然1收到offer 
+ 84:video-已发送answer给张慧-欣然1 
+ 85:从舒楠收到准备连接申请 
+ 86:发送连接申请的回复结果给 舒楠,结果：false 
+ 87:video-发送 candidate 给 张慧-欣然1 
+ 88:video- 与 张慧-欣然1 连接成功 
+ 89:从liu收到准备连接申请 
+ 90:发送连接申请的回复结果给 liu,结果：false 
+ 91:从张慧收到准备连接申请 
+ 92:发送连接申请的回复结果给 张慧,结果：false 
+ 93:从张慧-阿镜1收到准备连接申请 
+ 94:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 95:video-发送 candidate 给 张慧-欣然1 
+ 96:video- 与 xinran1 连接成功 
+ 97:收到连麦申请:506 
+ 98:Jlu9tMVqUQ异常掉线,unexpected close 
+ 99:xaGYhtDXxX异常掉线,unexpected close 
+ 100:g8Uv6x6iHi异常掉线,unexpected close 
+ 101:vmUvaaqSFJ异常掉线,unexpected close 
+ 102:舒楠异常掉线,unexpected close 
+ 
+  0:webSocket连接成功 
+ 1:audio-已获取音频流Audio 
+ 2:发送getRoomInfo消息到服务器 
+ 3:收到get_room_info消息 
+ 4:king已存在，我要入网:0 
+ 5:发送准备连接（pre-offer）消息给 541 
+ 6:收到 张慧-阿镜1的申请答复， 结果：ok 
+ 7:audio-已发offer给 张慧-阿镜1 
+ 8:进入preparePeerConnection函数! 
+ 9:从张慧-阿镜1收到answer 
+ 10:进入onAnswer 
+ 11:触发onaddstream 
+ 12:进入mixerAudio 
+ 13:audio-发送 candidate 给 张慧-阿镜1 
+ 14:audio- 与 张慧-阿镜1 连接成功 
+ 15:收到改变房间模式消息：3,1 
+ 16:larry1进入onLeave! 
+ 17:audio-断开自己的连接 
+ 18:进入onLeaveVideo!1 
+ 19:Video-模式，断开自己的连接 
+ 20:发送getRoomInfo消息到服务器 
+ 21:收到get_room_info消息 
+ 22:audio-已初始化语音模式变量 
+ 23:没有king，我要申请成为新的king 
+ 24:发送称王的消息到服务器 
+ 25:我成为了新的王： 
+ 26:video-我是直播者，已获取音视频流Video 
+ 27:从xinran1收到准备连接申请 
+ 28:audio-我是否已经发送preOffer给544?:undefined 
+ 29:video-我是否已经发送preOffer给544?:undefined 
+ 30:发送连接申请的回复结果给 xinran1,结果：true 
+ 31:从彩云收到准备连接申请 
+ 32:audio-我是否已经发送preOffer给507?:undefined 
+ 33:video-我是否已经发送preOffer给507?:undefined 
+ 34:发送连接申请的回复结果给 彩云,结果：true 
+ 35:从liu收到准备连接申请 
+ 36:audio-我是否已经发送preOffer给512?:undefined 
+ 37:video-我是否已经发送preOffer给512?:undefined 
+ 38:发送连接申请的回复结果给 liu,结果：true 
+ 39:从张慧-阿镜1收到准备连接申请 
+ 40:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 41:从xinran1收到offer 
+ 42:从百合收到准备连接申请 
+ 43:发送连接申请的回复结果给 百合,结果：false 
+ 44:video-已发送answer给xinran1 
+ 45:从彩云收到offer 
+ 46:video-已发送answer给彩云 
+ 47:从张慧收到准备连接申请 
+ 48:发送连接申请的回复结果给 张慧,结果：false 
+ 49:video-发送 candidate 给 彩云 
+ 50:video- 与 彩云 连接成功 
+ 51:video-发送 candidate 给 彩云 
+ 52:video- 与 xinran1 连接成功 
+ 53:收到连麦申请:544 
+ 54:进入onLeaveVideo!1 
+ 55:Video-模式，断开自己的连接 
+ 56:从xinran1收到offer 
+ 57:video-已发送answer给xinran1 
+ 58:video-发送 candidate 给 xinran1 
+ 59:yStuCanGuk异常掉线,unexpected close 
+ 60:video- 与 xinran1 连接成功 
+ 61:从liu收到准备连接申请 
+ 62:audio-我是否已经发送preOffer给512?:undefined 
+ 63:video-我是否已经发送preOffer给512?:undefined 
+ 64:发送连接申请的回复结果给 liu,结果：true 
+ 65:从liu收到准备连接申请 
+ 66:audio-我是否已经发送preOffer给512?:undefined 
+ 67:video-我是否已经发送preOffer给512?:undefined 
+ 68:发送连接申请的回复结果给 liu,结果：true 
+ 69:从liu收到准备连接申请 
+ 70:audio-我是否已经发送preOffer给512?:undefined 
+ 71:video-我是否已经发送preOffer给512?:undefined 
+ 72:发送连接申请的回复结果给 liu,结果：true 
+ 73:从彩云收到准备连接申请 
+ 74:audio-我是否已经发送preOffer给507?:undefined 
+ 75:video-我是否已经发送preOffer给507?:undefined 
+ 76:发送连接申请的回复结果给 彩云,结果：true 
+ 77:从liu收到准备连接申请 
+ 78:发送连接申请的回复结果给 liu,结果：false 
+ 79:从liu收到准备连接申请 
+ 80:发送连接申请的回复结果给 liu,结果：false 
+ 81:从彩云收到offer 
+ 82:从张慧-阿镜1收到准备连接申请 
+ 83:发送连接申请的回复结果给 张慧-阿镜1,结果：false 
+ 84:video-已发送answer给彩云 
+ 85:video-发送 candidate 给 彩云 
+ 86:video- 与 彩云 连接成功 
+ 87:从liu收到准备连接申请 
+ 88:发送连接申请的回复结果给 liu,结果：false 
+ 89:从liu收到准备连接申请 
+ 90:发送连接申请的回复结果给 liu,结果：false 
+ 91:从百合收到准备连接申请 
+ 92:发送连接申请的回复结果给 百合,结果：false 
+ 93:收到连麦申请:544 
+ 94:收到连麦申请:544 
+ 95:进入onLeaveVideo!1 
+ 96:Video-模式，断开自己的连接 
+ 97:从xinran1收到offer 
+ 98:video-已发送answer给xinran1 
+ 99:b1EWcOLUDN异常掉线,unexpected close 
+ 100:收到连麦申请:544 
+ 101:video-发送 candidate 给 xinran1 
+ 

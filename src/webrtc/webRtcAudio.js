@@ -387,7 +387,9 @@ function preparePeerConnection(wbMsg,sessionId,micphoneStream,remoteVidoeId,type
                     //父亲掉线
                     // userInfo = state.homeState.userInfo;
                     userInfo.parentNode = '';
-                    firstCandidate = 0;
+                    if(status === 'failed'){//压根连不上的情况就不需要重置firstCandidate
+                        firstCandidate = 0;
+                    }
                     getRoomInfo(state.homeState.currentRoomInfo.roomId);
                 }
                 // let updateUserMsg = {
@@ -729,7 +731,7 @@ function mixerAudioByAppointUser(stream,pc,type,toUser) {
                             mixerBysecond(stream,pc,type,item1.toUser);
                             mixerCount++;
                         }else{
-                            item1.ondisconnected();
+                            item1.ondisconnected('by mixerAudioByAppointUser');
                             keyerror('mixerAudioByAppointUser大于10次，断开与他的连接:'+item1.pcState+',toUser:'+item1.toUser.name);
                         }
                     }
@@ -928,7 +930,7 @@ function getCandidate(UserList,min) {
             if(item.seq > min && item.seq < minSeq && state.homeState.userInfo.id != item.id){
                 minSeq = item.seq;
                 minSeqUser = item;
-                // console.log(minSeqUser);
+                console.log(minSeqUser);
             }
         }
     });
@@ -1039,6 +1041,11 @@ function getRoomInfo(roomId){
 let count = 0,sendList = {};
 function startOnline() {
     let userInfo = state.homeState.userInfo;
+    let roomInfo = state.homeState.currentRoomInfo;
+    if(roomInfo.mode != '0'){
+        keyerror('audio-当前房间模式非语音模式');
+        return;
+    }
     if(state.homeState.numberOne == userInfo.id){
         console.log('我已经是王了，不需要连别人');
         return;
@@ -1109,7 +1116,7 @@ function startOnline() {
         type:'msg',
         typeString:'preOffer',
         ToUserOnly:objUser.minSeqUser.id,
-        roomId: state.homeState.currentRoomInfo.roomId,		//房间唯一标识符
+        roomId: roomInfo.roomId,		//房间唯一标识符
         // roomName: state.homeState.currentRoomInfo.roomName,
         fromUser: userInfo,
         toUser:objUser.minSeqUser

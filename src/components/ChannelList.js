@@ -215,7 +215,7 @@ class ChannelList extends React.Component{
 
         return (
             <div style={{paddingLeft:'20px',minWidth:'240px',overflowX:'scroll',height:'100%'}}
-                 onDoubleClick={this.dblClickHandle}
+                 onDoubleClick={(e)=>{this.dblClickHandle(e);}}
                  // onMouseDown={this.rightClickHandle}
                  className='channel-list'
             >

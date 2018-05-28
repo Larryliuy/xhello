@@ -1,24 +1,25 @@
 const webpack = require('webpack');
+const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
-    devtool:'eval-source-map',//成产环境不需要加这个，不然会导致文件巨大
+    // devtool:'eval-source-map',
     entry:{
         app:__dirname + '/src/index.js',
-        vendor:['react','react-dom','react-redux','react-router-dom',"redux"]
+        vendor:['react','react-dom','react-redux','react-router-dom','redux']
     },
     output: {
-        path: __dirname + "/build",
-        filename: "[name].js",
+        path: __dirname + '/build',
+        filename: '[name].js',
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new webpack.DefinePlugin({
-            // 'process.env.NODE.ENV': "production"
+            // 'process.env.NODE.ENV': 'production'
             'process.env': {
                 NODE_ENV: JSON.stringify('production')
             }
         }),
-        new ExtractTextPlugin({filename:"style.css",disable: false,allChunks: true}),
+        new ExtractTextPlugin({filename:'style.css',disable: false,allChunks: true}),
         new webpack.optimize.CommonsChunkPlugin({
             name:'vendor',
             // minChunks: ({ resource }) => (
@@ -34,8 +35,8 @@ module.exports = {
             },
             compress: {
                 warnings: false,
-                drop_debugger: true,
-                drop_console: true //去掉console
+                drop_debugger: true
+                //drop_console: true //去掉console
             }
         })
     ],
@@ -45,16 +46,18 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 loader: 'babel-loader',
-                /*query: {
-                    presets: [ 'react','es2015','stage-0'],
-                    plugins: ["transform-runtime",["import", { "libraryName": "antd", "style": true}]]
-                }*/
+            },
+            {
+                test:/\.js$/,
+                enforce:'pre',
+                loader:'eslint-loader',
+                include:path.resolve(__dirname,'src')
             },
             {
                 test: /\.css$/,
                 // exclude: /node_modules/,
                 loader: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
+                    fallback: 'style-loader',
                     use:[
                         {
                             loader: 'css-loader',
@@ -69,26 +72,26 @@ module.exports = {
                 test: /\.scss$/,
                 exclude: /node_modules/,
                 loader: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
+                    fallback: 'style-loader',
                     use:['css-loader','sass-loader']
                 })
             },
             {
                 test: /\.less$/,
                 loader: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
+                    fallback: 'style-loader',
                     use:['css-loader','less-loader']
                 })
             }
         ]
     },
-    // devServer:{
-    //     // contentBase:path.join(__dirname, "build"),
-    //     contentBase:__dirname + "/build",
-    //     historyApiFallback:true,
-    //     hot:true,
-    //     inline:true,
-    //     port:3006,
+    devServer:{
+        // contentBase:path.join(__dirname, 'build'),
+        contentBase:__dirname + '/build',
+        historyApiFallback:true,
+        hot:true,
+        inline:true,
+        port:3006,
     //     // host:'10.1.1.127'
     //     // proxy: {
     //     //     '/': {
@@ -96,5 +99,5 @@ module.exports = {
     //     //         secure: false
     //     //     }
     //     // }
-    // }
+    }
 };

@@ -77,6 +77,8 @@ class TestDoc extends Component{
             <a href={'./testTools/serverData.html'} target={'_blank'}><Button style={{zIndex:1000}} onClick={()=>this.serverDataClick()}>服务器通讯量</Button></a>
             <br/>
             <a href={'javascript:void(0)'}><Button style={{zIndex:1000}} onClick={()=>this.serverDelayClick()}>通信延时</Button></a>
+            <br/>
+            <a href={'./testTools/browserEnv.html'}><Button style={{zIndex:1000}} onClick={()=>this.serverDelayClick()}>检测功能支持</Button></a>
         </div>);
     }
     serverDataClick(){

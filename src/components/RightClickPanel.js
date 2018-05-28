@@ -57,9 +57,11 @@ class RightClickPanel extends React.Component{
         if(e.target.getAttribute('class').indexOf('ant-list-item') === 0) {
             let text = e.target.firstChild.innerText || e.target.innerText,
                 objId = state.homeState.location.obj,
+                objLevel = state.homeState.location.level,
                 Msg,
+                userInfo = state.homeState.userInfo,
                 allRoomListTmp = state.homeState.allRoomList;
-            if(objId.indexOf('u') !== -1 && parseInt(state.homeState.location.level) <= state.homeState.userInfo.level){
+            if(objId.indexOf('u') !== -1 && parseInt(objLevel) <= userInfo.level){
                 message.warning('不能操作等级相同或比您高的用户');
                 return;
             }
@@ -233,6 +235,10 @@ class RightClickPanel extends React.Component{
 
                     break;
                 case '副房主':
+                    if(userInfo.level >= 2){
+                        message.warn('您的权限不够');
+                        return;
+                    }
                     Msg = {
                         type:'msg',
                         typeString:'uPower',
